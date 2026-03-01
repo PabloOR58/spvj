@@ -1,1 +1,4 @@
-# spvj
+- Sergi Armengol
+- Pablo Orellana Revenko
+- Victor Manuel Camacho Jerez
+- Jorge Sanchez Estudillo
