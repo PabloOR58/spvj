@@ -1,3 +1,2 @@
 codigo que genere un fichero con un listaod de los juegos 
 que mas se estan jugando en el momento en el que ejecutamos
-victor es tonto
