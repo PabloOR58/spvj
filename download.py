@@ -20,7 +20,7 @@ def generar_listado():
 
             for i in range(10):
                 appid = juegos[i].get('appid')
-                jugadores = juegos[i].get('player_count', 0)
+                jugadores = juegos[i].get('concurrent_in_game', 0)
 
                 # Buscamos el nombre del juego
                 url_n = f"https://store.steampowered.com/api/appdetails?appids={appid}&filters=basic"

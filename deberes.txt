@@ -1,8 +1,3 @@
 codigo que genere un fichero con un listaod de los juegos 
-<<<<<<< HEAD
-que mas se estan jugando en el momento en el que ejecutamos pablo sdfsfs
-ufgjdfg
-=======
 que mas se estan jugando en el momento en el que ejecutamos
-victor es tonto
->>>>>>> 8203410e8ae3bd48328d55e534d48f9e1947cb2c
+

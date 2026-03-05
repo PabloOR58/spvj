@@ -1,12 +1,12 @@
 TOP 10 JUEGOS MAS JUGADOS
 ------------------------------
-1. Counter-Strike 2 | 0 jugadores
-2. Dota 2 | 0 jugadores
-3. PUBG: BATTLEGROUNDS | 0 jugadores
-4. Bongo Cat | 0 jugadores
-5. FiveM | 0 jugadores
-6. Resident Evil Requiem | 0 jugadores
-7. ARC Raiders | 0 jugadores
-8. Apex Legends™ | 0 jugadores
-9. Wallpaper Engine | 0 jugadores
-10. Delta Force | 0 jugadores
+1. Counter-Strike 2 | 1,298,107 jugadores
+2. Dota 2 | 742,193 jugadores
+3. PUBG: BATTLEGROUNDS | 384,974 jugadores
+4. Bongo Cat | 146,515 jugadores
+5. FiveM | 130,792 jugadores
+6. ARC Raiders | 126,387 jugadores
+7. Resident Evil Requiem | 125,963 jugadores
+8. Apex Legends™ | 114,577 jugadores
+9. Rust | 100,871 jugadores
+10. Wallpaper Engine | 99,759 jugadores
