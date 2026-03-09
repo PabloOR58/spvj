@@ -6,7 +6,7 @@ def generar_listado():
     url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
     
     try:
-        # 🔹 Obtener top juegos actuales
+        
         respuesta = requests.get(url_top)
         datos = respuesta.json()
         juegos = datos.get('response', {}).get('ranks', [])
@@ -17,12 +17,12 @@ def generar_listado():
         
         fecha_actual = datetime.now().strftime("%Y-%m-%d")
         
-        # 🔹 CSV de top 50 diario
+        
         with open("listado_juegos.csv", "w", encoding="utf-8", newline='') as fichero:
             writer = csv.writer(fichero)
             writer.writerow(["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
             
-            # 🔹 CSV con info de los juegos (fecha de lanzamiento, género, desarrollador)
+            
             with open("info_juegos.csv", "w", encoding="utf-8", newline='') as fichero_info:
                 writer_info = csv.writer(fichero_info)
                 writer_info.writerow(["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"])
@@ -31,7 +31,7 @@ def generar_listado():
                     appid = juegos[i].get('appid')
                     jugadores = juegos[i].get('concurrent_in_game', 0)
 
-                    #Obtener detalles del juego
+                  
                     url_n = f"https://store.steampowered.com/api/appdetails?appids={appid}"
                     try:
                         res_n = requests.get(url_n).json()
@@ -45,11 +45,11 @@ def generar_listado():
                         generos = ""
                         desarrollador = ""
 
-                    #Escribir top diario
+                  
                     writer.writerow([fecha_actual, i+1, appid, nombre, jugadores])
                     print(f"OK Top: {nombre}")
 
-                    #Escribir info del juego
+                    
                     writer_info.writerow([appid, nombre, fecha_lanzamiento, generos, desarrollador])
                     print(f"OK Info: {nombre}")
 
