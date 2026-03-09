@@ -55,20 +55,6 @@ def generar_listado():
                     writer_info.writerow([appid, nombre, fecha_lanzamiento, generos, desarrollador])
                     print(f"OK Info: {nombre}")
 
-        # 🔹 Generar gráfico de tops de juegos con jugadores concurrentes
-        df = pd.read_csv("Clean/listado_juegos.csv")
-        top_10 = df.head(10)  # Tomar los top 10 para el gráfico
-        
-        plt.figure(figsize=(10, 6))
-        plt.barh(top_10['Nombre'], top_10['JugadoresConcurrentes'], color='skyblue')
-        plt.xlabel('Jugadores Concurrentes')
-        plt.ylabel('Juegos')
-        plt.title('Top 10 Juegos por Jugadores Concurrentes')
-        plt.gca().invert_yaxis()  # Invertir para que el top 1 esté arriba
-        plt.tight_layout()
-        plt.savefig('top_juegos_grafico.png')  # Guardar el gráfico como imagen
-        plt.show()  # Mostrar el gráfico (si es posible en el entorno)
-
         print("\nProceso completado.")
 
     except Exception as e:
