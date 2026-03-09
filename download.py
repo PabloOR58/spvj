@@ -1,6 +1,8 @@
 import requests
 from datetime import datetime
 import csv
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def generar_listado():
     url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
@@ -18,12 +20,12 @@ def generar_listado():
         fecha_actual = datetime.now().strftime("%Y-%m-%d")
         
         
-        with open("listado_juegos.csv", "w", encoding="utf-8", newline='') as fichero:
+        with open("Clean/listado_juegos.csv", "w", encoding="utf-8", newline='') as fichero:
             writer = csv.writer(fichero)
             writer.writerow(["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
             
             
-            with open("info_juegos.csv", "w", encoding="utf-8", newline='') as fichero_info:
+            with open("Clean/info_juegos.csv", "w", encoding="utf-8", newline='') as fichero_info:
                 writer_info = csv.writer(fichero_info)
                 writer_info.writerow(["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"])
                 
@@ -52,6 +54,20 @@ def generar_listado():
                     
                     writer_info.writerow([appid, nombre, fecha_lanzamiento, generos, desarrollador])
                     print(f"OK Info: {nombre}")
+
+        # 🔹 Generar gráfico de tops de juegos con jugadores concurrentes
+        df = pd.read_csv("Clean/listado_juegos.csv")
+        top_10 = df.head(10)  # Tomar los top 10 para el gráfico
+        
+        plt.figure(figsize=(10, 6))
+        plt.barh(top_10['Nombre'], top_10['JugadoresConcurrentes'], color='skyblue')
+        plt.xlabel('Jugadores Concurrentes')
+        plt.ylabel('Juegos')
+        plt.title('Top 10 Juegos por Jugadores Concurrentes')
+        plt.gca().invert_yaxis()  # Invertir para que el top 1 esté arriba
+        plt.tight_layout()
+        plt.savefig('top_juegos_grafico.png')  # Guardar el gráfico como imagen
+        plt.show()  # Mostrar el gráfico (si es posible en el entorno)
 
         print("\nProceso completado.")
 
