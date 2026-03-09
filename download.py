@@ -1,4 +1,5 @@
 import requests
+from datetime import datetime
 
 
 def generar_listado():
@@ -13,8 +14,11 @@ def generar_listado():
         if not juegos:
             print("No hay datos.")
             return
+        
+        fecha_actual = datetime.now().strftime("%Y-%m-%d")
+        
         with open("listado_juegos.csv", "w", encoding="utf-8") as fichero:
-            fichero.write("Posicion,Juego,Jugadores\n")
+            fichero.write("Fecha,Posicion,Juego,Jugadores\n")
             
             for i in range(50):
                 appid = juegos[i].get('appid')
@@ -28,7 +32,7 @@ def generar_listado():
                     nombre = f"ID: {appid}"
 
                
-                linea = f"{i+1},{nombre},{jugadores}\n"
+                linea = f"{fecha_actual},{i+1},{nombre},{jugadores}\n"
                 fichero.write(linea)
                 print(f"OK: {nombre}")
 
