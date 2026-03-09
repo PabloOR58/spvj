@@ -1,11 +1,51 @@
-Top 10 juegos mas jugados en el momento:
-1. Counter-Strike 2 | 1,335,987 jugadores
-2. Dota 2 | 738,860 jugadores
-3. PUBG: BATTLEGROUNDS | 357,966 jugadores
-4. Bongo Cat | 144,692 jugadores
-5. FiveM | 134,191 jugadores
-6. ARC Raiders | 131,587 jugadores
-7. Resident Evil Requiem | 124,193 jugadores
-8. Apex Legends™ | 105,826 jugadores
-9. Rust | 102,712 jugadores
-10. Wallpaper Engine | 95,497 jugadores
+Top 50 juegos mas jugados en el momento:
+1. Counter-Strike 2 | 938,629 jugadores
+2. Dota 2 | 478,164 jugadores
+3. PUBG: BATTLEGROUNDS | 297,412 jugadores
+4. Slay the Spire 2 | 293,901 jugadores
+5. Bongo Cat | 168,360 jugadores
+6. Rust | 106,448 jugadores
+7. Apex Legends™ | 86,463 jugadores
+8. Delta Force | 83,145 jugadores
+9. Wallpaper Engine | 82,060 jugadores
+10. Path of Exile | 76,214 jugadores
+11. ARC Raiders | 67,237 jugadores
+12. Grand Theft Auto V Legacy | 66,990 jugadores
+13. FiveM | 60,358 jugadores
+14. Resident Evil Requiem | 59,147 jugadores
+15. War Thunder | 48,113 jugadores
+16. Stardew Valley | 47,258 jugadores
+17. Team Fortress 2 | 46,073 jugadores
+18. Warframe | 42,133 jugadores
+19. Deadlock | 42,074 jugadores
+20. Grand Theft Auto V Enhanced | 40,266 jugadores
+21. Overwatch® | 38,832 jugadores
+22. Terraria | 38,623 jugadores
+23. VRChat | 36,975 jugadores
+24. Limbus Company | 36,544 jugadores
+25. Tom Clancy's Rainbow Six Siege | 36,188 jugadores
+26. Geometry Dash | 35,706 jugadores
+27. NARAKA: BLADEPOINT | 34,292 jugadores
+28. tModLoader | 30,829 jugadores
+29. Marvel Rivals | 30,658 jugadores
+30. Counter-Strike:Global Offensive | 30,378 jugadores
+31. DayZ | 29,735 jugadores
+32. Crosshair X | 27,541 jugadores
+33. Baldur's Gate 3 | 27,173 jugadores
+34. Dead by Daylight | 25,789 jugadores
+35. Hearts of Iron IV | 25,723 jugadores
+36. Marathon | 25,435 jugadores
+37. Heartopia | 25,313 jugadores
+38. Slay the Spire | 24,755 jugadores
+39. Mewgenics | 24,623 jugadores
+40. HELLDIVERS™ 2 | 24,322 jugadores
+41. Palworld | 24,176 jugadores
+42. Sid Meier’s Civilization® VI | 24,051 jugadores
+43. Where Winds Meet | 23,839 jugadores
+44. RimWorld | 23,654 jugadores
+45. Monster Hunter Wilds | 22,351 jugadores
+46. EA SPORTS FC™ 26 | 22,030 jugadores
+47. ARK: Survival Ascended | 21,859 jugadores
+48. Don't Starve Together | 20,810 jugadores
+49. Black Desert | 20,506 jugadores
+50. Battlefield™ 6 | 20,179 jugadores
