@@ -20,7 +20,7 @@ def generar_listado():
         with open("listado_juegos.csv", "w", encoding="utf-8") as fichero:
             fichero.write("Fecha,Posicion,Juego,Jugadores\n")
             
-            for i in range(50):
+            for i in range(len(juegos)):
                 appid = juegos[i].get('appid')
                 jugadores = juegos[i].get('concurrent_in_game', 0)
 
