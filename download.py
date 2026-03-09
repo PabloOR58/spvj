@@ -13,17 +13,13 @@ def generar_listado():
         if not juegos:
             print("No hay datos.")
             return
-
-       
         with open("listado_juegos.csv", "w", encoding="utf-8") as fichero:
             fichero.write("Posicion,Juego,Jugadores\n")
             
-
             for i in range(50):
                 appid = juegos[i].get('appid')
                 jugadores = juegos[i].get('concurrent_in_game', 0)
 
-                
                 url_n = f"https://store.steampowered.com/api/appdetails?appids={appid}&filters=basic"
                 try:
                     res_n = requests.get(url_n).json()
