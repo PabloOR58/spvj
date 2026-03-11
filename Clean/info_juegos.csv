@@ -1,5 +1,5 @@
 AppID,Nombre,Fecha_Lanzamiento,Géneros,Desarrollador
-730,Counter-Strike 2,"Aug 21, 2012","Action, Free To Play",Valve
+730,Counter-Strike 2,"21 Aug, 2012","Action, Free To Play",Valve
 570,Dota 2,"9 Jul, 2013","Action, Strategy, Free To Play",Valve
 578080,PUBG: BATTLEGROUNDS,"21 Dec, 2017","Action, Adventure, Massively Multiplayer, Free To Play",PUBG Corporation
 2868840,Slay the Spire 2,"5 Mar, 2026","Indie, Strategy, Early Access",Mega Crit
@@ -13,28 +13,28 @@ AppID,Nombre,Fecha_Lanzamiento,Géneros,Desarrollador
 2357570,Overwatch®,"10 Aug, 2023","Action, Free To Play","Blizzard Entertainment, Inc."
 271590,Grand Theft Auto V Legacy,"13 Apr, 2015","Action, Adventure",Rockstar North
 322170,Geometry Dash,"22 Dec, 2014","Action, Indie",RobTop Games
-1172470,Apex Legends™,"4 Nov, 2020","Action, Adventure, Free To Play",Respawn
+1172470,Apex Legends™,4. Nov. 2020,"Action, Abenteuer, Kostenlos spielbar",Respawn
 236390,War Thunder,"15 Aug, 2013","Action, Massively Multiplayer, Simulation, Free To Play",Gaijin Entertainment
 3764200,Resident Evil Requiem,"26 Feb, 2026","Action, Adventure","CAPCOM Co., Ltd."
-2767030,Marvel Rivals,"5 Dec, 2024","Action, Free To Play",NetEase Games
+2767030,Marvel Rivals,5. Dez. 2024,"Action, Kostenlos spielbar",NetEase Games
 3405690,EA SPORTS FC™ 26,"25 Sep, 2025","Simulation, Sports","EA Canada, EA Romania"
-431960,Wallpaper Engine,"16 Nov, 2018","Casual, Indie, Animation & Modeling, Design & Illustration, Photo Editing, Utilities",Wallpaper Engine Team
 413150,Stardew Valley,"26 Feb, 2016","Indie, RPG, Simulation",ConcernedApe
+431960,Wallpaper Engine,"Nov 16, 2018","Casual, Indie, Animation & Modeling, Design & Illustration, Photo Editing, Utilities",Wallpaper Engine Team
 553850,HELLDIVERS™ 2,"8 Feb, 2024",Action,Arrowhead Game Studios
-221100,DayZ,"13 Dec, 2018","Action, Adventure, Massively Multiplayer",Bohemia Interactive
-440,Team Fortress 2,"10 Oct, 2007","Action, Free To Play",Valve
 1086940,Baldur's Gate 3,"3 Aug, 2023","Adventure, RPG, Strategy",Larian Studios
+440,Team Fortress 2,"10 Oct, 2007","Action, Free To Play",Valve
+221100,DayZ,"13 Dec, 2018","Action, Adventure, Massively Multiplayer",Bohemia Interactive
 381210,Dead by Daylight,"14 Jun, 2016",Action,Behaviour Interactive Inc.
 2507950,Delta Force,"4 Dec, 2024","Action, Adventure, Massively Multiplayer, Free To Play",Team Jade
-230410,Warframe,"Mar 25, 2013","Action, RPG, Free To Play",Digital Extremes
 2807960,Battlefield™ 6,"10 Oct, 2025",Action,Battlefield Studios
+230410,Warframe,"25 Mar, 2013","Action, RPG, Free To Play",Digital Extremes
 3065800,Marathon,"5 Mar, 2026",Action,Bungie
-3240220,Grand Theft Auto V Enhanced,"4 Mar, 2025","Action, Adventure, Racing",Rockstar North
 1366800,Crosshair X,"17 Aug, 2020","Action, Adventure, Indie, Animation & Modeling, Design & Illustration, Education, Photo Editing, Utilities, Game Development",CenterPoint Gaming
 105600,Terraria,"16 May, 2011","Action, Adventure, Indie, RPG",Re-Logic
+3240220,Grand Theft Auto V Enhanced,"4 Mar, 2025","Action, Adventure, Racing",Rockstar North
 4465480,Counter-Strike:Global Offensive,"21 Aug, 2012","Action, Free To Play",Valve
 394360,Hearts of Iron IV,"6 Jun, 2016","Simulation, Strategy",Paradox Development Studio
-227300,Euro Truck Simulator 2,"12 Oct, 2012","Indie, Simulation",SCS Software
+227300,Euro Truck Simulator 2,"Oct 12, 2012","Indie, Simulation",SCS Software
 438100,VRChat,"1 Feb, 2017","Adventure, Casual, Massively Multiplayer, Simulation, Sports, Free To Play, Early Access",VRChat Inc.
 686060,Mewgenics,"10 Feb, 2026","Adventure, Indie, RPG, Simulation, Strategy","Edmund McMillen, Tyler Glaiel"
 3551340,Football Manager 26,"4 Nov, 2025","Simulation, Sports, Strategy",Sports Interactive
@@ -42,60 +42,60 @@ AppID,Nombre,Fecha_Lanzamiento,Géneros,Desarrollador
 2300320,Farming Simulator 25,"12 Nov, 2024",Simulation,GIANTS Software
 240,Counter-Strike: Source,"1 Nov, 2004",Action,Valve
 1938090,Call of Duty®,"27 Oct, 2022",Action,"Treyarch, Raven Software, Beenox, High Moon Studios, Sledgehammer Games, Infinity Ward, Activision Shanghai, Demonware"
-3241660,R.E.P.O.,"26 Feb, 2025","Action, Early Access",semiwork
-1222670,The Sims™ 4,"18 Jun, 2020","Adventure, Casual, Simulation, Free To Play",Maxis
 892970,Valheim,"2 Feb, 2021","Action, Adventure, Indie, RPG, Early Access",Iron Gate AB
-108600,Project Zomboid,"Nov 8, 2013","Indie, RPG, Simulation, Early Access",The Indie Stone
+1222670,The Sims™ 4,"18 Jun, 2020","Adventure, Casual, Simulation, Free To Play",Maxis
+3241660,R.E.P.O.,"26 Feb, 2025","Action, Early Access",semiwork
+108600,Project Zomboid,"8 Nov, 2013","Indie, RPG, Simulation, Early Access",The Indie Stone
 2399830,ARK: Survival Ascended,"25 Oct, 2023","Action, Adventure, Indie, Massively Multiplayer, RPG, Early Access","Studio Wildcard, Grove Street Games, Instinct Games"
 1281930,tModLoader,"16 May, 2020","Action, Adventure, Indie, RPG, Free To Play",TML Team
 289070,Sid Meier’s Civilization® VI,"20 Oct, 2016",Strategy,"Firaxis Games, Aspyr (Mac), Aspyr (Linux)"
 284160,BeamNG.drive,"29 May, 2015","Racing, Simulation, Early Access",BeamNG
 294100,RimWorld,"17 Oct, 2018","Indie, Simulation, Strategy",Ludeon Studios
-4000,Garry's Mod,"29 Nov, 2006","Casual, Indie, Simulation",Facepunch Studios
 1245620,ELDEN RING,"24 Feb, 2022","Action, RPG","FromSoftware, Inc."
-1174180,Red Dead Redemption 2,"5 Dec, 2019","Action, Adventure",Rockstar Games
-3564740,Where Winds Meet,"14 Nov, 2025","Action, Adventure, RPG, Free To Play",Everstone Studio
-526870,Satisfactory,"10 Sep, 2024","Adventure, Indie, Simulation, Strategy",Coffee Stain Studios
-582660,Black Desert,"24 May, 2017","Action, Adventure, Massively Multiplayer, RPG, Strategy",Pearl Abyss
+4000,Garry's Mod,"Nov 29, 2006","Casual, Indie, Simulation",Facepunch Studios
 2923300,Banana,"23 Apr, 2024","Adventure, Casual, Simulation, Strategy, Free To Play","Sky, AestheticSpartan, O'Brian"
+526870,Satisfactory,"10 Sep, 2024","Adventure, Indie, Simulation, Strategy",Coffee Stain Studios
 489830,The Elder Scrolls V: Skyrim Special Edition,"27 Oct, 2016",RPG,Bethesda Game Studios
-4025700,Heartopia,"16 Jan, 2026","Casual, Simulation, Free To Play",XD
+1174180,Red Dead Redemption 2,"5 Dec, 2019","Action, Adventure",Rockstar Games
+582660,Black Desert,"24 May, 2017","Action, Adventure, Massively Multiplayer, RPG, Strategy",Pearl Abyss
 2073620,Arena Breakout: Infinite,"15 Sep, 2025","Action, Adventure, Massively Multiplayer, RPG, Strategy, Free To Play",Morefun Studios
 552990,World of Warships,"15 Nov, 2017","Action, Massively Multiplayer, Simulation, Strategy, Free To Play",Wargaming Group Limited
+3564740,Where Winds Meet,"14 Nov, 2025","Action, Adventure, RPG, Free To Play",Everstone Studio
+4025700,Heartopia,"16 Jan, 2026","Casual, Simulation, Free To Play",XD
 1623730,Palworld,"18 Jan, 2024","Action, Adventure, Indie, RPG, Early Access",Pocketpair
-1091500,Cyberpunk 2077,"Dec 9, 2020",RPG,CD PROJEKT RED
+1091500,Cyberpunk 2077,"9 Dec, 2020",RPG,CD PROJEKT RED
 251570,7 Days to Die,"25 Jul, 2024","Action, Adventure, Indie, RPG, Simulation, Strategy",The Fun Pimps
 1142710,Total War: WARHAMMER III,"16 Feb, 2022","Action, Strategy","CREATIVE ASSEMBLY, Feral Interactive"
 1973530,Limbus Company,"26 Feb, 2023",,ProjectMoon
-261550,Mount & Blade II: Bannerlord,"25 Oct, 2022","Action, Indie, RPG, Simulation, Strategy",TaleWorlds Entertainment
 377160,Fallout 4,"9 Nov, 2015",RPG,Bethesda Game Studios
+261550,Mount & Blade II: Bannerlord,"25 Oct, 2022","Action, Indie, RPG, Simulation, Strategy",TaleWorlds Entertainment
 1771300,Kingdom Come: Deliverance II,"4 Feb, 2025","Action, Adventure, RPG",Warhorse Studios
+2221490,Tom Clancy’s The Division® 2,"Jan 12, 2023","Action, Adventure, RPG",Ubisoft
 2246340,Monster Hunter Wilds,"27 Feb, 2025","Action, Adventure, RPG","CAPCOM Co., Ltd."
-2221490,Tom Clancy’s The Division® 2,"12 Jan, 2023","Action, Adventure, RPG",Ubisoft
 2050650,Resident Evil 4,"23 Mar, 2023","Action, Adventure","CAPCOM Co., Ltd."
-1158310,Crusader Kings III,1 września 2020,"RPG, Symulacje, Strategie",Paradox Development Studio
+1158310,Crusader Kings III,"1 Sep, 2020","RPG, Simulation, Strategy",Paradox Development Studio
 250900,The Binding of Isaac: Rebirth,"Nov 4, 2014",Action,"Nicalis, Inc., Edmund McMillen"
-427520,Factorio,"14 Aug, 2020","Casual, Indie, Simulation, Strategy",Wube Software LTD.
 218620,PAYDAY 2,"13 Aug, 2013","Action, RPG",OVERKILL - a Starbreeze Studio.
-1905180,OBS Studio,"21 Mar, 2022","Utilities, Video Production",OBS Project
-346110,ARK: Survival Evolved,"Aug 27, 2017","Action, Adventure, Indie, Massively Multiplayer, RPG","Studio Wildcard, Instinct Games, Efecto Studios, Virtual Basement LLC"
+427520,Factorio,"14 Aug, 2020","Casual, Indie, Simulation, Strategy",Wube Software LTD.
 646570,Slay the Spire,"23 Jan, 2019","Indie, Strategy",Mega Crit
+346110,ARK: Survival Evolved,"Aug 27, 2017","Action, Adventure, Indie, Massively Multiplayer, RPG","Studio Wildcard, Instinct Games, Efecto Studios, Virtual Basement LLC"
 813780,Age of Empires II: Definitive Edition,"14 Nov, 2019",Strategy,"World's Edge, Forgotten Empires, CaptureAge, Tantalus Media, Wicked Witch"
-2183900,"Warhammer 40,000: Space Marine 2","9 Sep, 2024","Action, Adventure, RPG",Saber Interactive
-1818450,STALCRAFT: X,"9 Dec, 2022","Action, Adventure, Massively Multiplayer, RPG, Free To Play",EXBO
-1149460,ICARUS,"3 Dec, 2021","Action, Adventure, Simulation",RocketWerkz
+2183900,"Warhammer 40,000: Space Marine 2","Sep 9, 2024","Action, Adventure, RPG",Saber Interactive
+1905180,OBS Studio,"21 Mar, 2022","Utilities, Video Production",OBS Project
 739630,Phasmophobia,"18 Sep, 2020","Action, Indie, Early Access",Kinetic Games
-1151340,Fallout 76,"14 Apr, 2020",RPG,Bethesda Game Studios
-2252570,Football Manager 2024,"6 Nov, 2023","Simulation, Sports, Strategy",Sports Interactive
-550,Left 4 Dead 2,16 NOV 2009,Acción,Valve
+1149460,ICARUS,"3 Dec, 2021","Action, Adventure, Simulation",RocketWerkz
 2344520,Diablo® IV,"17 Oct, 2023","Action, RPG","Blizzard Entertainment, Inc."
-3164500,Schedule I,"24 Mar, 2025","Action, Indie, Simulation, Strategy, Early Access",TVGS
+2252570,Football Manager 2024,"6 Nov, 2023","Simulation, Sports, Strategy",Sports Interactive
+550,Left 4 Dead 2,"16 Nov, 2009",Action,Valve
+3164500,Schedule I,"Mar 24, 2025","Action, Indie, Simulation, Strategy, Early Access",TVGS
+1818450,STALCRAFT: X,"9 Dec, 2022","Action, Adventure, Massively Multiplayer, RPG, Free To Play",EXBO
+1151340,Fallout 76,"14 Apr, 2020",RPG,Bethesda Game Studios
 629520,Soundpad,"30 Sep, 2017","Audio Production, Utilities",Leppsoft
 594650,Hunt: Showdown 1896,"27 Aug, 2019",Action,Crytek
 8930,Sid Meier's Civilization® V,"23 Sep, 2010",Strategy,"Firaxis Games, Aspyr (Mac), Aspyr (Linux)"
-39210,FINAL FANTASY XIV Online,"18 Feb, 2014","Massively Multiplayer, RPG",Square Enix
 1874880,Arma Reforger,"16 Nov, 2023","Action, Simulation, Strategy",Bohemia Interactive
-3472040,NBA 2K26,"Sep 4, 2025",Sports,Visual Concepts
+39210,FINAL FANTASY XIV Online,"18 Feb, 2014","Massively Multiplayer, RPG",Square Enix
+1203620,Enshrouded,"24 Jan, 2024","Action, Adventure, Indie, RPG, Early Access",Keen Games GmbH
+3472040,NBA 2K26,"4 Sep, 2025",Sports,Visual Concepts
 3527290,PEAK,"16 Jun, 2025","Action, Adventure, Indie",Team PEAK
 255710,Cities: Skylines,"10 Mar, 2015","Simulation, Strategy",Colossal Order
-1203620,Enshrouded,"24 Jan, 2024","Action, Adventure, Indie, RPG, Early Access",Keen Games GmbH
