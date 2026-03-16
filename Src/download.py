@@ -9,7 +9,7 @@ def generar_listado():
     
     fecha_actual = datetime.now().strftime("%Y-%m-%d")
 
-    # 1️⃣ Top jugadores
+   
     url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
     respuesta = requests.get(url_top)
     datos = respuesta.json()
@@ -19,7 +19,7 @@ def generar_listado():
         print("No hay datos de jugadores concurrentes.")
         return
 
-    # CSV Top jugadores
+    
     with open("Clean/listado_juegos.csv", "w", encoding="utf-8", newline='') as fichero:
         writer = csv.writer(fichero)
         writer.writerow(["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
@@ -37,7 +37,6 @@ def generar_listado():
             writer.writerow([fecha_actual, i+1, appid, nombre, jugadores])
             print(f"OK Top: {nombre}")
 
-    # 2️⃣ Info de juegos
     with open("Clean/info_juegos.csv", "w", encoding="utf-8", newline='') as fichero_info:
         writer_info = csv.writer(fichero_info)
         writer_info.writerow(["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"])
@@ -60,7 +59,6 @@ def generar_listado():
             writer_info.writerow([appid, nombre, fecha_lanzamiento, generos, desarrollador])
             print(f"OK Info: {nombre}")
 
-    # 3️⃣ Top sellers
     url_vendidos = "https://store.steampowered.com/api/featuredcategories"
     vendidos = requests.get(url_vendidos)
     datos_vendidos = vendidos.json()
