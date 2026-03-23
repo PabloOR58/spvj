@@ -9,7 +9,12 @@ def generar_listado():
     
     fecha_actual = datetime.now().strftime("%Y-%m-%d")
 
-   
+    def ensure_header(path, headers):
+        if not os.path.exists(path):
+            with open(path, "w", encoding="utf-8", newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(headers)
+
     url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
     respuesta = requests.get(url_top)
     datos = respuesta.json()
@@ -19,10 +24,10 @@ def generar_listado():
         print("No hay datos de jugadores concurrentes.")
         return
 
-    
-    with open("Clean/listado_juegos.csv", "w", encoding="utf-8", newline='') as fichero:
+    ensure_header("Clean/listado_juegos.csv", ["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
+
+    with open("Clean/listado_juegos.csv", "a", encoding="utf-8", newline='') as fichero:
         writer = csv.writer(fichero)
-        writer.writerow(["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
         for i, juego_data in enumerate(juegos):
             appid = juego_data.get('appid')
             jugadores = juego_data.get('concurrent_in_game', 0)
@@ -37,11 +42,23 @@ def generar_listado():
             writer.writerow([fecha_actual, i+1, appid, nombre, jugadores])
             print(f"OK Top: {nombre}")
 
-    with open("Clean/info_juegos.csv", "w", encoding="utf-8", newline='') as fichero_info:
+    info_path = "Clean/info_juegos.csv"
+    ensure_header(info_path, ["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"])
+
+    existing_appids = set()
+    if os.path.exists(info_path):
+        with open(info_path, "r", encoding="utf-8", newline='') as fcheck:
+            reader_check = csv.DictReader(fcheck)
+            for row in reader_check:
+                if row.get("AppID"):
+                    existing_appids.add(row["AppID"])
+
+    with open(info_path, "a", encoding="utf-8", newline='') as fichero_info:
         writer_info = csv.writer(fichero_info)
-        writer_info.writerow(["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"])
         for i, juego_data in enumerate(juegos):
-            appid = juego_data.get('appid')
+            appid = str(juego_data.get('appid'))
+            if appid in existing_appids:
+                continue
 
             url_n = f"https://store.steampowered.com/api/appdetails?appids={appid}"
             try:
@@ -64,13 +81,15 @@ def generar_listado():
     datos_vendidos = vendidos.json()
     top_vendidos = datos_vendidos["top_sellers"]["items"]
 
-    with open("Clean/Top_vendidos.csv", "w", encoding="utf-8", newline='') as fichero_vendidos:
+    vendidos_path = "Clean/Top_vendidos.csv"
+    ensure_header(vendidos_path, ["Fecha", "Nombre", "ID"])
+
+    with open(vendidos_path, "a", encoding="utf-8", newline='') as fichero_vendidos:
         writer_vendidos = csv.writer(fichero_vendidos)
-        writer_vendidos.writerow(["Nombre", "ID"])
         for juego in top_vendidos:
             nombre = juego.get("name")
             ID = juego.get("id")
-            writer_vendidos.writerow([nombre, ID])
+            writer_vendidos.writerow([fecha_actual, nombre, ID])
             print(f"OK Vendidos: {nombre}")
 
     print("\nProceso completado correctamente.")
