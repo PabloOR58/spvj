@@ -21,11 +21,10 @@ df_listado_juegos= pd.read_csv(csv_path_listado_juegos)
 
 st.write(df_listado_juegos.head(3))
 
-#Graficas
+#Estadisticas generales
 col1, col2, col3 = st.columns(3)
 col1.metric("Número de juegos", df_info_juegos.shape[0])
 
-total_jugadores = df_listado_juegos["JugadoresConcurrentes"].sum()
-col2.metric("Número de jugadores actuales en steam", total_jugadores)
+col2.metric("Número de jugadores actuales en steam", df_listado_juegos["JugadoresConcurrentes"].sum())
 
 col3.metric("Juego más jugado en este momento", df_listado_juegos.loc[df_listado_juegos["JugadoresConcurrentes"].idxmax(), "Nombre"])
