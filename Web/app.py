@@ -1,11 +1,31 @@
 import pandas as pd
-import
-x
-x
-x
-x
-x
+import streamlit as st
+import os
+import matplotlib.pyplot as plt
+import ast
 
-x
-x
-x
+#Titulo de la aplicacion
+
+st.title("Infosteam")
+
+#Lectura del csv que queremos mostrar en la aplicacion
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path = os.path.join(base_dir,"clean", "info_juegos.csv")
+df_info_juegos= pd.read_csv(csv_path)
+
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path_listado_juegos = os.path.join(base_dir,"clean", "listado_juegos.csv")
+df_listado_juegos= pd.read_csv(csv_path_listado_juegos)
+
+
+
+st.write(df_listado_juegos.head(3))
+
+#Graficas
+col1, col2, col3 = st.columns(3)
+col1.metric("Número de juegos", df_info_juegos.shape[0])
+
+total_jugadores = df_listado_juegos["JugadoresConcurrentes"].sum()
+col2.metric("Número de jugadores actuales en steam", total_jugadores)
+
+col3.metric("Juego más jugado en este momento", df_listado_juegos.loc[df_listado_juegos["JugadoresConcurrentes"].idxmax(), "Nombre"])
