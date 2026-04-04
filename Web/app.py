@@ -28,3 +28,6 @@ col1.metric("Número de juegos", df_info_juegos.shape[0])
 col2.metric("Número de jugadores actuales en steam", df_listado_juegos["JugadoresConcurrentes"].sum())
 
 col3.metric("Juego más jugado en este momento", df_listado_juegos.loc[df_listado_juegos["JugadoresConcurrentes"].idxmax(), "Nombre"])
+
+
+

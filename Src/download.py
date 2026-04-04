@@ -10,6 +10,7 @@ def ensure_header(path, headers):
             writer = csv.writer(f)
             writer.writerow(headers)
 
+
 def datos_ya_guardados(path, fecha_actual, columna_fecha="Fecha"):
     """Devuelve True si ya existen datos para la fecha indicada"""
     if not os.path.exists(path):
@@ -20,6 +21,7 @@ def datos_ya_guardados(path, fecha_actual, columna_fecha="Fecha"):
             if row.get(columna_fecha) == fecha_actual:
                 return True
     return False
+
 
 def generar_listado():
     """Descarga datos de Steam y los guarda en CSV, sin duplicar datos del mismo día"""
