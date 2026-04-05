@@ -37,6 +37,6 @@ plt.figure(figsize=(10, 6))
 plt.barh(top_10_juegos["Nombre"], top_10_juegos["JugadoresConcurrentes"], color='skyblue')
 plt.xlabel("Número de jugadores concurrentes")
 plt.title("Top 10 juegos más jugados en Steam")
-plt.gca().invert_yaxis()  # Invertir el eje y para mostrar el juego más jugado en la parte superior
+plt.gca().invert_yaxis()  
 st.pyplot(plt)  
 
