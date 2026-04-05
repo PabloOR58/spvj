@@ -30,13 +30,21 @@ col2.metric("Número de jugadores actuales en steam", df_listado_juegos["Jugador
 
 col3.metric("Juego más jugado en este momento", df_listado_juegos.loc[df_listado_juegos["JugadoresConcurrentes"].idxmax(), "Nombre"])
 
-import matplotlib.pyplot as plt
-# Gráfico de barras para los 10 juegos más jugados
-top_10_juegos = df_listado_juegos.nlargest(10, "JugadoresConcurrentes")
-plt.figure(figsize=(10, 6))
-plt.barh(top_10_juegos["Nombre"], top_10_juegos["JugadoresConcurrentes"], color='skyblue')
-plt.xlabel("Número de jugadores concurrentes")
-plt.title("Top 10 juegos más jugados en Steam")
-plt.gca().invert_yaxis()  
-st.pyplot(plt)  
+# Selector de fecha
+selected_date = st.date_input("Selecciona una fecha", value=pd.to_datetime(df_listado_juegos.iloc[0]['Fecha'] if 'Fecha' in df_listado_juegos.columns else None))
+
+# Filtrar datos por fecha
+df_filtered = df_listado_juegos[pd.to_datetime(df_listado_juegos['Fecha']).dt.date == selected_date]
+
+if df_filtered.empty:
+    st.warning("No hay datos para la fecha seleccionada")
+else:
+    # Gráfico de barras para los 10 juegos más jugados
+    top_10_juegos = df_filtered.nlargest(10, "JugadoresConcurrentes")
+
+    plt.figure(figsize=(12, 6))
+    plt.barh(top_10_juegos["Nombre"], top_10_juegos["JugadoresConcurrentes"])
+    plt.xlabel("Jugadores Concurrentes")
+    plt.tight_layout()
+    st.pyplot(plt)
 
