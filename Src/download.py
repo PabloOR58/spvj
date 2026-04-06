@@ -182,6 +182,5 @@ def generar_listado():
     print("\nProceso completado correctamente.")
     
     
-    
 if __name__ == "__main__":
     generar_listado()
