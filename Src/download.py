@@ -33,34 +33,25 @@ def generar_listado():
     fecha_actual = datetime.now().strftime("%Y-%m-%d")
 
     # ----------------------------------------------------------------------------------------------------------------------
-    #  Listado de juegos por jugadores concurrentes
+    # LISTADO JUEGOS
     # ----------------------------------------------------------------------------------------------------------------------
     path_listado = "Clean/listado_juegos.csv"
     ensure_header(path_listado, ["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
 
-    # Evitar duplicados por fecha
-    if datos_ya_guardados(path_listado, fecha_actual):
-        print(f"Ya existen datos para {fecha_actual} en listado_juegos.csv. Saltando esta sección.")
-    else:
+    if not datos_ya_guardados(path_listado, fecha_actual):
         url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
-        respuesta = requests.get(url_top)
-        datos = respuesta.json()
-        juegos = datos.get('response', {}).get('ranks', [])
+        juegos = requests.get(url_top).json().get('response', {}).get('ranks', [])
 
-        if not juegos:
-            print("No hay datos de jugadores concurrentes.")
-            return
+        with open(path_listado, "a", encoding="utf-8", newline='') as f:
+            writer = csv.writer(f)
 
-        with open(path_listado, "a", encoding="utf-8", newline='') as fichero:
-            writer = csv.writer(fichero)
-            for i, juego_data in enumerate(juegos):
-                appid = juego_data.get('appid')
-                jugadores = juego_data.get('concurrent_in_game', 0)
+            for i, juego in enumerate(juegos):
+                appid = juego.get('appid')
+                jugadores = juego.get('concurrent_in_game', 0)
 
-                # Obtener nombre
                 try:
-                    res_n = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
-                    nombre = res_n[str(appid)]['data']['name']
+                    data = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
+                    nombre = data[str(appid)]['data']['name']
                 except:
                     nombre = f"ID: {appid}"
 
@@ -68,119 +59,124 @@ def generar_listado():
                 print(f"OK Top: {nombre}")
 
     # ----------------------------------------------------------------------------------------------------------------------
-    #  Información general de juegos
+    # INFO JUEGOS
     # ----------------------------------------------------------------------------------------------------------------------
     info_path = "Clean/info_juegos.csv"
     ensure_header(info_path, ["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"])
 
-    existing_appids = set()
+    existing_ids = set()
     if os.path.exists(info_path):
-        with open(info_path, "r", encoding="utf-8", newline='') as fcheck:
-            reader_check = csv.DictReader(fcheck)
-            for row in reader_check:
-                if row.get("AppID"):
-                    existing_appids.add(row["AppID"])
+        with open(info_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                existing_ids.add(row["AppID"])
 
-    with open(info_path, "a", encoding="utf-8", newline='') as fichero_info:
-        writer_info = csv.writer(fichero_info)
+    with open(info_path, "a", encoding="utf-8", newline='') as f:
+        writer = csv.writer(f)
+
         url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
         juegos = requests.get(url_top).json().get('response', {}).get('ranks', [])
 
-        for juego_data in juegos:
-            appid = str(juego_data.get('appid'))
-            if appid in existing_appids:
+        for juego in juegos:
+            appid = str(juego.get('appid'))
+
+            if appid in existing_ids:
                 continue
 
             try:
-                res_n = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
-                data = res_n[str(appid)]['data']
-                nombre = data['name']
-                fecha_lanzamiento = data['release_date']['date']
+                data = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
+                data = data[str(appid)]['data']
+
+                nombre = data.get('name')
+                fecha = data['release_date']['date']
                 generos = ", ".join([g['description'] for g in data.get('genres', [])])
-                desarrollador = ", ".join(data.get('developers', []))
+                dev = ", ".join(data.get('developers', []))
             except:
                 nombre = f"ID: {appid}"
-                fecha_lanzamiento = "Desconocida"
+                fecha = "Desconocida"
                 generos = ""
-                desarrollador = ""
+                dev = ""
 
-            writer_info.writerow([appid, nombre, fecha_lanzamiento, generos, desarrollador])
+            writer.writerow([appid, nombre, fecha, generos, dev])
             print(f"OK Info: {nombre}")
 
     # ----------------------------------------------------------------------------------------------------------------------
-    # Top vendidos
+    # TOP VENDIDOS
     # ----------------------------------------------------------------------------------------------------------------------
     vendidos_path = "Clean/Top_vendidos.csv"
     ensure_header(vendidos_path, ["Fecha", "Nombre", "ID"])
 
-    if datos_ya_guardados(vendidos_path, fecha_actual):
-        print(f"Ya existen datos para {fecha_actual} en Top_vendidos.csv. Saltando esta sección.")
-    else:
-        url_vendidos = "https://store.steampowered.com/api/featuredcategories"
-        vendidos = requests.get(url_vendidos).json()
-        top_vendidos = vendidos["top_sellers"]["items"]
+    if not datos_ya_guardados(vendidos_path, fecha_actual):
+        vendidos = requests.get("https://store.steampowered.com/api/featuredcategories").json()
+        top = vendidos["top_sellers"]["items"]
 
-        with open(vendidos_path, "a", encoding="utf-8", newline='') as fichero_vendidos:
-            writer_vendidos = csv.writer(fichero_vendidos)
-            for juego in top_vendidos:
-                nombre = juego.get("name")
-                ID = juego.get("id")
-                writer_vendidos.writerow([fecha_actual, nombre, ID])
-                print(f"OK Vendidos: {nombre}")
-# ----------------------------------------------------------------------------------------------------------------------
-#  Detalles adicionales de juegos (precio, rating, etc.)
-# ----------------------------------------------------------------------------------------------------------------------
-detalles_path = "Clean/detalles_juegos.csv"
-ensure_header(detalles_path, ["AppID", "Nombre", "Precio", "Rating", "Reviews"])
+        with open(vendidos_path, "a", encoding="utf-8", newline='') as f:
+            writer = csv.writer(f)
+            for j in top:
+                writer.writerow([fecha_actual, j.get("name"), j.get("id")])
+                print(f"OK Vendidos: {j.get('name')}")
 
-existing_ids = set()
-if os.path.exists(detalles_path):
-    with open(detalles_path, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if row.get("AppID"):
+    # ----------------------------------------------------------------------------------------------------------------------
+    # 🔥 DETALLES AVANZADOS
+    # ----------------------------------------------------------------------------------------------------------------------
+    detalles_path = "Clean/detalles_juegos.csv"
+    ensure_header(detalles_path, [
+        "AppID", "Nombre", "Precio", "Rating", "Reviews",
+        "Generos", "Desarrollador", "Publisher",
+        "Plataformas", "Edad", "Categorias"
+    ])
+
+    existing_ids = set()
+    if os.path.exists(detalles_path):
+        with open(detalles_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
                 existing_ids.add(row["AppID"])
 
-with open(detalles_path, "a", encoding="utf-8", newline='') as f_detalles:
-    writer = csv.writer(f_detalles)
+    with open(detalles_path, "a", encoding="utf-8", newline='') as f:
+        writer = csv.writer(f)
 
-    url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
-    juegos = requests.get(url_top).json().get('response', {}).get('ranks', [])
+        url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
+        juegos = requests.get(url_top).json().get('response', {}).get('ranks', [])
 
-    for juego_data in juegos:
-        appid = str(juego_data.get('appid'))
+        for juego in juegos:
+            appid = str(juego.get('appid'))
 
-        if appid in existing_ids:
-            continue
+            if appid in existing_ids:
+                continue
 
-        try:
-            res = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
-            data = res[str(appid)]['data']
+            try:
+                data = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
+                data = data[str(appid)]['data']
 
-            nombre = data.get("name", "")
-            
-            # Precio
-            if data.get("is_free"):
-                precio = "Gratis"
-            else:
-                precio = data.get("price_overview", {}).get("final_formatted", "N/A")
+                nombre = data.get("name")
 
-            # Rating (Steam)
-            rating = data.get("metacritic", {}).get("score", "N/A")
+                precio = "Gratis" if data.get("is_free") else data.get("price_overview", {}).get("final_formatted", "N/A")
+                rating = data.get("metacritic", {}).get("score", "N/A")
+                reviews = data.get("recommendations", {}).get("total", "N/A")
 
-            # Reviews (estimación)
-            reviews = data.get("recommendations", {}).get("total", "N/A")
+                generos = ", ".join([g['description'] for g in data.get('genres', [])])
+                dev = ", ".join(data.get("developers", []))
+                pub = ", ".join(data.get("publishers", []))
 
-        except:
-            nombre = f"ID: {appid}"
-            precio = "N/A"
-            rating = "N/A"
-            reviews = "N/A"
+                plataformas = ", ".join([k for k, v in data.get("platforms", {}).items() if v])
+                edad = data.get("required_age", "0")
+                categorias = ", ".join([c['description'] for c in data.get("categories", [])])
 
-        writer.writerow([appid, nombre, precio, rating, reviews])
-        print(f"OK Detalles: {nombre}")
-    print("\n Proceso completado correctamente.")
+            except:
+                nombre = f"ID: {appid}"
+                precio = rating = reviews = "N/A"
+                generos = dev = pub = ""
+                plataformas = categorias = ""
+                edad = "0"
 
+            writer.writerow([
+                appid, nombre, precio, rating, reviews,
+                generos, dev, pub, plataformas, edad, categorias
+            ])
 
+            print(f"OK Detalles: {nombre}")
+
+    print("\nProceso completado correctamente.")
 if __name__ == "__main__":
     generar_listado()
