@@ -49,6 +49,7 @@ def generar_listado():
                 appid = juego.get('appid')
                 jugadores = juego.get('concurrent_in_game', 0)
 
+                # Obtener nombre
                 try:
                     data = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
                     nombre = data[str(appid)]['data']['name']
@@ -117,7 +118,7 @@ def generar_listado():
                 print(f"OK Vendidos: {j.get('name')}")
 
     # ----------------------------------------------------------------------------------------------------------------------
-    # 🔥 DETALLES AVANZADOS
+    # DETALLES AVANZADOS
     # ----------------------------------------------------------------------------------------------------------------------
     detalles_path = "Clean/detalles_juegos.csv"
     ensure_header(detalles_path, [
@@ -176,7 +177,11 @@ def generar_listado():
             ])
 
             print(f"OK Detalles: {nombre}")
-
+    
+ 
     print("\nProceso completado correctamente.")
+    
+    
+    
 if __name__ == "__main__":
     generar_listado()
