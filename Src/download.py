@@ -127,7 +127,58 @@ def generar_listado():
                 ID = juego.get("id")
                 writer_vendidos.writerow([fecha_actual, nombre, ID])
                 print(f"OK Vendidos: {nombre}")
+# ----------------------------------------------------------------------------------------------------------------------
+#  Detalles adicionales de juegos (precio, rating, etc.)
+# ----------------------------------------------------------------------------------------------------------------------
+detalles_path = "Clean/detalles_juegos.csv"
+ensure_header(detalles_path, ["AppID", "Nombre", "Precio", "Rating", "Reviews"])
 
+existing_ids = set()
+if os.path.exists(detalles_path):
+    with open(detalles_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row.get("AppID"):
+                existing_ids.add(row["AppID"])
+
+with open(detalles_path, "a", encoding="utf-8", newline='') as f_detalles:
+    writer = csv.writer(f_detalles)
+
+    url_top = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
+    juegos = requests.get(url_top).json().get('response', {}).get('ranks', [])
+
+    for juego_data in juegos:
+        appid = str(juego_data.get('appid'))
+
+        if appid in existing_ids:
+            continue
+
+        try:
+            res = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
+            data = res[str(appid)]['data']
+
+            nombre = data.get("name", "")
+            
+            # Precio
+            if data.get("is_free"):
+                precio = "Gratis"
+            else:
+                precio = data.get("price_overview", {}).get("final_formatted", "N/A")
+
+            # Rating (Steam)
+            rating = data.get("metacritic", {}).get("score", "N/A")
+
+            # Reviews (estimación)
+            reviews = data.get("recommendations", {}).get("total", "N/A")
+
+        except:
+            nombre = f"ID: {appid}"
+            precio = "N/A"
+            rating = "N/A"
+            reviews = "N/A"
+
+        writer.writerow([appid, nombre, precio, rating, reviews])
+        print(f"OK Detalles: {nombre}")
     print("\n Proceso completado correctamente.")
 
 
