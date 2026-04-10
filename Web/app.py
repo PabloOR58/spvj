@@ -47,4 +47,3 @@ else:
     plt.xlabel("Jugadores Concurrentes")
     plt.tight_layout()
     st.pyplot(plt)
-
