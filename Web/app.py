@@ -84,8 +84,8 @@ if st.session_state.selected_game:
         st.image(get_game_image(appid), use_container_width=True)
         if g_d is not None:
             st.metric("Precio", g_d.get('Precio_USD', 'N/A'))
-            st.metric("Rating", f" {g_d.get('Rating', 'N/A')}/100⭐ ")
-            st.metric("Reseñas", f"{g_d.get('Reviews', 'N/A')}💬 ")
+            st.metric("Rating", f"⭐ {g_d.get('Rating', 'N/A')}/100")
+            st.metric("Reseñas", f"💬 {g_d.get('Reviews', 'N/A')}")
         st.link_button("🚀 Ver en Steam", f"https://store.steampowered.com/app/{appid}", use_container_width=True)
     st.stop()
 
