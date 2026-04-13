@@ -162,12 +162,4 @@ with t4:
         st.dataframe(df_sales[['Nombre', 'Precio', 'Precio_USD', 'Rating']], use_container_width=True, hide_index=True)
 
 st.divider()
-<<<<<<< HEAD
-<<<<<<< HEAD
-st.caption("© 2026 infosteam — Data from Steam Web API")
-=======
-st.caption("© 2026 infosteam — Dashboard de Seguimiento de Steam")
->>>>>>> main
-=======
 st.caption("© 2026 infosteam — Dashboard Profesional")
->>>>>>> main
