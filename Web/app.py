@@ -108,7 +108,9 @@ with st.sidebar:
         st.session_state.selected_game = None
         st.rerun()
 
-# ---------- LÓGICA DE PANTALLAS ----------
+    st.divider()
+    st.caption(f"Available dates: {len(dates)}")
+    st.caption(f"Range: {dates[-1]} → {dates[0]}")
 
 # 1. PANTALLA: SALES (NUEVA)
 if st.session_state.page == "sales":

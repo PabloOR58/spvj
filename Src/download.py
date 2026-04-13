@@ -2,96 +2,106 @@ import requests
 from datetime import datetime
 import csv
 import os
-import time
 
-# ----------------------------------------------------------
-# UTILIDADES
-# ----------------------------------------------------------
-def ensure_header(path, headers):
+# ========================================
+# CREAR CSV SI NO EXISTE
+# ========================================
+def crear_csv(path, headers):
     if not os.path.exists(path):
-        with open(path, "w", encoding="utf-8", newline='') as f:
+        with open(path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(headers)
 
-
-def datos_ya_guardados(path, fecha_actual):
+# ========================================
+# ELIMINAR DATOS DE HOY (PARA ACTUALIZAR)
+# ========================================
+def eliminar_fecha(path, fecha):
     if not os.path.exists(path):
-        return False
+        return
 
-    with open(path, "r", encoding="utf-8", newline='') as f:
+    with open(path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            if row.get("Fecha") == fecha_actual:
-                return True
-    return False
+        filas = list(reader)
 
+    # Si el CSV está mal, no hacer nada
+    if reader.fieldnames is None or "Fecha" not in reader.fieldnames:
+        return
 
-# ----------------------------------------------------------
+    filas_filtradas = [row for row in filas if row.get("Fecha") != fecha]
+
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=reader.fieldnames)
+        writer.writeheader()
+        writer.writerows(filas_filtradas)
+
+# ========================================
 # FUNCIÓN PRINCIPAL
-# ----------------------------------------------------------
-def generar_listado():
+# ========================================
+def generar_datos():
 
     if not os.path.exists("Clean"):
         os.makedirs("Clean")
 
-    fecha_actual = datetime.now().strftime("%Y-%m-%d")
-    path_listado = "Clean/listado_juegos.csv"
+    fecha = datetime.now().strftime("%Y-%m-%d")
 
-    ensure_header(path_listado, ["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
+    # ======================================================
+    # TOP JUGADOS
+    # ======================================================
+    path_jugados = "Clean/listado_juegos.csv"
 
-    # Evitar duplicados
-    if datos_ya_guardados(path_listado, fecha_actual):
-        print(f"Ya existen datos para hoy ({fecha_actual}). No se duplican.")
-        return
+    crear_csv(path_jugados, ["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
 
-    print("Descargando datos de Steam...")
+    # elimina datos de hoy si existen
+    eliminar_fecha(path_jugados, fecha)
 
-    try:
-        url = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        juegos = data.get('response', {}).get('ranks', [])
-    except Exception as e:
-        print("Error al conectar con Steam:", e)
-        return
+    url = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
+    juegos = requests.get(url).json().get("response", {}).get("ranks", [])
 
-    if not juegos:
-        print("No se recibieron datos")
-        return
-
-    # Solo top 100
-    juegos = juegos[:100]
-
-    with open(path_listado, "a", encoding="utf-8", newline='') as f:
+    with open(path_jugados, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
 
-        for i, juego in enumerate(juegos, start=1):
-            appid = juego.get('appid')
-            jugadores = juego.get('concurrent_in_game', 0)
+        for i, juego in enumerate(juegos[:100]):
+            appid = juego.get("appid")
+            players = juego.get("concurrent_in_game", 0)
 
-            # Obtener nombre del juego
             try:
-                url_name = f"https://store.steampowered.com/api/appdetails?appids={appid}"
-                res = requests.get(url_name, timeout=10).json()
-
-                if res[str(appid)]["success"]:
-                    nombre = res[str(appid)]['data']['name']
-                else:
-                    nombre = f"ID: {appid}"
-
-                time.sleep(0.2)
-
+                data = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
+                nombre = data[str(appid)]["data"]["name"]
             except:
-                nombre = f"ID: {appid}"
+                nombre = f"ID {appid}"
 
-            writer.writerow([fecha_actual, i, appid, nombre, jugadores])
-            print(f"{i}/100 - {nombre}")
+            writer.writerow([fecha, i+1, appid, nombre, players])
+            print("OK Jugado:", nombre)
 
-    print("\nDatos guardados correctamente (Top 100 del día)")
+    # ======================================================
+    # TOP VENDIDOS
+    # ======================================================
+    path_vendidos = "Clean/top_vendidos.csv"
 
+    crear_csv(path_vendidos, ["Fecha", "Posicion", "ID", "Nombre"])
 
-# ----------------------------------------------------------
-# MAIN
-# ----------------------------------------------------------
+    # elimina datos de hoy si existen
+    eliminar_fecha(path_vendidos, fecha)
+
+    url = "https://store.steampowered.com/api/featuredcategories"
+    data = requests.get(url).json()
+
+    top = data.get("top_sellers", {}).get("items", [])
+
+    with open(path_vendidos, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+
+        for i, juego in enumerate(top[:100]):
+            nombre = juego.get("name", "Desconocido")
+            appid = juego.get("id", "")
+
+            writer.writerow([fecha, i+1, appid, nombre])
+            print("OK Vendido:", nombre)
+
+    print("\nProceso terminado")
+
+# ========================================
+# EJECUCIÓN
+# ========================================
 if __name__ == "__main__":
-    generar_listado()
+    generar_datos()
