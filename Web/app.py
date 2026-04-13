@@ -3,6 +3,31 @@ import pandas as pd
 import os
 import subprocess
 
+import re
+
+def convert_to_usd(price_str):
+    """Limpia el precio y lo convierte a dólares."""
+    if pd.isna(price_str) or price_str == "" or price_str == "N/A":
+        return "N/A"
+    p = str(price_str).replace('"', '').replace("'", "").upper()
+    if any(word in p for word in ["GRATIS", "FREE", "0"]):
+        return "Free to Play"
+    try:
+        nums = re.findall(r"[-+]?\d*\.\d+|\d+", p.replace(',', '.'))
+        if not nums: return p
+        val = float(nums[0])
+        # Tasas de cambio aproximadas
+        if "€" in p: return f"${round(val * 1.08, 2)}"
+        if "฿" in p: return f"${round(val * 0.028, 2)}"
+        if "РУБ" in p: return f"${round(val * 0.011, 2)}"
+        if "AED" in p: return f"${round(val * 0.27, 2)}"
+        if "CLP" in p: return f"${round(val * 0.0011, 2)}"
+        if "CDN$" in p: return f"${round(val * 0.74, 2)}"
+        if "¥" in p: return f"${round(val * 0.0067, 2)}"
+        return f"${val}"
+    except:
+        return p
+
 # ---------- Page config ----------
 st.set_page_config(
     page_title="infosteam - Most Played Games",
@@ -38,9 +63,13 @@ def load_info():
 
 @st.cache_data(ttl=3600)
 def load_detalles():
-    """Load game details (price, rating, reviews)."""
+    """Load game details and convert prices to USD."""
     if os.path.exists(DETALLES_CSV):
-        return pd.read_csv(DETALLES_CSV, on_bad_lines="skip")
+        df = pd.read_csv(DETALLES_CSV, on_bad_lines="skip")
+        df['AppID'] = pd.to_numeric(df['AppID'], errors='coerce')
+        # Creamos la nueva columna con el precio convertido
+        df['Precio_USD'] = df['Precio'].apply(convert_to_usd)
+        return df
     return pd.DataFrame()
 
 
@@ -126,6 +155,7 @@ tab1, tab2, tab3 = st.tabs(["📊 Rankings", "📈 7-Day Trend", "📋 Data Tabl
 
 # ---- Tab 1: game cards (top 10) ----
 with tab1:
+    
     top10 = df_day.head(10).reset_index(drop=True)
 
     for row_start in range(0, len(top10), 5):
@@ -148,11 +178,13 @@ with tab1:
                     if pd.notna(genres):
                         st.caption(f"🏷️ {genres}")
 
-                if not df_detalles.empty and appid in df_detalles["AppID"].values:
-                    row_det = df_detalles[df_detalles["AppID"] == appid].iloc[0]
-                    price = row_det.get("Precio", "")
-                    if pd.notna(price):
-                        st.caption(f"💰 {price}")
+                # Mostrar precio del CSV de detalles convertido a USD
+                if not df_detalles.empty:
+                    row_p = df_detalles[df_detalles["AppID"] == appid]
+                    if not row_p.empty:
+                        st.markdown(f"💰 **{row_p.iloc[0]['Precio_USD']}**")
+                    else:
+                        st.caption("💰 Price: N/A")
 
 
 # ---- Tab 2: 7-day trend ----
