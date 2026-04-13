@@ -159,3 +159,7 @@ Traceback (most recent call last):
 SyntaxError: '(' was never closed
 2026-03-26 20:54:21.231 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
   Stopping...
+Usage: streamlit run [OPTIONS] [TARGET] [ARGS]...
+Try 'streamlit run --help' for help.
+
+Error: Invalid value: File does not exist: app.py

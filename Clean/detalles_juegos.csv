@@ -113,3 +113,9 @@ AppID,Nombre,Precio,Rating,Reviews
 3932890,Escape from Tarkov,"49,99€",N/A,44078,"Action, Massively Multiplayer, RPG, Simulation",Battlestate Games,Battlestate Games,windows,0,"Multi-player, MMO, PvP, Online PvP, Co-op, Online Co-op, Steam Achievements, Steam Trading Cards, In-App Purchases, Camera Comfort, Color Alternatives, Custom Volume Controls, Playable without Timed Input, Stereo Sound, Surround Sound"
 1551360,Forza Horizon 5,"59,99€",N/A,247900,"Action, Adventure, Racing, Simulation, Sports",Playground Games,Xbox Game Studios,windows,0,"Single-player, Multi-player, PvP, Online PvP, Co-op, Online Co-op, Cross-Platform Multiplayer, Steam Achievements, Full controller support, Steam Trading Cards, Steam Cloud, HDR available, Family Sharing"
 1716740,Starfield,"49,99€",N/A,112630,RPG,Bethesda Game Studios,Bethesda Softworks,windows,18,"Single-player, Steam Achievements, Full controller support, Steam Trading Cards, Color Alternatives, Playable without Timed Input, Stereo Sound, Surround Sound, Steam Cloud, Family Sharing"
+<<<<<<< Updated upstream
+393380,Squad,"¥ 6,500",N/A,174044,"Action, Indie, Massively Multiplayer, Strategy",Offworld,Offworld,windows,0,"Multi-player, PvP, Online PvP, Co-op, Online Co-op, Steam Trading Cards, Steam Workshop, Partial Controller Support, Valve Anti-Cheat enabled"
+1325860,VTube Studio,Gratis,N/A,102,"Indie, Animation & Modeling, Video Production",DenchiSoft,DenchiSoft,"windows, mac",0,"Single-player, Steam Workshop"
+=======
+393380,Squad,"48,99€",N/A,174044,"Action, Indie, Massively Multiplayer, Strategy",Offworld,Offworld,windows,0,"Multi-player, PvP, Online PvP, Co-op, Online Co-op, Steam Trading Cards, Steam Workshop, Partial Controller Support, Valve Anti-Cheat enabled"
+>>>>>>> Stashed changes
