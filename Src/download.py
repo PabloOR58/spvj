@@ -3,9 +3,9 @@ from datetime import datetime
 import csv
 import os
 
-# =========================
+# ========================================
 # CREAR CSV SI NO EXISTE
-# =========================
+# =========================================
 def crear_csv(path, headers):
     if not os.path.exists(path):
         with open(path, "w", newline="", encoding="utf-8") as f:
@@ -32,9 +32,9 @@ def ya_existe_fecha(path, fecha):
 
     return False
 
-# =========================
+# ============================================================
 # FUNCIÓN PRINCIPAL
-# =========================
+# ============================================================
 def generar_datos():
 
     if not os.path.exists("Clean"):
@@ -102,8 +102,8 @@ def generar_datos():
 
     print("\nProceso terminado")
 
-# =========================
+# ==========================================================
 # EJECUCIÓN
-# =========================
+# =========================================================
 if __name__ == "__main__":
     generar_datos()
