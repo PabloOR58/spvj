@@ -2,96 +2,108 @@ import requests
 from datetime import datetime
 import csv
 import os
-import time
 
-# ----------------------------------------------------------
-# UTILIDADES
-# ----------------------------------------------------------
-def ensure_header(path, headers):
+# ========================================
+# CREAR CSV SI NO EXISTE
+# =========================================
+def crear_csv(path, headers):
     if not os.path.exists(path):
-        with open(path, "w", encoding="utf-8", newline='') as f:
+        with open(path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(headers)
 
-
-def datos_ya_guardados(path, fecha_actual):
+# =========================================
+# COMPROBAR SI YA EXISTE ESA FECHA
+# ==========================================
+def ya_existe_fecha(path, fecha):
     if not os.path.exists(path):
         return False
 
-    with open(path, "r", encoding="utf-8", newline='') as f:
+    with open(path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            if row.get("Fecha") == fecha_actual:
+
+        # Si el CSV está mal (sin columna Fecha)
+        if reader.fieldnames is None or "Fecha" not in reader.fieldnames:
+            return False
+
+        for row in reader: 
+            if row.get("Fecha") == fecha:
                 return True
+
     return False
 
-
-# ----------------------------------------------------------
+# ============================================================
 # FUNCIÓN PRINCIPAL
-# ----------------------------------------------------------
-def generar_listado():
+# ============================================================
+def generar_datos():
 
     if not os.path.exists("Clean"):
         os.makedirs("Clean")
 
-    fecha_actual = datetime.now().strftime("%Y-%m-%d")
-    path_listado = "Clean/listado_juegos.csv"
+    fecha = datetime.now().strftime("%Y-%m-%d")
 
-    ensure_header(path_listado, ["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
+    # ======================================================
+    # TOP JUGADOS (100)
+    # ======================================================
+    path_jugados = "Clean/listado_juegos.csv"
 
-    # Evitar duplicados
-    if datos_ya_guardados(path_listado, fecha_actual):
-        print(f"Ya existen datos para hoy ({fecha_actual}). No se duplican.")
-        return
+    crear_csv(path_jugados, ["Fecha", "Posicion", "AppID", "Nombre", "JugadoresConcurrentes"])
 
-    print("Descargando datos de Steam...")
+    if not ya_existe_fecha(path_jugados, fecha):
 
-    try:
         url = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        juegos = data.get('response', {}).get('ranks', [])
-    except Exception as e:
-        print("Error al conectar con Steam:", e)
-        return
+        juegos = requests.get(url).json().get("response", {}).get("ranks", [])
 
-    if not juegos:
-        print("No se recibieron datos")
-        return
+        with open(path_jugados, "a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
 
-    # Solo top 100
-    juegos = juegos[:100]
+            for i, juego in enumerate(juegos[:100]):
+                appid = juego.get("appid")
+                players = juego.get("concurrent_in_game", 0)
 
-    with open(path_listado, "a", encoding="utf-8", newline='') as f:
-        writer = csv.writer(f)
+                try:
+                    data = requests.get(f"https://store.steampowered.com/api/appdetails?appids={appid}").json()
+                    nombre = data[str(appid)]["data"]["name"]
+                except:
+                    nombre = f"ID {appid}"
 
-        for i, juego in enumerate(juegos, start=1):
-            appid = juego.get('appid')
-            jugadores = juego.get('concurrent_in_game', 0)
+                writer.writerow([fecha, i+1, appid, nombre, players])
+                print("OK Jugado:", nombre)
 
-            # Obtener nombre del juego
-            try:
-                url_name = f"https://store.steampowered.com/api/appdetails?appids={appid}"
-                res = requests.get(url_name, timeout=10).json()
+    else:
+        print("Top jugados ya guardado hoy")
 
-                if res[str(appid)]["success"]:
-                    nombre = res[str(appid)]['data']['name']
-                else:
-                    nombre = f"ID: {appid}"
+    # ======================================================
+    # TOP VENDIDOS
+    # ======================================================
+    path_vendidos = "Clean/top_vendidos.csv"
 
-                time.sleep(0.2)
+    crear_csv(path_vendidos, ["Fecha", "Posicion", "ID", "Nombre"])
 
-            except:
-                nombre = f"ID: {appid}"
+    if not ya_existe_fecha(path_vendidos, fecha):
 
-            writer.writerow([fecha_actual, i, appid, nombre, jugadores])
-            print(f"{i}/100 - {nombre}")
+        url = "https://store.steampowered.com/api/featuredcategories"
+        data = requests.get(url).json()
 
-    print("\nDatos guardados correctamente (Top 100 del día)")
+        top = data.get("top_sellers", {}).get("items", [])
 
+        with open(path_vendidos, "a", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
 
-# ----------------------------------------------------------
-# MAIN
-# ----------------------------------------------------------
+            for i, juego in enumerate(top[:100]):
+                nombre = juego.get("name", "Desconocido")
+                appid = juego.get("id", "")
+
+                writer.writerow([fecha, i+1, appid, nombre])
+                print("OK Vendido:", nombre)
+
+    else:
+        print("Top vendidos ya guardado hoy")
+
+    print("\nProceso terminado")
+
+# ==========================================================
+# EJECUCIÓN
+# =========================================================
 if __name__ == "__main__":
-    generar_listado()
+    generar_datos()
