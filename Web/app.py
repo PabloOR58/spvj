@@ -94,7 +94,6 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
-    st.caption("Data from your CSV files in Clean/.")
     st.caption(f"Available dates: {len(dates)}")
     st.caption(f"Range: {dates[-1]} → {dates[0]}")
 
