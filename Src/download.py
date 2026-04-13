@@ -26,7 +26,7 @@ def ya_existe_fecha(path, fecha):
         if reader.fieldnames is None or "Fecha" not in reader.fieldnames:
             return False
 
-        for row in reader:
+        for row in reader: 
             if row.get("Fecha") == fecha:
                 return True
 
