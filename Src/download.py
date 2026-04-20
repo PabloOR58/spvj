@@ -2,7 +2,6 @@ import requests
 from datetime import datetime
 import csv
 import os
-import random
 
 # ========================================
 # CREAR CSV SI NO EXISTE
@@ -24,140 +23,118 @@ def eliminar_fecha(path, fecha):
         reader = csv.DictReader(f)
         filas = list(reader)
 
-    if reader.fieldnames is None or "Fecha" not in reader.fieldnames:
+    if not reader.fieldnames or "Fecha" not in reader.fieldnames:
         return
 
-    filas_filtradas = [r for r in filas if r.get("Fecha") != fecha]
+    filas = [r for r in filas if r.get("Fecha") != fecha]
 
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=reader.fieldnames)
         writer.writeheader()
-        writer.writerows(filas_filtradas)
+        writer.writerows(filas)
 
 # ========================================
-# OBTENER DATOS LIMPIOS DE STEAM
+# PLATAFORMAS
 # ========================================
-def get_game_details(appid):
-
-    rating = None
-    reviews = None
-    plataformas = "unknown"
-
+def get_platforms(appid):
     try:
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}"
-        data = requests.get(url, timeout=5).json()
+        data = requests.get(url, timeout=10).json()
+        info = data[str(appid)]["data"]
 
-        game = data.get(str(appid), {}).get("data", {})
+        p = info.get("platforms", {})
 
-        # =========================
-        # PLATAFORMAS
-        # =========================
-        p = game.get("platforms", {})
-        lista = []
-
+        platforms = []
         if p.get("windows"):
-            lista.append("windows")
+            platforms.append("windows")
         if p.get("mac"):
-            lista.append("mac")
+            platforms.append("mac")
         if p.get("linux"):
-            lista.append("linux")
+            platforms.append("linux")
 
-        plataformas = ",".join(lista) if lista else "windows"
-
-        # =========================
-        # RATING
-        # =========================
-        meta = game.get("metacritic", {})
-        if meta and "score" in meta:
-            rating = meta["score"]
-        else:
-            rating = random.randint(70, 95)
-
-        # =========================
-        # REVIEWS (NO EXISTEN EN API → SIMULAMOS)
-        # =========================
-        reviews = random.randint(5000, 2000000)
+        return ",".join(platforms) if platforms else "windows"
 
     except:
-        rating = random.randint(70, 95)
-        reviews = random.randint(5000, 2000000)
-        plataformas = "windows"
-
-    return rating, reviews, plataformas
+        return "windows"
 
 # ========================================
 # FUNCIÓN PRINCIPAL
 # ========================================
 def generar_datos():
 
-    if not os.path.exists("Clean"):
-        os.makedirs("Clean")
-
+    os.makedirs("Clean", exist_ok=True)
     fecha = datetime.now().strftime("%Y-%m-%d")
 
-    # ======================================================
+    # =========================
     # TOP JUGADOS
-    # ======================================================
+    # =========================
     path_jugados = "Clean/listado_juegos.csv"
+    path_plataformas = "Clean/plataformas_juegos.csv"
 
     crear_csv(path_jugados, [
-        "Fecha", "Posicion", "AppID", "Nombre",
-        "JugadoresConcurrentes", "Plataformas", "Rating", "Reviews"
+        "Fecha",
+        "Posicion",
+        "AppID",
+        "Nombre",
+        "JugadoresConcurrentes"
+    ])
+
+    crear_csv(path_plataformas, [
+        "Fecha",
+        "AppID",
+        "Plataformas"
     ])
 
     eliminar_fecha(path_jugados, fecha)
+    eliminar_fecha(path_plataformas, fecha)
 
     url = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
     juegos = requests.get(url).json().get("response", {}).get("ranks", [])
 
-    with open(path_jugados, "a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+    with open(path_jugados, "a", newline="", encoding="utf-8") as f1, \
+         open(path_plataformas, "a", newline="", encoding="utf-8") as f2:
+
+        writer1 = csv.writer(f1)
+        writer2 = csv.writer(f2)
 
         for i, juego in enumerate(juegos[:100]):
-
             appid = juego.get("appid")
             players = juego.get("concurrent_in_game", 0)
-
-            nombre = f"ID {appid}"
 
             try:
                 data = requests.get(
                     f"https://store.steampowered.com/api/appdetails?appids={appid}"
                 ).json()
-
-                game = data.get(str(appid), {}).get("data", {})
-                nombre = game.get("name", nombre)
-
-                rating, reviews, plataformas = get_game_details(appid)
-
+                nombre = data[str(appid)]["data"]["name"]
             except:
-                rating = random.randint(70, 95)
-                reviews = random.randint(5000, 2000000)
-                plataformas = "windows"
+                nombre = f"ID {appid}"
 
-            writer.writerow([
+            plataformas = get_platforms(appid)
+
+            # CSV ranking
+            writer1.writerow([
                 fecha,
                 i + 1,
                 appid,
                 nombre,
-                players,
-                plataformas,
-                rating,
-                reviews
+                players
             ])
 
-            print("OK:", nombre, rating, reviews)
+            # CSV plataformas (SEPARADO)
+            writer2.writerow([
+                fecha,
+                appid,
+                plataformas
+            ])
 
-    # ======================================================
+            print("OK:", nombre)
+
+    # =========================
     # TOP VENDIDOS
-    # ======================================================
+    # =========================
     path_vendidos = "Clean/top_vendidos.csv"
 
-    crear_csv(path_vendidos, [
-        "Fecha", "Posicion", "ID", "Nombre",
-        "Plataformas", "Rating", "Reviews"
-    ])
-
+    crear_csv(path_vendidos, ["Fecha", "Posicion", "ID", "Nombre"])
     eliminar_fecha(path_vendidos, fecha)
 
     url = "https://store.steampowered.com/api/featuredcategories"
@@ -169,26 +146,14 @@ def generar_datos():
         writer = csv.writer(f)
 
         for i, juego in enumerate(top[:100]):
-
-            appid = juego.get("id", "")
-            nombre = juego.get("name", "Desconocido")
-
-            rating, reviews, plataformas = get_game_details(appid)
-
             writer.writerow([
                 fecha,
                 i + 1,
-                appid,
-                nombre,
-                plataformas,
-                rating,
-                reviews
+                juego.get("id", ""),
+                juego.get("name", "Desconocido")
             ])
 
-            print("OK vendido:", nombre)
-
-    print("\nProceso terminado")
-
+    print("Proceso terminado")
 
 # ========================================
 # EJECUCIÓN
