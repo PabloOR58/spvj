@@ -232,4 +232,4 @@ with t4:
         st.dataframe(df_detalles[['Nombre', 'Precio', 'Rating']], use_container_width=True, hide_index=True)
 
 st.divider()
-st.caption("© 2026 infosteam — Dashboard de Seguimiento")
+st.caption("© 2026 infosteam — Sistema de Monitorización de Datos de Steam")
