@@ -25,3 +25,13 @@ Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
     - Pablo Orellana Revenko
     - Victor Manuel Camacho Jerez
     - Jorge Sanchez Estudillo
+
+
+
+# URL Juego
+
+    -https://infosteam.streamlit.app/
+
+
+# 
+    -streamlit run web\app.py
