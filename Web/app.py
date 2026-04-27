@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import os
 import re
+import subprocess
+import sys
+from datetime import datetime
 
 # ---------- 1. PAGE CONFIGURATION ----------
 st.set_page_config(
@@ -64,7 +67,11 @@ def get_game_background(appid):
 # ---------- 4. DATA LOADING ----------
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLEAN_DIR = os.path.join(BASE_DIR, "Clean")
+SRC_DIR = os.path.join(BASE_DIR, "Src")
+DOWNLOAD_SCRIPT = os.path.join(SRC_DIR, "download.py")
 
+
+# ---------- LOAD DATA ----------
 @st.cache_data(ttl=300)
 def load_data():
     try:
@@ -72,8 +79,9 @@ def load_data():
         df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"))
         df_d = pd.read_csv(os.path.join(CLEAN_DIR, "detalles_juegos.csv"), on_bad_lines="skip")
         for df in [df_l, df_i, df_d]:
-            if not df.empty and 'AppID' in df.columns:
-                df['AppID'] = pd.to_numeric(df['AppID'], errors='coerce').fillna(0).astype(int)
+            if not df.empty and "AppID" in df.columns:
+                df["AppID"] = pd.to_numeric(df["AppID"], errors="coerce").fillna(0).astype(int)
+
         return df_l, df_i, df_d
     except:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
@@ -128,6 +136,30 @@ with st.sidebar:
     if not df_listado.empty:
         dates = sorted(df_listado["Fecha"].unique(), reverse=True)
         sel_date = st.selectbox("Select Date:", dates)
+
+    if st.button("🔄 Actualizando datos", use_container_width=True):
+        with st.spinner("Actualizando datos..."):
+            try:
+                result = subprocess.run(
+                    [sys.executable, DOWNLOAD_SCRIPT],
+                    capture_output=True,
+                    text=True,
+                    cwd=BASE_DIR,
+                    timeout=300
+                )
+                st.write("### 📄 LOG")
+                st.code(result.stdout if result.stdout else "Sin output")
+                if result.returncode != 0:
+                    st.error("❌ Error actualizando datos")
+                    st.code(result.stderr if result.stderr else "Sin detalles de error")
+                else:
+                    st.success("✅ Datos actualizados correctamente")
+                    st.cache_data.clear()
+                    st.rerun()
+            except subprocess.TimeoutExpired:
+                st.error("❌ Timeout: el proceso tardó demasiado")
+            except Exception as e:
+                st.error(f"❌ Error: {str(e)}")
 
     if st.button("🏠 Home Dashboard", use_container_width=True): 
         st.session_state.selected_game = None
