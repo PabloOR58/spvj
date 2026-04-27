@@ -66,8 +66,7 @@ def get_game_image(appid):
         aid = int(float(appid))
         if aid <= 0:
             return get_fallback_game_image()
-        steam_url = f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
-        return steam_url
+        return f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
     except:
         return get_fallback_game_image()
 
@@ -107,12 +106,10 @@ def get_game_background(appid):
 
 def get_enhanced_game_image(appid, game_name=None):
     """Return the best available game image with fallback."""
-    # First try Steam image by AppID
     image = get_game_image(appid)
     if image and "steamstatic.com" in image:
         return image
 
-    # Then try a search-based image if game name is available
     if game_name:
         unsplash_image = search_game_image_unsplash(game_name)
         if unsplash_image:
@@ -358,7 +355,7 @@ if st.session_state.selected_game:
             if "linux" in p_str: pc[2].image(LOGOS["linux"], width=35)
         with cb:
             game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
-            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" style="width:100%;" title="{img_title}">', unsafe_allow_html=True)
+            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:10px;" title="{img_title}">', unsafe_allow_html=True)
             st.metric("Price", format_usd(g_d.get('Precio', 'N/A')))
         
         rating = fix_nan(g_d.get('Rating'), 'N/A')
@@ -456,7 +453,8 @@ if st.session_state.view == "Favorites":
                 g_name = g_data["Nombre"].iloc[0] if not g_data.empty else f"AppID: {aid}"
                 
                 c1, c2, c3 = st.columns([1, 4, 1])
-                with c1: st.image(get_enhanced_game_image(aid, g_name))
+                with c1:
+                    st.markdown(f'<img src="{get_enhanced_game_image(aid, g_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; height:auto; border-radius:10px;" title="{g_name}">', unsafe_allow_html=True)
                 with c2: 
                     st.markdown(f"### {g_name}")
                     if st.button("View Info", key=f"fav_view_{aid}"):
