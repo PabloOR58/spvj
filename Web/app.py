@@ -5,6 +5,11 @@ import re
 import json
 from datetime import datetime
 
+try:
+    import genai
+except ImportError:
+    genai = None
+
 # ---------- 1. PAGE CONFIGURATION ---------- 
 st.set_page_config(
     page_title="infosteam | Professional Dashboard",
@@ -99,6 +104,39 @@ def get_game_background(appid):
         return steam_bg
     except:
         return get_fallback_game_background()
+
+def get_enhanced_game_image(appid, game_name=None):
+    """Return the best available game image with fallback."""
+    # First try Steam image by AppID
+    image = get_game_image(appid)
+    if image and "steamstatic.com" in image:
+        return image
+
+    # Then try a search-based image if game name is available
+    if game_name:
+        unsplash_image = search_game_image_unsplash(game_name)
+        if unsplash_image:
+            return unsplash_image
+
+    return get_fallback_game_image()
+
+def get_ai_response(user_input, game_data):
+    """Return a safe fallback AI-style response using known game data."""
+    response_lines = [
+        f"Here is what I found for {game_data.get('name', 'the game')}:",
+        f"- Developer: {game_data.get('developer', 'Unknown')}",
+        f"- Genres: {game_data.get('genres', 'Unknown')}",
+        f"- Platforms: {game_data.get('platforms', 'Unknown')}",
+        f"- Release Date: {game_data.get('release_date', 'Unknown')}",
+        f"- Price: {game_data.get('price', 'Unknown')}",
+        f"- Rating: {game_data.get('rating', 'Unknown')}",
+        f"- Reviews: {game_data.get('reviews', 'Unknown')}"
+    ]
+    if "price" in user_input.lower():
+        response_lines.append("This game appears to have the listed price and may be free to play depending on the store listing.")
+    elif "rating" in user_input.lower() or "review" in user_input.lower():
+        response_lines.append("The rating and reviews are based on the current dataset and may vary over time.")
+    return "\n".join(response_lines)
 
 def get_fallback_game_background():
     """Get a fallback background image"""
@@ -353,7 +391,7 @@ if st.session_state.selected_game:
             else:
                 st.metric("Current Players", "👥 N/A")
             
-            st.link_button("🚀 Open in Steam", f"https://store.steampowered.com/app/{appid}", width='stretch')
+            st.markdown(f"[🚀 Open in Steam](https://store.steampowered.com/app/{appid})")
     
     with tab2:
         st.subheader("📅 Release Information")
@@ -503,9 +541,9 @@ with t1:
                             if not ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == aid)).any():
                                 new_fav = pd.DataFrame([[st.session_state["user"], aid]], columns=["username","appid"])
                                 pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
-                                st.toast(f"Saved: {game.get('Nombre')}")
+                                st.success(f"Saved: {game.get('Nombre')}")
                             else:
-                                st.toast("Already in favorites")
+                                st.info("Already in favorites")
                     
                     st.caption(f"👥 {int(game.get('JugadoresConcurrentes', 0)):,} players")
 
