@@ -5,6 +5,11 @@ import re
 import json
 from datetime import datetime
 
+try:
+    import genai
+except ImportError:
+    genai = None
+
 # ---------- 1. PAGE CONFIGURATION ---------- 
 st.set_page_config(
     page_title="infosteam | Professional Dashboard",
@@ -12,7 +17,17 @@ st.set_page_config(
     layout="wide"
 )
 
-IMG_ERROR = "https://i.imgur.com/8N9V6vT.png"
+IMG_ERROR = "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=460&h=215&fit=crop"
+
+GAME_IMAGE_OVERRIDES = {
+    "fivem": "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=460&h=215&fit=crop",
+    "windrose": "https://images.unsplash.com/photo-1556438064-2d7646166914?w=460&h=215&fit=crop",
+}
+
+NON_STEAM_IMAGE_TOKENS = [
+    "fivem", "windrose", "mod", "server", "custom", "roleplay", "private", "rp"
+]
+
 USERS_FILE = "users.csv"
 FAV_FILE = "favoritos.csv"
 
@@ -61,10 +76,49 @@ def get_game_image(appid):
         aid = int(float(appid))
         if aid <= 0:
             return get_fallback_game_image()
-        steam_url = f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
-        return steam_url
+        return f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
     except:
         return get_fallback_game_image()
+
+def normalize_game_name(game_name):
+    if not game_name:
+        return ""
+    name = str(game_name).strip().lower()
+    return re.sub(r"[^a-z0-9\s]", "", name)
+
+
+def normalize_game_name_compact(game_name):
+    return normalize_game_name(game_name).replace(" ", "")
+
+
+def get_special_game_image(game_name):
+    normalized = normalize_game_name(game_name)
+    compact = normalize_game_name_compact(game_name)
+    for key, image_url in GAME_IMAGE_OVERRIDES.items():
+        if key in normalized or key in compact:
+            return image_url
+    return None
+
+
+def should_skip_steam_image(game_name):
+    normalized = normalize_game_name(game_name)
+    compact = normalize_game_name_compact(game_name)
+    return any(token in normalized or token in compact for token in NON_STEAM_IMAGE_TOKENS)
+
+
+@st.cache_data(ttl=86400)
+def steam_image_exists(appid):
+    try:
+        aid = int(float(appid))
+        if aid <= 0:
+            return False
+        import requests
+        url = f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
+        response = requests.head(url, allow_redirects=True, timeout=5)
+        return response.status_code == 200
+    except:
+        return False
+
 
 def get_fallback_game_image():
     """Get a fallback game image when Steam image is not available"""
@@ -99,6 +153,47 @@ def get_game_background(appid):
         return steam_bg
     except:
         return get_fallback_game_background()
+
+def get_enhanced_game_image(appid, game_name=None):
+    """Return the best available game image with fallback."""
+    if game_name:
+        special_image = get_special_game_image(game_name)
+        if special_image:
+            return special_image
+
+    if game_name and should_skip_steam_image(game_name):
+        unsplash_image = search_game_image_unsplash(game_name)
+        if unsplash_image:
+            return unsplash_image
+        return get_fallback_game_image()
+
+    if steam_image_exists(appid):
+        return get_game_image(appid)
+
+    if game_name:
+        unsplash_image = search_game_image_unsplash(game_name)
+        if unsplash_image:
+            return unsplash_image
+
+    return get_fallback_game_image()
+
+def get_ai_response(user_input, game_data):
+    """Return a safe fallback AI-style response using known game data."""
+    response_lines = [
+        f"Here is what I found for {game_data.get('name', 'the game')}:",
+        f"- Developer: {game_data.get('developer', 'Unknown')}",
+        f"- Genres: {game_data.get('genres', 'Unknown')}",
+        f"- Platforms: {game_data.get('platforms', 'Unknown')}",
+        f"- Release Date: {game_data.get('release_date', 'Unknown')}",
+        f"- Price: {game_data.get('price', 'Unknown')}",
+        f"- Rating: {game_data.get('rating', 'Unknown')}",
+        f"- Reviews: {game_data.get('reviews', 'Unknown')}"
+    ]
+    if "price" in user_input.lower():
+        response_lines.append("This game appears to have the listed price and may be free to play depending on the store listing.")
+    elif "rating" in user_input.lower() or "review" in user_input.lower():
+        response_lines.append("The rating and reviews are based on the current dataset and may vary over time.")
+    return "\n".join(response_lines)
 
 def get_fallback_game_background():
     """Get a fallback background image"""
@@ -199,7 +294,7 @@ def get_enhanced_game_background(appid, game_name=None):
             should_check_steam = False
 
         # First try Steam background if valid
-        if should_check_steam:
+        if should_check_steam and steam_image_exists(appid):
             steam_bg = f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/page_bg_generated_v6b.jpg"
             return steam_bg
 
@@ -320,7 +415,7 @@ if st.session_state.selected_game:
             if "linux" in p_str: pc[2].image(LOGOS["linux"], width=35)
         with cb:
             game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
-            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" style="width:100%;" title="{img_title}">', unsafe_allow_html=True)
+            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:10px;" title="{img_title}">', unsafe_allow_html=True)
             st.metric("Price", format_usd(g_d.get('Precio', 'N/A')))
         
         rating = fix_nan(g_d.get('Rating'), 'N/A')
@@ -353,7 +448,7 @@ if st.session_state.selected_game:
             else:
                 st.metric("Current Players", "👥 N/A")
             
-            st.link_button("🚀 Open in Steam", f"https://store.steampowered.com/app/{appid}", width='stretch')
+            st.markdown(f"[🚀 Open in Steam](https://store.steampowered.com/app/{appid})")
     
     with tab2:
         st.subheader("📅 Release Information")
@@ -418,7 +513,8 @@ if st.session_state.view == "Favorites":
                 g_name = g_data["Nombre"].iloc[0] if not g_data.empty else f"AppID: {aid}"
                 
                 c1, c2, c3 = st.columns([1, 4, 1])
-                with c1: st.image(get_enhanced_game_image(aid, g_name))
+                with c1:
+                    st.markdown(f'<img src="{get_enhanced_game_image(aid, g_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; height:auto; border-radius:10px;" title="{g_name}">', unsafe_allow_html=True)
                 with c2: 
                     st.markdown(f"### {g_name}")
                     if st.button("View Info", key=f"fav_view_{aid}"):
@@ -503,9 +599,9 @@ with t1:
                             if not ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == aid)).any():
                                 new_fav = pd.DataFrame([[st.session_state["user"], aid]], columns=["username","appid"])
                                 pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
-                                st.toast(f"Saved: {game.get('Nombre')}")
+                                st.success(f"Saved: {game.get('Nombre')}")
                             else:
-                                st.toast("Already in favorites")
+                                st.info("Already in favorites")
                     
                     st.caption(f"👥 {int(game.get('JugadoresConcurrentes', 0)):,} players")
 
