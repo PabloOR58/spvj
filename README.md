@@ -50,8 +50,4 @@ La aplicación utiliza una arquitectura de un solo contenedor Docker para simpli
 - **Volúmenes**: Ninguno por ahora; los datos se manejan dentro del contenedor.
 - **Ejecución**: Construye con `docker build -t spvj .` y ejecuta con `docker run -p 8501:8501 spvj`.
 
-## Instalación de Docker Desktop
-Descarga e instala Docker Desktop desde [docker.com](https://www.docker.com/products/docker-desktop). Asegúrate de que esté ejecutándose antes de construir imágenes.
 
-## Futuras expansiones
-Si se agrega una base de datos (ej. PostgreSQL), usar Docker Compose para múltiples contenedores con volúmenes compartidos.
