@@ -35,3 +35,5 @@ Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
 
 # 
     -streamlit run web\app.py
+    docker run --rm -p 8501:8501 mi-web-app
+    docker ps -a --filter "publish=8501"
