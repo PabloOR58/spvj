@@ -86,6 +86,22 @@ TRANSLATIONS = {
         "welcome": "Bienvenido",
         "price": "Precio",
         "free_to_play": "Gratis para jugar",
+        "overview_tab": "📖 Resumen",
+        "details_tab": "ℹ️ Detalles",
+        "reviews_tab": "⭐ Reseñas",
+        "information": "📋 Información",
+        "release_information": "📅 Información de lanzamiento",
+        "about_game": "📝 Acerca del juego",
+        "developer_label": "Desarrollador",
+        "platforms_label": "Plataformas",
+        "genres_label": "Géneros",
+        "rating_label": "Rating",
+        "reviews_label": "Reseñas",
+        "current_rank": "Posición actual",
+        "current_players": "Jugadores actuales",
+        "open_steam": "Abrir en Steam",
+        "added_to_favorites": "Añadido a favoritos",
+        "remove_from_favorites": "Quitar de favoritos",
     },
     "en": {
         "language_label": "🌐 Language",
@@ -126,6 +142,22 @@ TRANSLATIONS = {
         "welcome": "Welcome",
         "price": "Price",
         "free_to_play": "Free to Play",
+        "overview_tab": "📖 Overview",
+        "details_tab": "ℹ️ Details",
+        "reviews_tab": "⭐ Reviews",
+        "information": "📋 Information",
+        "release_information": "📅 Release Information",
+        "about_game": "📝 About This Game",
+        "developer_label": "Developer",
+        "platforms_label": "Platforms",
+        "genres_label": "Genres",
+        "rating_label": "Rating",
+        "reviews_label": "Reviews",
+        "current_rank": "Current Rank",
+        "current_players": "Current Players",
+        "open_steam": "Open in Steam",
+        "added_to_favorites": "Added to favorites",
+        "remove_from_favorites": "Remove from favorites",
     },
     "fr": {
         "language_label": "🌐 Langue",
@@ -166,6 +198,22 @@ TRANSLATIONS = {
         "welcome": "Bienvenue",
         "price": "Prix",
         "free_to_play": "Gratuit",
+        "overview_tab": "📖 Aperçu",
+        "details_tab": "ℹ️ Détails",
+        "reviews_tab": "⭐ Avis",
+        "information": "📋 Informations",
+        "release_information": "📅 Informations de sortie",
+        "about_game": "📝 À propos du jeu",
+        "developer_label": "Développeur",
+        "platforms_label": "Plateformes",
+        "genres_label": "Genres",
+        "rating_label": "Note",
+        "reviews_label": "Avis",
+        "current_rank": "Rang actuel",
+        "current_players": "Joueurs actuels",
+        "open_steam": "Ouvrir sur Steam",
+        "added_to_favorites": "Ajouté aux favoris",
+        "remove_from_favorites": "Retirer des favoris",
     },
     "pt": {
         "language_label": "🌐 Idioma",
@@ -206,6 +254,22 @@ TRANSLATIONS = {
         "welcome": "Bem-vindo",
         "price": "Preço",
         "free_to_play": "Grátis para jogar",
+        "overview_tab": "📖 Visão geral",
+        "details_tab": "ℹ️ Detalhes",
+        "reviews_tab": "⭐ Avaliações",
+        "information": "📋 Informações",
+        "release_information": "📅 Informações de lançamento",
+        "about_game": "📝 Sobre este jogo",
+        "developer_label": "Desenvolvedor",
+        "platforms_label": "Plataformas",
+        "genres_label": "Genres",
+        "rating_label": "Avaliação",
+        "reviews_label": "Avaliações",
+        "current_rank": "Posição atual",
+        "current_players": "Jogadores atuais",
+        "open_steam": "Abrir no Steam",
+        "added_to_favorites": "Adicionado aos favoritos",
+        "remove_from_favorites": "Remover dos favoritos",
     },
 }
 CURRENCY_CONFIG = {
@@ -521,105 +585,91 @@ if st.session_state.selected_game:
     g_i = df_info[df_info["AppID"] == appid].iloc[0] if not df_info[df_info["AppID"] == appid].empty else pd.Series()
     g_d = df_detalles[df_detalles["AppID"] == appid].iloc[0] if not df_detalles[df_detalles["AppID"] == appid].empty else pd.Series()
 
-    st.title(f"🎮 {fix_nan(g_l['Nombre'] if g_l is not None else 'Game Details')}")
-    
-    # Tabs for more detailed view
-    tab1, tab2, tab3 = st.tabs(["📖 Overview", "ℹ️ Details", "⭐ Reviews"])
-    
-    with tab1:
-        bg_title = f"Background of {fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')}"
-        img_title = f"Click for details - {fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')}"
-        ca, cb = st.columns([1.5, 1])
-        with ca:
-            game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
-            st.markdown(f'<img src="{get_enhanced_game_background(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:10px;" title="{bg_title}">', unsafe_allow_html=True)
-            st.subheader("📋 Information")
-            st.write(f"**Developer:** {fix_nan(g_i.get('Desarrollador'))}")
-            p_str = fix_nan(g_i.get('Plataformas'), "").lower()
-            pc = st.columns(10)
-            if "win" in p_str: pc[0].image(LOGOS["windows"], width=35)
-            if "mac" in p_str or "apple" in p_str: pc[1].image(LOGOS["mac"], width=30)
-            if "linux" in p_str: pc[2].image(LOGOS["linux"], width=35)
-        with cb:
-            game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
-            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:10px;" title="{img_title}">', unsafe_allow_html=True)
-            st.metric(t["price"], format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language))
-        
-        rating = fix_nan(g_d.get('Rating'), 'N/A')
-        rating_num = pd.to_numeric(rating, errors='coerce')
-        if not pd.isna(rating_num):
-            st.metric("Rating", f"⭐ {rating_num}/100")
-        else:
-            st.metric("Rating", "⭐ N/A")
-        
-        reviews = fix_nan(g_d.get('Reviews'), 'N/A')
-        reviews_num = pd.to_numeric(reviews, errors='coerce')
-        if not pd.isna(reviews_num):
-            st.metric("Reviews", f"💬 {int(reviews_num):,}")
-        else:
-            st.metric("Reviews", "💬 N/A")
+    # Define metric values before use
+    g_rank = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["Posicion"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
+    g_players = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["JugadoresConcurrentes"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
+    rating = fix_nan(g_d.get('Rating'), 'N/A')
+    rating_num = pd.to_numeric(rating, errors='coerce')
+    reviews = fix_nan(g_d.get('Reviews'), 'N/A')
+    reviews_num = pd.to_numeric(reviews, errors='coerce')
+    rank_num = pd.to_numeric(g_rank, errors='coerce')
+    players_num = pd.to_numeric(g_players, errors='coerce')
 
-        # Additional metrics
-        g_rank = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["Posicion"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
-        g_players = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["JugadoresConcurrentes"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
-        
-        rank_num = pd.to_numeric(g_rank, errors='coerce')
-        if not pd.isna(rank_num):
-            st.metric("Current Rank", f"#{int(rank_num)}")
-        else:
-            st.metric("Current Rank", "#N/A")
-        
-        players_num = pd.to_numeric(g_players, errors='coerce')
-        if not pd.isna(players_num):
-            st.metric("Current Players", f"👥 {int(players_num):,}")
-        else:
-            st.metric("Current Players", "👥 N/A")
-        
-        st.markdown(f"[🚀 Open in Steam](https://store.steampowered.com/app/{appid})")
-    
+    st.title(f"🎮 {fix_nan(g_l['Nombre'] if g_l is not None else 'Game Details')}")
+
+    # Tabs for more detailed view
+    tab1, tab2, tab3 = st.tabs([t["overview_tab"], t["details_tab"], t["reviews_tab"]])
+
+    with tab1:
+        st.markdown(f"## {fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')}")
+        c1, c2 = st.columns([1.7, 1])
+        with c1:
+            game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
+            st.markdown(f'<img src="{get_enhanced_game_background(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" title="{game_name}">', unsafe_allow_html=True)
+            st.markdown(f"### {t['information']}")
+            st.write(f"**{t['developer_label']}:** {fix_nan(g_i.get('Desarrollador'))}")
+            st.write(f"**{t['genres_label']}:** {fix_nan(g_i.get('Géneros'))}")
+            st.write(f"**{t['platforms_label']}:** {fix_nan(g_i.get('Plataformas'))}")
+            st.write(f"**{t['release_information']}:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}")
+            st.write(f"**{t['current_rank']}:** {fix_nan(g_rank)}")
+            st.write(f"**{t['current_players']}:** {fix_nan(g_players)}")
+            st.write(f"**{t['price']}:** {format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language)}")
+        with c2:
+            game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
+            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" title="{game_name}">', unsafe_allow_html=True)
+            st.metric(t["rating_label"], f"⭐ {rating_num}/100" if not pd.isna(rating_num) else "⭐ N/A")
+            st.metric(t["reviews_label"], f"💬 {int(reviews_num):,}" if not pd.isna(reviews_num) else "💬 N/A")
+            st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "N/A")
+            st.metric(t["current_players"], f"👥 {int(players_num):,}" if not pd.isna(players_num) else "👥 N/A")
+            st.markdown(f"[{t['open_steam']}](https://store.steampowered.com/app/{appid})")
+        st.divider()
+        st.subheader(t["about_game"])
+        st.write(
+            f"⭐ {t['rating_label']}: {rating}\n"
+            f"💬 {t['reviews_label']}: {reviews}\n\n"
+            "This summary uses the rating and review counts from the dataset to describe the selected game."
+        )
+
     with tab2:
-        st.subheader("📅 Release Information")
-        st.write(f"**Release Date:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}")
-        st.write(f"**Genres:** {fix_nan(g_i.get('Géneros'))}")
-        st.write(f"**Platforms:** {fix_nan(g_i.get('Plataformas'))}")
-        st.write(f"**Developer:** {fix_nan(g_i.get('Desarrollador'))}")
-        
-        # Description section
-        st.subheader("📝 About This Game")
-        st.write("Detailed game description not available in current dataset. This would typically include a comprehensive overview of the game's storyline, gameplay mechanics, and features. Please visit the game's Steam page for full details.")
-    
+        st.markdown(f"### {t['details_tab']}")
+        detail_rows = {
+            t['developer_label']: fix_nan(g_i.get('Desarrollador')),
+            t['genres_label']: fix_nan(g_i.get('Géneros')),
+            t['platforms_label']: fix_nan(g_i.get('Plataformas')),
+            t['release_information']: fix_nan(g_i.get('Fecha_Lanzamiento')),
+            t['price']: format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language),
+            t['rating_label']: fix_nan(g_d.get('Rating'), 'N/A'),
+            t['reviews_label']: fix_nan(g_d.get('Reviews'), 'N/A'),
+            t['current_rank']: fix_nan(g_rank),
+            t['current_players']: fix_nan(g_players),
+        }
+        st.table(pd.DataFrame.from_dict(detail_rows, orient="index", columns=["Value"]))
+
     with tab3:
-        st.subheader("⭐ User Reviews")
-        rating = fix_nan(g_d.get('Rating'), 'N/A')
-        reviews = fix_nan(g_d.get('Reviews'), 'N/A')
-        
-        rating_num = pd.to_numeric(rating, errors='coerce')
-        reviews_num = pd.to_numeric(reviews, errors='coerce')
-        
+        st.markdown(f"### {t['reviews_tab']}")
         if not pd.isna(rating_num):
-            st.metric("Overall Rating", f"{rating_num}/100")
+            st.metric(t["rating_label"], f"{rating_num}/100")
         else:
-            st.write("**Overall Rating:** Not available")
-        
+            st.write(f"**{t['rating_label']}:** N/A")
         if not pd.isna(reviews_num):
-            st.metric("Total Reviews", f"{int(reviews_num):,}")
+            st.metric(t["reviews_label"], f"{int(reviews_num):,}")
         else:
-            st.write("**Total Reviews:** Not available")
-        
+            st.write(f"**{t['reviews_label']}:** N/A")
+
         # Add favorite functionality in game detail view
         if "user" in st.session_state:
             f_df = pd.read_csv(FAV_FILE)
             is_fav = ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == appid)).any()
             if is_fav:
-                if st.button("💔 Remove from Favorites", width='stretch'):
+                if st.button(t["remove_from_favorites"], width='stretch'):
                     f_df = f_df[~((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == appid))]
                     f_df.to_csv(FAV_FILE, index=False)
                     st.rerun()
             else:
-                if st.button("❤️ Add to Favorites", width='stretch'):
+                if st.button(t["added_to_favorites"], width='stretch'):
                     new_fav = pd.DataFrame([[st.session_state["user"], appid]], columns=["username","appid"])
                     pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
-                    st.success("Added to favorites!")
+                    st.success(t["added_to_favorites"])
     st.stop()
 
 # ---------- 8. VIEW: FAVORITES ---------- 
