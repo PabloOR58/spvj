@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: infosteam_web
+    restart: always # <--- ESTO HACE QUE SE ENCIENDA SOLO
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./:/app
+      - game_data:/app/Clean
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["streamlit", "run", "Web/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+
+  downloader:
+    build: .
+    container_name: infosteam_downloader
+    restart: always # <--- ESTO HACE QUE SE ENCIENDA SOLO
+    depends_on:
+      - web
+    volumes:
+      - ./:/app
+      - game_data:/app/Clean
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      bash -c "while true; do 
+      echo 'Iniciando descarga diaria...';
+      python /app/Src/download.py; 
+      echo 'Descarga finalizada. Esperando 24 horas...';
+      sleep 86400; 
+      done"
+
+volumes:
+  game_data:

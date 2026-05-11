@@ -1,15 +1,19 @@
-FROM python:3.9-slim
+# Usamos una imagen ligera de Python
+FROM python:3.11-slim
+
+# Instalamos dependencias del sistema necesarias
+RUN apt-get update && apt-get install -y \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Copiamos los requisitos e instalamos (ajusta el nombre si es requirements.txt)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copiamos el resto del proyecto
 COPY . .
 
-RUN ls -la /app
-
+# Exponemos el puerto de Streamlit
 EXPOSE 8501
-   
-# Comando para ejecutar la app con Streamlit
-CMD ["streamlit", "run", "Web/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
