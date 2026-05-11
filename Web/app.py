@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import re
+import base64
 
 # ---------- 1. PAGE CONFIGURATION ---------- 
 st.set_page_config(
@@ -92,6 +93,8 @@ TRANSLATIONS = {
         "information": "📋 Información",
         "release_information": "📅 Información de lanzamiento",
         "about_game": "📝 Acerca del juego",
+        "trailer": "🎥 Trailer",
+        "twitch_streams": "🎮 Streams en Vivo",
         "developer_label": "Desarrollador",
         "platforms_label": "Plataformas",
         "genres_label": "Géneros",
@@ -100,6 +103,7 @@ TRANSLATIONS = {
         "current_rank": "Posición actual",
         "current_players": "Jugadores actuales",
         "open_steam": "Abrir en Steam",
+        "open_twitch": "Ver en Twitch",
         "added_to_favorites": "Añadido a favoritos",
         "remove_from_favorites": "Quitar de favoritos",
     },
@@ -148,6 +152,8 @@ TRANSLATIONS = {
         "information": "📋 Information",
         "release_information": "📅 Release Information",
         "about_game": "📝 About This Game",
+        "trailer": "🎥 Trailer",
+        "twitch_streams": "🎮 Live Streams",
         "developer_label": "Developer",
         "platforms_label": "Platforms",
         "genres_label": "Genres",
@@ -156,6 +162,7 @@ TRANSLATIONS = {
         "current_rank": "Current Rank",
         "current_players": "Current Players",
         "open_steam": "Open in Steam",
+        "open_twitch": "Watch on Twitch",
         "added_to_favorites": "Added to favorites",
         "remove_from_favorites": "Remove from favorites",
     },
@@ -204,6 +211,8 @@ TRANSLATIONS = {
         "information": "📋 Informations",
         "release_information": "📅 Informations de sortie",
         "about_game": "📝 À propos du jeu",
+        "trailer": "🎥 Bande-annonce",
+        "twitch_streams": "🎮 Streams en Direct",
         "developer_label": "Développeur",
         "platforms_label": "Plateformes",
         "genres_label": "Genres",
@@ -212,6 +221,7 @@ TRANSLATIONS = {
         "current_rank": "Rang actuel",
         "current_players": "Joueurs actuels",
         "open_steam": "Ouvrir sur Steam",
+        "open_twitch": "Voir sur Twitch",
         "added_to_favorites": "Ajouté aux favoris",
         "remove_from_favorites": "Retirer des favoris",
     },
@@ -260,6 +270,8 @@ TRANSLATIONS = {
         "information": "📋 Informações",
         "release_information": "📅 Informações de lançamento",
         "about_game": "📝 Sobre este jogo",
+        "trailer": "🎥 Trailer",
+        "twitch_streams": "🎮 Streams ao Vivo",
         "developer_label": "Desenvolvedor",
         "platforms_label": "Plataformas",
         "genres_label": "Genres",
@@ -268,6 +280,7 @@ TRANSLATIONS = {
         "current_rank": "Posição atual",
         "current_players": "Jogadores atuais",
         "open_steam": "Abrir no Steam",
+        "open_twitch": "Ver no Twitch",
         "added_to_favorites": "Adicionado aos favoritos",
         "remove_from_favorites": "Remover dos favoritos",
     },
@@ -292,6 +305,31 @@ def format_local_price(price_str, lang):
 
 def get_translations(lang):
     return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
+
+# ---------- PASSWORD ENCRYPTION FUNCTIONS ----------
+def encrypt_password(password):
+    """Encrypt password using base64 encoding"""
+    if not password:
+        return ""
+    try:
+        # Convert to bytes, encode with base64, then back to string
+        password_bytes = password.encode('utf-8')
+        encoded_bytes = base64.b64encode(password_bytes)
+        return encoded_bytes.decode('utf-8')
+    except:
+        return password  # Fallback to plain text if encoding fails
+
+def decrypt_password(encrypted_password):
+    """Decrypt password from base64 encoding"""
+    if not encrypted_password:
+        return ""
+    try:
+        # Convert from string to bytes, decode from base64, then to string
+        encrypted_bytes = encrypted_password.encode('utf-8')
+        decoded_bytes = base64.b64decode(encrypted_bytes)
+        return decoded_bytes.decode('utf-8')
+    except:
+        return encrypted_password  # Fallback to encrypted text if decoding fails
 
 # ---------- 3. HELPER FUNCTIONS ---------- 
 def fix_nan(val, default="-"):
@@ -367,6 +405,43 @@ def steam_image_exists(appid):
         return False
 
 
+@st.cache_data(ttl=86400)
+def steam_video_exists(appid):
+    try:
+        aid = int(float(appid))
+        if aid <= 0:
+            return False
+        import requests
+        # Use Steam API to get movie data
+        url = f"https://store.steampowered.com/api/appdetails?appids={aid}"
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        if str(aid) in data and data[str(aid)]['success']:
+            app_data = data[str(aid)]['data']
+            if 'movies' in app_data and len(app_data['movies']) > 0:
+                # Return the HLS URL of the first movie
+                first_movie = app_data['movies'][0]
+                if 'hls_h264' in first_movie:
+                    return first_movie['hls_h264']
+        return False
+    except:
+        return False
+
+
+def get_game_video(appid):
+    """Get game trailer video URL"""
+    try:
+        aid = int(float(appid))
+        if aid <= 0:
+            return None
+        video_url = steam_video_exists(appid)
+        if video_url:
+            return video_url
+        return None
+    except:
+        return None
+
+
 def get_fallback_game_image():
     """Get a fallback game image when Steam image is not available"""
     # Collection of gaming-themed placeholder images
@@ -431,16 +506,57 @@ def get_ai_response(user_input, game_data):
         response_lines.append("The rating and reviews are based on the current dataset and may vary over time.")
     return "\n".join(response_lines)
 
-def get_fallback_game_background():
-    """Get a fallback background image"""
-    backgrounds = [
-        "https://images.unsplash.com/photo-1556438064-2d7646166914?w=800&h=400&fit=crop",  # Gaming setup
-        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&h=400&fit=crop",  # Controller
-        "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=400&fit=crop",  # Gaming mouse
-        "https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=800&h=400&fit=crop",  # VR headset
-    ]
-    import random
-    return random.choice(backgrounds)
+def format_game_name_for_twitch(game_name):
+    """Format game name for Twitch URL"""
+    if not game_name:
+        return ""
+    # Remove special characters and replace spaces with %20 or use urllib
+    import re
+    import urllib.parse
+    # Clean the name
+    clean_name = re.sub(r'[^\w\s-]', '', game_name).strip()
+    # URL encode
+    return urllib.parse.quote(clean_name)
+
+
+def get_platform_icons(platforms_str):
+    """Convert platform string to visual icons"""
+    if not platforms_str or pd.isna(platforms_str):
+        return "❓ No disponible"
+
+    platforms = [p.strip().lower() for p in str(platforms_str).split(',')]
+
+    platform_icons = {
+        'windows': '🪟 Windows',
+        'mac': '🍎 macOS',
+        'linux': '🐧 Linux',
+        'android': '🤖 Android',
+        'ios': '📱 iOS'
+    }
+
+    icons = []
+    for platform in platforms:
+        if platform in platform_icons:
+            icons.append(platform_icons[platform])
+        else:
+            icons.append(f"❓ {platform.title()}")
+
+    return " | ".join(icons)
+
+
+def display_platforms_section(appid, lang):
+    """Display platforms in an attractive card format"""
+    t = get_translations(lang)
+
+    # Get platforms for this game
+    platforms_data = df_plataformas[df_plataformas["AppID"] == appid]
+    if not platforms_data.empty:
+        platforms_str = platforms_data["Plataformas"].iloc[0]
+        platforms_display = get_platform_icons(platforms_str)
+    else:
+        platforms_display = "❓ No disponible"
+
+    return platforms_display
 
 
 def get_enhanced_game_background(appid, game_name=None):
@@ -487,14 +603,15 @@ def load_data():
         df_l = pd.read_csv(os.path.join(CLEAN_DIR, "listado_juegos.csv"))
         df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"))
         df_d = pd.read_csv(os.path.join(CLEAN_DIR, "detalles_juegos.csv"), on_bad_lines="skip")
-        for df in [df_l, df_i, df_d]:
+        df_p = pd.read_csv(os.path.join(CLEAN_DIR, "plataformas_juegos.csv"))
+        for df in [df_l, df_i, df_d, df_p]:
             if not df.empty and 'AppID' in df.columns:
                 df['AppID'] = pd.to_numeric(df['AppID'], errors='coerce').fillna(0).astype(int)
-        return df_l, df_i, df_d
+        return df_l, df_i, df_d, df_p
     except:
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-df_listado, df_info, df_detalles = load_data()
+df_listado, df_info, df_detalles, df_plataformas = load_data()
 
 # ---------- 6. SESSION STATE ---------- 
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
@@ -530,14 +647,33 @@ with st.sidebar:
             if u_name in users["username"].values:
                 st.error(t["user_exists"])
             else:
-                new_u = pd.DataFrame([[u_name, u_pass]], columns=["username", "password"])
+                # Encrypt password before saving
+                encrypted_pass = encrypt_password(u_pass)
+                new_u = pd.DataFrame([[u_name, encrypted_pass]], columns=["username", "password"])
                 pd.concat([users, new_u]).to_csv(USERS_FILE, index=False)
                 st.success(t["user_registered"])
     else:
         if st.button(t["login"], width='stretch'):
             users = pd.read_csv(USERS_FILE)
-            valid = users[(users["username"] == u_name) & (users["password"] == u_pass)]
-            if not valid.empty:
+            # Check for valid login (support both encrypted and plain text passwords for migration)
+            valid_user = None
+            for _, user_row in users.iterrows():
+                if user_row["username"] == u_name:
+                    stored_pass = user_row["password"]
+                    # Try encrypted comparison first
+                    encrypted_input = encrypt_password(u_pass)
+                    if stored_pass == encrypted_input:
+                        valid_user = user_row
+                        break
+                    # Try plain text comparison for backward compatibility
+                    elif stored_pass == u_pass:
+                        valid_user = user_row
+                        # Migrate to encrypted password
+                        users.loc[users["username"] == u_name, "password"] = encrypted_input
+                        users.to_csv(USERS_FILE, index=False)
+                        break
+
+            if valid_user is not None:
                 st.session_state["user"] = u_name
                 st.rerun()
             else:
@@ -601,28 +737,116 @@ if st.session_state.selected_game:
     tab1, tab2, tab3 = st.tabs([t["overview_tab"], t["details_tab"], t["reviews_tab"]])
 
     with tab1:
-        st.markdown(f"## {fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')}")
-        c1, c2 = st.columns([1.7, 1])
-        with c1:
-            game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
-            st.markdown(f'<img src="{get_enhanced_game_background(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" title="{game_name}">', unsafe_allow_html=True)
-            st.markdown(f"### {t['information']}")
+        game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
+
+        # Hero section with background image and title
+        st.markdown(f"""
+        <div style="position: relative; height: 300px; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+            <img src="{get_enhanced_game_background(appid, game_name)}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4);" />
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                <h1 style="font-size: 3em; margin: 0; font-weight: bold;">{game_name}</h1>
+                <p style="font-size: 1.2em; margin: 10px 0 0 0; opacity: 0.9;">{fix_nan(g_i.get('Desarrollador'))}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Key metrics in a nice grid
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric(t["rating_label"], f"⭐ {rating_num}/100" if not pd.isna(rating_num) else "⭐ N/A")
+        with col2:
+            st.metric(t["reviews_label"], f"💬 {int(reviews_num):,}" if not pd.isna(reviews_num) else "💬 N/A")
+        with col3:
+            st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "🏆 N/A")
+        with col4:
+            st.metric(t["current_players"], f"👥 {int(players_num):,}" if not pd.isna(players_num) else "👥 N/A")
+
+        # Action buttons
+        st.markdown("---")
+        col_a, col_b, col_c = st.columns([1, 1, 2])
+        with col_a:
+            st.markdown(f"[![Steam](https://img.icons8.com/color/48/000000/steam.png)](https://store.steampowered.com/app/{appid})", unsafe_allow_html=True)
+            st.caption(f"[{t['open_steam']}](https://store.steampowered.com/app/{appid})")
+        with col_b:
+            game_name_for_twitch = format_game_name_for_twitch(game_name)
+            twitch_url = f"https://www.twitch.tv/directory/game/{game_name_for_twitch}" if game_name_for_twitch else "https://www.twitch.tv"
+            st.markdown(f"[![Twitch](https://img.icons8.com/color/48/9146FF/twitch.png)]({twitch_url})", unsafe_allow_html=True)
+            st.caption(f"[{t['open_twitch']}]({twitch_url})")
+        with col_c:
+            st.metric(t["price"], format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language))
+
+        st.markdown("---")
+
+        # Media section - Trailer and Twitch side by side
+        st.markdown(f"## 🎬 {t['trailer']} & {t['twitch_streams']}")
+
+        media_col1, media_col2 = st.columns(2)
+
+        with media_col1:
+            st.markdown(f"### {t['trailer']}")
+            video_url = get_game_video(appid)
+            if video_url:
+                video_html = f"""
+                <video controls style="width:100%; border-radius:10px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);" poster="{get_enhanced_game_image(appid, game_name)}">
+                    <source src="{video_url}" type="application/x-mpegURL">
+                    Your browser does not support HLS video playback.
+                </video>
+                """
+                st.components.v1.html(video_html, height=250)
+            else:
+                st.markdown(f"🎥 [Watch Trailer on Steam](https://store.steampowered.com/app/{appid})")
+
+        with media_col2:
+            st.markdown(f"### {t['twitch_streams']}")
+            if game_name_for_twitch:
+                # Create an attractive Twitch link instead of blocked iframe
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #9146FF 0%, #1e1e2e 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 8px 32px rgba(145, 70, 255, 0.3);">
+                    <div style="font-size: 3em; margin-bottom: 10px;">🔴</div>
+                    <h3 style="margin: 0 0 15px 0; color: #ffffff;">{t['twitch_streams']}</h3>
+                    <p style="margin: 0 0 20px 0; opacity: 0.8;">Ver streams en vivo de {game_name}</p>
+                    <a href="{twitch_url}" target="_blank" style="background: #ffffff; color: #9146FF; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; transition: all 0.3s ease;">
+                        🎮 {t['open_twitch']}
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style="background: linear-gradient(135deg, #9146FF 0%, #1e1e2e 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">🔴</div>
+                    <h3 style="margin: 0 0 15px 0;">{t['twitch_streams']}</h3>
+                    <a href="https://www.twitch.tv" target="_blank" style="background: #ffffff; color: #9146FF; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: bold;">
+                        🎮 {t['open_twitch']}
+                    </a>
+                </div>
+                """, unsafe_allow_html=True)
+        # Game information in organized cards
+        st.markdown(f"## 📋 {t['information']}")
+
+        info_col1, info_col2 = st.columns(2)
+
+        with info_col1:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0;">🎮 Game Details</h4>
+            </div>
+            """, unsafe_allow_html=True)
             st.write(f"**{t['developer_label']}:** {fix_nan(g_i.get('Desarrollador'))}")
             st.write(f"**{t['genres_label']}:** {fix_nan(g_i.get('Géneros'))}")
-            st.write(f"**{t['platforms_label']}:** {fix_nan(g_i.get('Plataformas'))}")
+            st.write(f"**{t['platforms_label']}:** {display_platforms_section(appid, st.session_state.language)}")
             st.write(f"**{t['release_information']}:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}")
+
+        with info_col2:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0;">📊 Statistics</h4>
+            </div>
+            """, unsafe_allow_html=True)
             st.write(f"**{t['current_rank']}:** {fix_nan(g_rank)}")
             st.write(f"**{t['current_players']}:** {fix_nan(g_players)}")
             st.write(f"**{t['price']}:** {format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language)}")
-        with c2:
-            game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
-            st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);" title="{game_name}">', unsafe_allow_html=True)
-            st.metric(t["rating_label"], f"⭐ {rating_num}/100" if not pd.isna(rating_num) else "⭐ N/A")
-            st.metric(t["reviews_label"], f"💬 {int(reviews_num):,}" if not pd.isna(reviews_num) else "💬 N/A")
-            st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "N/A")
-            st.metric(t["current_players"], f"👥 {int(players_num):,}" if not pd.isna(players_num) else "👥 N/A")
-            st.markdown(f"[{t['open_steam']}](https://store.steampowered.com/app/{appid})")
-        st.divider()
+
+        st.markdown("---")
         st.subheader(t["about_game"])
         st.write(
             f"⭐ {t['rating_label']}: {rating}\n"
@@ -635,7 +859,7 @@ if st.session_state.selected_game:
         detail_rows = {
             t['developer_label']: fix_nan(g_i.get('Desarrollador')),
             t['genres_label']: fix_nan(g_i.get('Géneros')),
-            t['platforms_label']: fix_nan(g_i.get('Plataformas')),
+            t['platforms_label']: display_platforms_section(appid, st.session_state.language),
             t['release_information']: fix_nan(g_i.get('Fecha_Lanzamiento')),
             t['price']: format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language),
             t['rating_label']: fix_nan(g_d.get('Rating'), 'N/A'),
@@ -774,14 +998,14 @@ with t1:
                         st.rerun()
 
                     if "user" in st.session_state:
-                        if st.button(f"❤️ {t['favorite']}", key=f"fav_{idx}", width='stretch'):
-                            f_df = pd.read_csv(FAV_FILE)
-                            if not ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == aid)).any():
+                        f_df = pd.read_csv(FAV_FILE)
+                        if ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == aid)).any():
+                            if st.button(f"❤️ {t['favorite']}", key=f"fav_{idx}", width='stretch'):
+                                st.info(t["already_in_favorites"])
+                        elif st.button(f"<3 {t['favorite']}", key=f"fav_{idx}", width='stretch'):
                                 new_fav = pd.DataFrame([[st.session_state["user"], aid]], columns=["username","appid"])
                                 pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
                                 st.success(f"{t['saved']} {game.get('Nombre')}")
-                            else:
-                                st.info(t["already_in_favorites"])
     if st.button(t["toggle_top"]):
         st.session_state.show_more = not st.session_state.show_more
         st.rerun()
