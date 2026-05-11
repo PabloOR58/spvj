@@ -2,13 +2,6 @@ import streamlit as st
 import pandas as pd
 import os
 import re
-import json
-from datetime import datetime
-
-try:
-    import genai
-except ImportError:
-    genai = None
 
 # ---------- 1. PAGE CONFIGURATION ---------- 
 st.set_page_config(
@@ -161,19 +154,8 @@ def get_enhanced_game_image(appid, game_name=None):
         if special_image:
             return special_image
 
-    if game_name and should_skip_steam_image(game_name):
-        unsplash_image = search_game_image_unsplash(game_name)
-        if unsplash_image:
-            return unsplash_image
-        return get_fallback_game_image()
-
     if steam_image_exists(appid):
         return get_game_image(appid)
-
-    if game_name:
-        unsplash_image = search_game_image_unsplash(game_name)
-        if unsplash_image:
-            return unsplash_image
 
     return get_fallback_game_image()
 
@@ -206,74 +188,6 @@ def get_fallback_game_background():
     import random
     return random.choice(backgrounds)
 
-def search_game_image_unsplash(game_name):
-    """Search for game images using Unsplash API (free, no API key needed)"""
-    try:
-        import requests
-        # Clean and prepare game name for search
-        search_term = game_name.lower().strip()
-
-        # Handle special cases and abbreviations
-        special_cases = {
-            'fivem': 'gta v fivem multiplayer',
-            'fife': 'gta v fivem',
-            'gta v': 'grand theft auto v',
-            'gta 5': 'grand theft auto v',
-            'csgo': 'counter strike global offensive',
-            'cs:go': 'counter strike global offensive',
-            'lol': 'league of legends',
-            'dota': 'dota 2 defense of the ancients',
-            'wow': 'world of warcraft',
-            'fortnite': 'fortnite battle royale',
-            'minecraft': 'minecraft game',
-            'among us': 'among us crewmate',
-            'amongus': 'among us crewmate',
-            'rocket league': 'rocket league soccer',
-            'rocketleague': 'rocket league soccer',
-            'apex': 'apex legends battle royale',
-            'apex legends': 'apex legends battle royale',
-            'valorant': 'valorant tactical shooter',
-            'overwatch': 'overwatch team shooter',
-            'pubg': 'playerunknown battlegrounds',
-            'rainbow six': 'rainbow six siege',
-            'r6': 'rainbow six siege',
-            'cod': 'call of duty modern warfare',
-            'call of duty': 'call of duty modern warfare',
-            'fifa': 'fifa soccer football',
-            'nba': 'nba basketball',
-            'madden': 'madden nfl football',
-            'nhl': 'nhl hockey',
-            'the sims': 'the sims life simulation',
-            'sims': 'the sims life simulation',
-            'civilization': 'civilization strategy game',
-            'civ': 'civilization strategy game'
-        }
-
-        # Apply special cases
-        for key, value in special_cases.items():
-            if key in search_term:
-                search_term = value
-                break
-
-        # Remove special characters and prepare for URL
-        search_term = re.sub(r'[^\w\s]', '', search_term)
-        search_query = search_term.replace(' ', '+') + '+game'
-
-        url = f"https://api.unsplash.com/search/photos?query={search_query}&per_page=1&orientation=landscape"
-        response = requests.get(url, timeout=5)
-
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('results') and len(data['results']) > 0:
-                # Return the first result with proper dimensions
-                image_url = data['results'][0]['urls']['regular']
-                return image_url
-
-    except Exception as e:
-        # If Unsplash fails, continue to fallback
-        pass
-
-    return None
 
 def get_enhanced_game_background(appid, game_name=None):
     """Enhanced background getter that tries multiple sources"""
@@ -320,9 +234,8 @@ def load_data():
         df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"))
         df_d = pd.read_csv(os.path.join(CLEAN_DIR, "detalles_juegos.csv"), on_bad_lines="skip")
         for df in [df_l, df_i, df_d]:
-            if not df.empty and "AppID" in df.columns:
-                df["AppID"] = pd.to_numeric(df["AppID"], errors="coerce").fillna(0).astype(int)
-
+            if not df.empty and 'AppID' in df.columns:
+                df['AppID'] = pd.to_numeric(df['AppID'], errors='coerce').fillna(0).astype(int)
         return df_l, df_i, df_d
     except:
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
@@ -339,6 +252,9 @@ if "sel_date" not in st.session_state:
         st.session_state.sel_date = dates[0]
     else:
         st.session_state.sel_date = None
+
+if "show_chat" not in st.session_state:
+    st.session_state.show_chat = False
 
 # ---------- 6. SIDEBAR ---------- 
 with st.sidebar:
@@ -392,6 +308,8 @@ with st.sidebar:
         load_data.clear()
         st.rerun()
 
+    st.session_state.show_chat = st.checkbox("💬 Show Chat", value=st.session_state.show_chat)
+
 # ---------- 7. VIEW: GAME DETAIL ---------- 
 if st.session_state.selected_game:
     appid = st.session_state.selected_game
@@ -436,24 +354,24 @@ if st.session_state.selected_game:
             st.metric("Reviews", f"💬 {int(reviews_num):,}")
         else:
             st.metric("Reviews", "💬 N/A")
-            
-            # Additional metrics
-            g_rank = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["Posicion"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
-            g_players = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["JugadoresConcurrentes"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
-            
-            rank_num = pd.to_numeric(g_rank, errors='coerce')
-            if not pd.isna(rank_num):
-                st.metric("Current Rank", f"#{int(rank_num)}")
-            else:
-                st.metric("Current Rank", "#N/A")
-            
-            players_num = pd.to_numeric(g_players, errors='coerce')
-            if not pd.isna(players_num):
-                st.metric("Current Players", f"👥 {int(players_num):,}")
-            else:
-                st.metric("Current Players", "👥 N/A")
-            
-            st.markdown(f"[🚀 Open in Steam](https://store.steampowered.com/app/{appid})")
+
+        # Additional metrics
+        g_rank = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["Posicion"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
+        g_players = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["JugadoresConcurrentes"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
+        
+        rank_num = pd.to_numeric(g_rank, errors='coerce')
+        if not pd.isna(rank_num):
+            st.metric("Current Rank", f"#{int(rank_num)}")
+        else:
+            st.metric("Current Rank", "#N/A")
+        
+        players_num = pd.to_numeric(g_players, errors='coerce')
+        if not pd.isna(players_num):
+            st.metric("Current Players", f"👥 {int(players_num):,}")
+        else:
+            st.metric("Current Players", "👥 N/A")
+        
+        st.markdown(f"[🚀 Open in Steam](https://store.steampowered.com/app/{appid})")
     
     with tab2:
         st.subheader("📅 Release Information")
@@ -537,7 +455,10 @@ df_day = df_listado[df_listado["Fecha"] == st.session_state.sel_date].copy()
 
 if st.session_state.view == "Market Trends":
     st.title("📈 Market Trends & Sales")
-    st.dataframe(df_detalles[['Nombre', 'Precio', 'Rating', 'Reviews']], width='stretch', hide_index=True)
+    if 'Precio_USD' in df_detalles.columns:
+        st.dataframe(df_detalles[['Nombre', 'Precio_USD', 'Rating', 'Reviews']].rename(columns={'Precio_USD': 'Price (USD)'}), width='stretch', hide_index=True)
+    else:
+        st.dataframe(df_detalles[['Nombre', 'Precio', 'Rating', 'Reviews']], width='stretch', hide_index=True)
     st.stop()
 
 elif st.session_state.view == "Top Genres":
@@ -559,7 +480,10 @@ elif st.session_state.view == "Price Analysis":
     df_p = df_detalles.copy()
     df_p['Price_Val'] = df_p['Precio'].apply(convert_to_usd_numeric)
     st.bar_chart(df_p.sort_values('Price_Val', ascending=False).head(20).set_index('Nombre')['Price_Val'])
-    st.dataframe(df_p[['Nombre', 'Precio', 'Rating']].sort_values('Price_Val', ascending=False), width='stretch', hide_index=True)
+    if 'Precio_USD' in df_p.columns:
+        st.dataframe(df_p[['Nombre', 'Precio_USD', 'Rating']].rename(columns={'Precio_USD': 'Price (USD)'}).sort_values('Price_Val', ascending=False), width='stretch', hide_index=True)
+    else:
+        st.dataframe(df_p[['Nombre', 'Precio', 'Rating']].sort_values('Price_Val', ascending=False), width='stretch', hide_index=True)
     st.stop()
 
 # ---------- 10. MAIN DASHBOARD ---------- 
@@ -691,16 +615,11 @@ if st.session_state.get('show_chat', False):
             if game_data:
                 bot_response = get_ai_response(user_input, game_data)
             else:
-                # General AI response using new API
-                try:
-                    client = genai.Client(api_key=st.secrets.get("GOOGLE_API_KEY", "your-api-key-here"))
-                    response = client.models.generate_content(
-                        model='gemini-1.5-flash',
-                        contents=f"You are a helpful game information assistant. Help users with questions about video games. If they ask about specific games, suggest they mention the game name. You have access to a database of games but need the name to provide specific info.\n\nUser question: {user_input}"
-                    )
-                    bot_response = response.text.strip()
-                except Exception as e:
-                    bot_response = f"I couldn't find a specific game in your question. Please mention a game name from our database, like 'Counter-Strike 2' or 'Dota 2'. AI service may be unavailable: {str(e)}"
+                bot_response = (
+                    "I couldn't find a specific game in your question. "
+                    "Please mention an exact game name from the database, such as 'Counter-Strike 2' or 'Dota 2'. "
+                    "If you need more details, select the game from the dashboard." 
+                )
 
             st.session_state.global_chat_history.append({"role": "assistant", "content": bot_response})
             st.rerun()
