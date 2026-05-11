@@ -83,6 +83,9 @@ TRANSLATIONS = {
         "players_online": "🟢 Jugadores en Línea",
         "games_tracked": "🎮 Juegos Seguimiento",
         "top_game": "🏆 Mejor Juego",
+        "welcome": "Bienvenido",
+        "price": "Precio",
+        "free_to_play": "Gratis para jugar",
     },
     "en": {
         "language_label": "🌐 Language",
@@ -120,82 +123,109 @@ TRANSLATIONS = {
         "players_online": "🟢 Players Online",
         "games_tracked": "🎮 Games Tracked",
         "top_game": "🏆 Top Game",
+        "welcome": "Welcome",
+        "price": "Price",
+        "free_to_play": "Free to Play",
     },
     "fr": {
-        "language_label": "🌐 Language",
-        "account": "🔐 Account",
+        "language_label": "🌐 Langue",
+        "account": "🔐 Compte",
         "mode": "Mode",
-        "user": "User",
-        "password": "Password",
-        "create_account": "Create Account",
-        "login": "Login",
-        "register": "Register",
-        "logout": "Logout",
-        "my_favorites": "⭐ My Favorites",
+        "user": "Utilisateur",
+        "password": "Mot de passe",
+        "create_account": "Créer un compte",
+        "login": "Connexion",
+        "register": "S'inscrire",
+        "logout": "Déconnexion",
+        "my_favorites": "⭐ Mes Favoris",
         "navigation": "📑 Navigation",
-        "select_date": "Select Date:",
-        "home_dashboard": "🏠 Home",
-        "update_data": "🔄 Update Data",
-        "dashboard": "Dashboard",
-        "market_trends": "Market Trends",
-        "top_genres": "Top Genres",
-        "top_developers": "Top Developers",
-        "price_analysis": "Price Analysis",
-        "favorites": "Favorites",
-        "user_exists": "User exists!",
-        "user_registered": "User registered!",
-        "wrong_credentials": "Wrong credentials",
-        "please_login_favorites": "Please login to see your favorites.",
-        "favorites_empty": "Your favorites list is empty.",
-        "saved": "Saved:",
-        "already_in_favorites": "Already in favorites",
-        "remove": "🗑️ Remove",
-        "view_info": "View Info",
-        "details": "Details",
-        "favorite": "Favorite",
-        "toggle_top": "Toggle Top 10 / 100",
-        "players_online": "🟢 Players Online",
-        "games_tracked": "🎮 Games Tracked",
-        "top_game": "🏆 Top Game",
+        "select_date": "Sélectionner la date:",
+        "home_dashboard": "🏠 Accueil",
+        "update_data": "🔄 Mettre à jour",
+        "dashboard": "Tableau de bord",
+        "market_trends": "Tendances",
+        "top_genres": "Meilleurs Genres",
+        "top_developers": "Meilleurs Développeurs",
+        "price_analysis": "Analyse des Prix",
+        "favorites": "Favoris",
+        "user_exists": "L'utilisateur existe déjà !",
+        "user_registered": "Utilisateur enregistré !",
+        "wrong_credentials": "Identifiants incorrects",
+        "please_login_favorites": "Veuillez vous connecter pour voir vos favoris.",
+        "favorites_empty": "Votre liste de favoris est vide.",
+        "saved": "Enregistré :",
+        "already_in_favorites": "Déjà dans les favoris",
+        "remove": "🗑️ Supprimer",
+        "view_info": "Voir Infos",
+        "details": "Détails",
+        "favorite": "Favori",
+        "toggle_top": "Basculer Top 10 / 100",
+        "players_online": "🟢 Joueurs en ligne",
+        "games_tracked": "🎮 Jeux suivis",
+        "top_game": "🏆 Meilleur jeu",
+        "welcome": "Bienvenue",
+        "price": "Prix",
+        "free_to_play": "Gratuit",
     },
     "pt": {
-        "language_label": "🌐 Language",
-        "account": "🔐 Account",
-        "mode": "Mode",
-        "user": "User",
-        "password": "Password",
-        "create_account": "Create Account",
-        "login": "Login",
-        "register": "Register",
-        "logout": "Logout",
-        "my_favorites": "⭐ My Favorites",
-        "navigation": "📑 Navigation",
-        "select_date": "Select Date:",
-        "home_dashboard": "🏠 Home",
-        "update_data": "🔄 Update Data",
-        "dashboard": "Dashboard",
-        "market_trends": "Market Trends",
-        "top_genres": "Top Genres",
-        "top_developers": "Top Developers",
-        "price_analysis": "Price Analysis",
-        "favorites": "Favorites",
-        "user_exists": "User exists!",
-        "user_registered": "User registered!",
-        "wrong_credentials": "Wrong credentials",
-        "please_login_favorites": "Please login to see your favorites.",
-        "favorites_empty": "Your favorites list is empty.",
-        "saved": "Saved:",
-        "already_in_favorites": "Already in favorites",
-        "remove": "🗑️ Remove",
-        "view_info": "View Info",
-        "details": "Details",
-        "favorite": "Favorite",
-        "toggle_top": "Toggle Top 10 / 100",
-        "players_online": "🟢 Players Online",
-        "games_tracked": "🎮 Games Tracked",
-        "top_game": "🏆 Top Game",
+        "language_label": "🌐 Idioma",
+        "account": "🔐 Conta",
+        "mode": "Modo",
+        "user": "Usuário",
+        "password": "Senha",
+        "create_account": "Criar conta",
+        "login": "Entrar",
+        "register": "Registrar",
+        "logout": "Sair",
+        "my_favorites": "⭐ Meus Favoritos",
+        "navigation": "📑 Navegação",
+        "select_date": "Selecionar data:",
+        "home_dashboard": "🏠 Início",
+        "update_data": "🔄 Atualizar Dados",
+        "dashboard": "Painel",
+        "market_trends": "Tendências",
+        "top_genres": "Principais Gêneros",
+        "top_developers": "Principais Desenvolvedores",
+        "price_analysis": "Análise de Preços",
+        "favorites": "Favoritos",
+        "user_exists": "O usuário já existe!",
+        "user_registered": "Usuário registrado!",
+        "wrong_credentials": "Credenciais incorretas",
+        "please_login_favorites": "Por favor faça login para ver seus favoritos.",
+        "favorites_empty": "Sua lista de favoritos está vazia.",
+        "saved": "Salvo:",
+        "already_in_favorites": "Já está nos favoritos",
+        "remove": "🗑️ Remover",
+        "view_info": "Ver Informações",
+        "details": "Detalhes",
+        "favorite": "Favorito",
+        "toggle_top": "Alternar Top 10 / 100",
+        "players_online": "🟢 Jogadores Online",
+        "games_tracked": "🎮 Jogos Monitorados",
+        "top_game": "🏆 Melhor Jogo",
+        "welcome": "Bem-vindo",
+        "price": "Preço",
+        "free_to_play": "Grátis para jogar",
     },
 }
+CURRENCY_CONFIG = {
+    "es": {"symbol": "€", "rate": 0.92},
+    "fr": {"symbol": "€", "rate": 0.92},
+    "pt": {"symbol": "€", "rate": 0.92},
+    "en": {"symbol": "$", "rate": 1.00},
+}
+def get_currency_config(lang):
+    return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"])
+
+def format_local_price(price_str, lang):
+    val_usd = convert_to_usd_numeric(price_str)
+    t = get_translations(lang)
+    if val_usd == 0.0:
+        return t["free_to_play"]
+    cfg = get_currency_config(lang)
+    amount = val_usd * cfg["rate"]
+    return f"{cfg['symbol']}{amount:,.2f}"
+
 def get_translations(lang):
     return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
 
@@ -420,8 +450,8 @@ if "show_chat" not in st.session_state:
 
 # ---------- 6. SIDEBAR ---------- 
 with st.sidebar:
-    st.title("🎮 infosteam")
-    st.selectbox("🌐 Language", LANGUAGE_NAMES, index=LANGUAGE_NAMES.index(st.session_state.language_name), key="language_name")
+    current_t = get_translations(st.session_state.language)
+    st.selectbox(current_t["language_label"], LANGUAGE_NAMES, index=LANGUAGE_NAMES.index(st.session_state.language_name), key="language_name")
     st.session_state.language = LANGUAGE_CODES.get(st.session_state.language_name, "es")
     t = get_translations(st.session_state.language)
 
@@ -513,7 +543,7 @@ if st.session_state.selected_game:
         with cb:
             game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
             st.markdown(f'<img src="{get_enhanced_game_image(appid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; border-radius:10px;" title="{img_title}">', unsafe_allow_html=True)
-            st.metric("Price", format_usd(g_d.get('Precio', 'N/A')))
+            st.metric(t["price"], format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language))
         
         rating = fix_nan(g_d.get('Rating'), 'N/A')
         rating_num = pd.to_numeric(rating, errors='coerce')
@@ -785,7 +815,7 @@ if st.session_state.get('show_chat', False):
                 bot_response = (
                     "I couldn't find a specific game in your question. "
                     "Please mention an exact game name from the database, such as 'Counter-Strike 2' or 'Dota 2'. "
-                    "If you need more details, select the game from the dashboard." 
+                    "If you need more details, select the game from the dashboard. " 
                 )
 
             st.session_state.global_chat_history.append({"role": "assistant", "content": bot_response})
