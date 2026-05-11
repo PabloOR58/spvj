@@ -39,6 +39,166 @@ LOGOS = {
     "linux": "https://img.icons8.com/color/48/000000/tux.png"
 }
 
+LANGUAGE_NAMES = ["Español", "English", "Français", "Português"]
+LANGUAGE_CODES = {
+    "Español": "es",
+    "English": "en",
+    "Français": "fr",
+    "Português": "pt",
+}
+TRANSLATIONS = {
+    "es": {
+        "language_label": "🌐 Idioma",
+        "account": "🔐 Cuenta",
+        "mode": "Modo",
+        "user": "Usuario",
+        "password": "Contraseña",
+        "create_account": "Crear Cuenta",
+        "login": "Iniciar Sesión",
+        "register": "Registrarse",
+        "logout": "Cerrar sesión",
+        "my_favorites": "⭐ Mis Favoritos",
+        "navigation": "📑 Navegación",
+        "select_date": "Seleccionar fecha:",
+        "home_dashboard": "🏠 Inicio",
+        "update_data": "🔄 Actualizar Datos",
+        "dashboard": "Dashboard",
+        "market_trends": "Tendencias",
+        "top_genres": "Géneros",
+        "top_developers": "Desarrolladores",
+        "price_analysis": "Análisis de Precios",
+        "favorites": "Favoritos",
+        "user_exists": "¡El usuario ya existe!",
+        "user_registered": "¡Usuario registrado!",
+        "wrong_credentials": "Credenciales incorrectas",
+        "please_login_favorites": "Por favor inicia sesión para ver tus favoritos.",
+        "favorites_empty": "Tu lista de favoritos está vacía.",
+        "saved": "Guardado:",
+        "already_in_favorites": "Ya está en favoritos",
+        "remove": "🗑️ Eliminar",
+        "view_info": "Ver Información",
+        "details": "Detalles",
+        "favorite": "Favorito",
+        "toggle_top": "Alternar Top 10 / 100",
+        "players_online": "🟢 Jugadores en Línea",
+        "games_tracked": "🎮 Juegos Seguimiento",
+        "top_game": "🏆 Mejor Juego",
+    },
+    "en": {
+        "language_label": "🌐 Language",
+        "account": "🔐 Account",
+        "mode": "Mode",
+        "user": "User",
+        "password": "Password",
+        "create_account": "Create Account",
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "my_favorites": "⭐ My Favorites",
+        "navigation": "📑 Navigation",
+        "select_date": "Select Date:",
+        "home_dashboard": "🏠 Home",
+        "update_data": "🔄 Update Data",
+        "dashboard": "Dashboard",
+        "market_trends": "Market Trends",
+        "top_genres": "Top Genres",
+        "top_developers": "Top Developers",
+        "price_analysis": "Price Analysis",
+        "favorites": "Favorites",
+        "user_exists": "User exists!",
+        "user_registered": "User registered!",
+        "wrong_credentials": "Wrong credentials",
+        "please_login_favorites": "Please login to see your favorites.",
+        "favorites_empty": "Your favorites list is empty.",
+        "saved": "Saved:",
+        "already_in_favorites": "Already in favorites",
+        "remove": "🗑️ Remove",
+        "view_info": "View Info",
+        "details": "Details",
+        "favorite": "Favorite",
+        "toggle_top": "Toggle Top 10 / 100",
+        "players_online": "🟢 Players Online",
+        "games_tracked": "🎮 Games Tracked",
+        "top_game": "🏆 Top Game",
+    },
+    "fr": {
+        "language_label": "🌐 Language",
+        "account": "🔐 Account",
+        "mode": "Mode",
+        "user": "User",
+        "password": "Password",
+        "create_account": "Create Account",
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "my_favorites": "⭐ My Favorites",
+        "navigation": "📑 Navigation",
+        "select_date": "Select Date:",
+        "home_dashboard": "🏠 Home",
+        "update_data": "🔄 Update Data",
+        "dashboard": "Dashboard",
+        "market_trends": "Market Trends",
+        "top_genres": "Top Genres",
+        "top_developers": "Top Developers",
+        "price_analysis": "Price Analysis",
+        "favorites": "Favorites",
+        "user_exists": "User exists!",
+        "user_registered": "User registered!",
+        "wrong_credentials": "Wrong credentials",
+        "please_login_favorites": "Please login to see your favorites.",
+        "favorites_empty": "Your favorites list is empty.",
+        "saved": "Saved:",
+        "already_in_favorites": "Already in favorites",
+        "remove": "🗑️ Remove",
+        "view_info": "View Info",
+        "details": "Details",
+        "favorite": "Favorite",
+        "toggle_top": "Toggle Top 10 / 100",
+        "players_online": "🟢 Players Online",
+        "games_tracked": "🎮 Games Tracked",
+        "top_game": "🏆 Top Game",
+    },
+    "pt": {
+        "language_label": "🌐 Language",
+        "account": "🔐 Account",
+        "mode": "Mode",
+        "user": "User",
+        "password": "Password",
+        "create_account": "Create Account",
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "my_favorites": "⭐ My Favorites",
+        "navigation": "📑 Navigation",
+        "select_date": "Select Date:",
+        "home_dashboard": "🏠 Home",
+        "update_data": "🔄 Update Data",
+        "dashboard": "Dashboard",
+        "market_trends": "Market Trends",
+        "top_genres": "Top Genres",
+        "top_developers": "Top Developers",
+        "price_analysis": "Price Analysis",
+        "favorites": "Favorites",
+        "user_exists": "User exists!",
+        "user_registered": "User registered!",
+        "wrong_credentials": "Wrong credentials",
+        "please_login_favorites": "Please login to see your favorites.",
+        "favorites_empty": "Your favorites list is empty.",
+        "saved": "Saved:",
+        "already_in_favorites": "Already in favorites",
+        "remove": "🗑️ Remove",
+        "view_info": "View Info",
+        "details": "Details",
+        "favorite": "Favorite",
+        "toggle_top": "Toggle Top 10 / 100",
+        "players_online": "🟢 Players Online",
+        "games_tracked": "🎮 Games Tracked",
+        "top_game": "🏆 Top Game",
+    },
+}
+def get_translations(lang):
+    return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
+
 # ---------- 3. HELPER FUNCTIONS ---------- 
 def fix_nan(val, default="-"):
     if pd.isna(val) or str(val).lower() == "nan" or str(val).strip() == "":
@@ -246,6 +406,8 @@ df_listado, df_info, df_detalles = load_data()
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
 if "show_more" not in st.session_state: st.session_state.show_more = False
 if "view" not in st.session_state: st.session_state.view = "Dashboard"
+if "language_name" not in st.session_state: st.session_state.language_name = "Español"
+if "language" not in st.session_state: st.session_state.language = LANGUAGE_CODES[st.session_state.language_name]
 if "sel_date" not in st.session_state:
     if not df_listado.empty:
         dates = sorted(df_listado["Fecha"].unique(), reverse=True)
@@ -259,52 +421,64 @@ if "show_chat" not in st.session_state:
 # ---------- 6. SIDEBAR ---------- 
 with st.sidebar:
     st.title("🎮 infosteam")
-    st.markdown("### 🔐 Account")
-    if "user" not in st.session_state:
-        auth_mode = st.radio("Mode", ["Login", "Register"], label_visibility="collapsed")
-        u_name = st.text_input("User")
-        u_pass = st.text_input("Password", type="password")
+    st.selectbox("🌐 Language", LANGUAGE_NAMES, index=LANGUAGE_NAMES.index(st.session_state.language_name), key="language_name")
+    st.session_state.language = LANGUAGE_CODES.get(st.session_state.language_name, "es")
+    t = get_translations(st.session_state.language)
 
-        if auth_mode == "Register":
-            if st.button("Create Account", width='stretch'):
-                users = pd.read_csv(USERS_FILE)
-                if u_name in users["username"].values: st.error("User exists!")
-                else:
-                    new_u = pd.DataFrame([[u_name, u_pass]], columns=["username", "password"])
-                    pd.concat([users, new_u]).to_csv(USERS_FILE, index=False)
-                    st.success("User registered!")
-        else:
-            if st.button("Login", width='stretch'):
-                users = pd.read_csv(USERS_FILE)
-                valid = users[(users["username"] == u_name) & (users["password"] == u_pass)]
-                if not valid.empty:
-                    st.session_state["user"] = u_name
-                    st.rerun()
-                else: st.error("Wrong credentials")
+    st.markdown(f"### {t['account']}")
+    auth_mode = st.radio(t["mode"], [t["login"], t["register"]], label_visibility="collapsed")
+    u_name = st.text_input(t["user"])
+    u_pass = st.text_input(t["password"], type="password")
+
+    if auth_mode == t["register"]:
+        if st.button(t["create_account"], width='stretch'):
+            users = pd.read_csv(USERS_FILE)
+            if u_name in users["username"].values:
+                st.error(t["user_exists"])
+            else:
+                new_u = pd.DataFrame([[u_name, u_pass]], columns=["username", "password"])
+                pd.concat([users, new_u]).to_csv(USERS_FILE, index=False)
+                st.success(t["user_registered"])
     else:
-        st.success(f"👤 Welcome, {st.session_state['user']}")
-        if st.button("Logout", width='stretch'):
+        if st.button(t["login"], width='stretch'):
+            users = pd.read_csv(USERS_FILE)
+            valid = users[(users["username"] == u_name) & (users["password"] == u_pass)]
+            if not valid.empty:
+                st.session_state["user"] = u_name
+                st.rerun()
+            else:
+                st.error(t["wrong_credentials"])
+    if "user" in st.session_state:
+        st.success(f"👤 {t['welcome'] if 'welcome' in t else 'Welcome'}, {st.session_state['user']}")
+        if st.button(t["logout"], width='stretch'):
             del st.session_state["user"]
             st.rerun()
-        if st.button("⭐ My Favorites", width='stretch'):
+        if st.button(t["my_favorites"], width='stretch'):
             st.session_state.view = "Favorites"
             st.rerun()
 
     st.divider()
-    st.markdown("### 📑 Navigation")
-    sections = ["Dashboard", "Market Trends", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
-    st.session_state.view = st.selectbox("Menu", sections, index=sections.index(st.session_state.view) if st.session_state.view in sections else 0)
+    st.markdown(f"### {t['navigation']}")
+
+    view_menu_keys = ["Dashboard", "Market Trends", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
+    view_menu_labels = [
+        t["dashboard"], t["market_trends"], t["top_genres"],
+        t["top_developers"], t["price_analysis"], t["favorites"]
+    ]
+    current_index = view_menu_keys.index(st.session_state.view) if st.session_state.view in view_menu_keys else 0
+    selected_label = st.selectbox("", view_menu_labels, index=current_index, label_visibility="collapsed")
+    st.session_state.view = view_menu_keys[view_menu_labels.index(selected_label)]
 
     if not df_listado.empty:
         dates = sorted(df_listado["Fecha"].unique(), reverse=True)
-        st.session_state.sel_date = st.selectbox("Select Date:", dates, index=dates.index(st.session_state.sel_date) if st.session_state.sel_date in dates else 0)
+        st.session_state.sel_date = st.selectbox(t["select_date"], dates, index=dates.index(st.session_state.sel_date) if st.session_state.sel_date in dates else 0)
 
-    if st.button("🏠 Home Dashboard", width='stretch'):
+    if st.button(t["home_dashboard"], width='stretch'):
         st.session_state.selected_game = None
         st.session_state.view = "Dashboard"
         st.rerun()
 
-    if st.button("🔄 Update Data", width='stretch'):
+    if st.button(t["update_data"], width='stretch'):
         load_data.clear()
         st.rerun()
 
@@ -420,31 +594,30 @@ if st.session_state.selected_game:
 
 # ---------- 8. VIEW: FAVORITES ---------- 
 if st.session_state.view == "Favorites":
-    st.title("⭐ My Favorite Games")
+    st.title(f"⭐ {t['my_favorites']}")
     if "user" not in st.session_state:
-        st.warning("Please login to see your favorites.")
+        st.warning(t["please_login_favorites"])
     else:
         favs_df = pd.read_csv(FAV_FILE)
         user_favs = favs_df[favs_df["username"] == st.session_state["user"]]
         if user_favs.empty:
-            st.info("Your favorites list is empty.")
+            st.info(t["favorites_empty"])
         else:
             for idx, row in user_favs.iterrows():
                 aid = int(row["appid"])
-                # Get Name for display
                 g_data = df_listado[df_listado["AppID"] == aid]
                 g_name = g_data["Nombre"].iloc[0] if not g_data.empty else f"AppID: {aid}"
-                
+
                 c1, c2, c3 = st.columns([1, 4, 1])
                 with c1:
                     st.markdown(f'<img src="{get_enhanced_game_image(aid, g_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; height:auto; border-radius:10px;" title="{g_name}">', unsafe_allow_html=True)
                 with c2: 
                     st.markdown(f"### {g_name}")
-                    if st.button("View Info", key=f"fav_view_{aid}"):
+                    if st.button(t["view_info"], key=f"fav_view_{aid}"):
                         st.session_state.selected_game = aid
                         st.rerun()
                 with c3:
-                    if st.button("🗑️ Remove", key=f"del_{aid}_{idx}", width='stretch'):
+                    if st.button(t["remove"], key=f"del_{aid}_{idx}", width='stretch'):
                         favs_df = favs_df.drop(idx)
                         favs_df.to_csv(FAV_FILE, index=False)
                         st.rerun()
@@ -491,9 +664,9 @@ st.title("🎮 Dashboard")
 
 # Dashboard metrics
 m1, m2, m3 = st.columns(3)
-m1.metric("🟢 Players Online", f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
-m2.metric("🎮 Games Tracked", f"{len(df_day)}")
-m3.metric("🏆 Top Game", fix_nan(df_day.iloc[0]["Nombre"]) if len(df_day) > 0 else "N/A")
+m1.metric(t["players_online"], f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
+m2.metric(t["games_tracked"], f"{len(df_day)}")
+m3.metric(t["top_game"], fix_nan(df_day.iloc[0]["Nombre"]) if len(df_day) > 0 else "N/A")
 
 st.divider()
 
@@ -516,26 +689,20 @@ with t1:
                     st.markdown(f'<div style="height: 140px; overflow: hidden; border-radius: 5px; background: #161921;"><img src="{get_enhanced_game_image(aid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width: 100%; height: 100%; object-fit: cover;" title="{game_title}"></div>', unsafe_allow_html=True)
                     st.markdown(f"**#{int(game.get('Posicion', 0))} {game_name}**")
                     
-                    if st.button("Details", key=f"btn_{idx}", width='stretch'):
+                    if st.button(t["details"], key=f"btn_{idx}", width='stretch'):
                         st.session_state.selected_game = aid
                         st.rerun()
-                    
+
                     if "user" in st.session_state:
-                        # LOGICA DE FAVORITOS CORREGIDA (EVITA DUPLICADOS)
-                        if st.button("❤️ Favorite", key=f"fav_{idx}", width='stretch'):
+                        if st.button(f"❤️ {t['favorite']}", key=f"fav_{idx}", width='stretch'):
                             f_df = pd.read_csv(FAV_FILE)
-                            # Verificar si ya existe para este usuario
                             if not ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == aid)).any():
                                 new_fav = pd.DataFrame([[st.session_state["user"], aid]], columns=["username","appid"])
                                 pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
-                                st.success(f"Saved: {game.get('Nombre')}")
+                                st.success(f"{t['saved']} {game.get('Nombre')}")
                             else:
-                                st.info("Already in favorites")
-                    
-                    st.caption(f"👥 {int(game.get('JugadoresConcurrentes', 0)):,} players")
-
-    # BOTÓN ACTUALIZADO PARA TOP 100
-    if st.button("Toggle Top 10 / 100"):
+                                st.info(t["already_in_favorites"])
+    if st.button(t["toggle_top"]):
         st.session_state.show_more = not st.session_state.show_more
         st.rerun()
 
