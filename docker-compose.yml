@@ -4,12 +4,11 @@ services:
   web:
     build: .
     container_name: infosteam_web
-    restart: always # <--- ESTO HACE QUE SE ENCIENDA SOLO
+    restart: always
     ports:
       - "8501:8501"
     volumes:
-      - ./:/app
-      - game_data:/app/Clean
+      - ./:/app  # Vincula tu carpeta local con el contenedor
     environment:
       - PYTHONUNBUFFERED=1
     command: ["streamlit", "run", "Web/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
@@ -17,12 +16,11 @@ services:
   downloader:
     build: .
     container_name: infosteam_downloader
-    restart: always # <--- ESTO HACE QUE SE ENCIENDA SOLO
+    restart: always
     depends_on:
       - web
     volumes:
-      - ./:/app
-      - game_data:/app/Clean
+      - ./:/app  # Vincula tu carpeta local para que el CSV aparezca en tu PC
     environment:
       - PYTHONUNBUFFERED=1
     command: >
@@ -32,6 +30,3 @@ services:
       echo 'Descarga finalizada. Esperando 24 horas...';
       sleep 86400; 
       done"
-
-volumes:
-  game_data:
