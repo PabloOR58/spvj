@@ -47,6 +47,7 @@ LANGUAGE_CODES = {
     "Français": "fr",
     "Português": "pt",
 }
+LANGUAGE_CODE_TO_NAME = {v: k for k, v in LANGUAGE_CODES.items()}
 TRANSLATIONS = {
     "es": {
         "language_label": "🌐 Idioma",
@@ -68,6 +69,7 @@ TRANSLATIONS = {
         "top_genres": "Géneros",
         "top_developers": "Desarrolladores",
         "price_analysis": "Análisis de Precios",
+        "popular_releases": "Populares",
         "favorites": "Favoritos",
         "user_exists": "¡El usuario ya existe!",
         "user_registered": "¡Usuario registrado!",
@@ -87,6 +89,29 @@ TRANSLATIONS = {
         "welcome": "Bienvenido",
         "price": "Precio",
         "free_to_play": "Gratis para jugar",
+        "market_trends_title": "📈 Tendencias y ventas",
+        "genre_popularity_title": "📂 Popularidad de géneros",
+        "top_developers_title": "👨‍💻 Mejores desarrolladores",
+        "popular_releases_title": "🎯 Populares",
+        "price_analysis_title": "💰 Análisis de precios",
+        "historical_trends_header": "📈 Tendencias históricas y cuota de mercado",
+        "market_share": "🎭 Cuota de mercado",
+        "volatility": "🔥 Volatilidad",
+        "peak_24h_section": "📈 Pico 24h",
+        "dashboard_title": "🎮 Dashboard",
+        "live_rankings": "📊 Clasificación en vivo",
+        "performance_trend": "📈 Tendencia de rendimiento",
+        "data_explorer": "📋 Explorador de datos",
+        "compare_games": "Comparar juegos:",
+        "data_date": "Fecha de datos:",
+        "no_24h_data": "No hay datos disponibles para las últimas 24 horas.",
+        "popular_releases_description": "Un juego se considera popular si su pico de jugadores en la última semana supera al pico semanal de otros juegos lanzados en fechas similares (±7 días).",
+        "copyright": "© 2026 infosteam — Monitorización de datos de alto nivel",
+        "release_date": "Fecha de lanzamiento",
+        "weekly_peak": "Pico última semana",
+        "game_details": "Detalles del juego",
+        "watch_trailer_on_steam": "Ver tráiler en Steam",
+        "watch_live_streams_of": "Ver streams en vivo de {game_name}",
         "overview_tab": "📖 Resumen",
         "details_tab": "ℹ️ Detalles",
         "reviews_tab": "⭐ Reseñas",
@@ -102,6 +127,7 @@ TRANSLATIONS = {
         "reviews_label": "Reseñas",
         "current_rank": "Posición actual",
         "current_players": "Jugadores actuales",
+        "peak_24h": "📈 Pico 24h",
         "open_steam": "Abrir en Steam",
         "open_twitch": "Ver en Twitch",
         "added_to_favorites": "Añadido a favoritos",
@@ -127,6 +153,7 @@ TRANSLATIONS = {
         "top_genres": "Top Genres",
         "top_developers": "Top Developers",
         "price_analysis": "Price Analysis",
+        "popular_releases": "Popular Releases",
         "favorites": "Favorites",
         "user_exists": "User exists!",
         "user_registered": "User registered!",
@@ -146,6 +173,29 @@ TRANSLATIONS = {
         "welcome": "Welcome",
         "price": "Price",
         "free_to_play": "Free to Play",
+        "market_trends_title": "📈 Market Trends & Sales",
+        "genre_popularity_title": "📂 Genre Popularity",
+        "top_developers_title": "👨‍💻 Top Developers",
+        "popular_releases_title": "🎯 Popular Releases",
+        "price_analysis_title": "💰 Price Analysis",
+        "historical_trends_header": "📈 Historical Trends & Market Share",
+        "market_share": "🎭 Market Share",
+        "volatility": "🔥 Volatility",
+        "peak_24h_section": "📈 24h Peak Players",
+        "dashboard_title": "🎮 Dashboard",
+        "live_rankings": "📊 Live Rankings",
+        "performance_trend": "📈 Performance Trend",
+        "data_explorer": "📋 Data Explorer",
+        "compare_games": "Compare Games:",
+        "data_date": "Data date:",
+        "no_24h_data": "No data available for the latest 24 hours.",
+        "popular_releases_description": "A game is considered popular if its weekly peak players exceed the weekly peak of other games released on similar dates (±7 days).",
+        "copyright": "© 2026 infosteam — High-End Data Monitoring",
+        "release_date": "Release Date",
+        "weekly_peak": "Weekly peak",
+        "game_details": "Game Details",
+        "watch_trailer_on_steam": "Watch Trailer on Steam",
+        "watch_live_streams_of": "Watch live streams of {game_name}",
         "overview_tab": "📖 Overview",
         "details_tab": "ℹ️ Details",
         "reviews_tab": "⭐ Reviews",
@@ -161,6 +211,7 @@ TRANSLATIONS = {
         "reviews_label": "Reviews",
         "current_rank": "Current Rank",
         "current_players": "Current Players",
+        "peak_24h": "📈 24h Peak",
         "open_steam": "Open in Steam",
         "open_twitch": "Watch on Twitch",
         "added_to_favorites": "Added to favorites",
@@ -186,6 +237,7 @@ TRANSLATIONS = {
         "top_genres": "Meilleurs Genres",
         "top_developers": "Meilleurs Développeurs",
         "price_analysis": "Analyse des Prix",
+        "popular_releases": "Sorties Populaires",
         "favorites": "Favoris",
         "user_exists": "L'utilisateur existe déjà !",
         "user_registered": "Utilisateur enregistré !",
@@ -205,6 +257,29 @@ TRANSLATIONS = {
         "welcome": "Bienvenue",
         "price": "Prix",
         "free_to_play": "Gratuit",
+        "market_trends_title": "📈 Tendances et ventes",
+        "genre_popularity_title": "📂 Popularité des genres",
+        "top_developers_title": "👨‍💻 Meilleurs développeurs",
+        "popular_releases_title": "🎯 Sorties Populaires",
+        "price_analysis_title": "💰 Analyse des prix",
+        "historical_trends_header": "📈 Tendances historiques et part de marché",
+        "market_share": "🎭 Part de marché",
+        "volatility": "🔥 Volatilité",
+        "peak_24h_section": "📈 Pic 24h",
+        "dashboard_title": "🎮 Tableau de bord",
+        "live_rankings": "📊 Classement en direct",
+        "performance_trend": "📈 Tendance de performance",
+        "data_explorer": "📋 Explorateur de données",
+        "compare_games": "Comparer les jeux:",
+        "data_date": "Date des données :",
+        "no_24h_data": "Aucune donnée disponible pour les dernières 24 heures.",
+        "popular_releases_description": "Un jeu est considéré comme populaire si son pic de joueurs hebdomadaire dépasse celui des autres jeux sortis à des dates similaires (±7 jours).",
+        "copyright": "© 2026 infosteam — Surveillance de données haut de gamme",
+        "release_date": "Date de sortie",
+        "weekly_peak": "Pic hebdomadaire",
+        "game_details": "Détails du jeu",
+        "watch_trailer_on_steam": "Regarder la bande-annonce sur Steam",
+        "watch_live_streams_of": "Voir les streams en direct de {game_name}",
         "overview_tab": "📖 Aperçu",
         "details_tab": "ℹ️ Détails",
         "reviews_tab": "⭐ Avis",
@@ -220,6 +295,7 @@ TRANSLATIONS = {
         "reviews_label": "Avis",
         "current_rank": "Rang actuel",
         "current_players": "Joueurs actuels",
+        "peak_24h": "📈 Pic 24h",
         "open_steam": "Ouvrir sur Steam",
         "open_twitch": "Voir sur Twitch",
         "added_to_favorites": "Ajouté aux favoris",
@@ -245,6 +321,7 @@ TRANSLATIONS = {
         "top_genres": "Principais Gêneros",
         "top_developers": "Principais Desenvolvedores",
         "price_analysis": "Análise de Preços",
+        "popular_releases": "Lançamentos Populares",
         "favorites": "Favoritos",
         "user_exists": "O usuário já existe!",
         "user_registered": "Usuário registrado!",
@@ -264,6 +341,29 @@ TRANSLATIONS = {
         "welcome": "Bem-vindo",
         "price": "Preço",
         "free_to_play": "Grátis para jogar",
+        "market_trends_title": "📈 Tendências e vendas",
+        "genre_popularity_title": "📂 Popularidade de gêneros",
+        "top_developers_title": "👨‍💻 Principais desenvolvedores",
+        "popular_releases_title": "🎯 Lançamentos populares",
+        "price_analysis_title": "💰 Análise de preços",
+        "historical_trends_header": "📈 Tendências históricas e participação de mercado",
+        "market_share": "🎭 Participação de mercado",
+        "volatility": "🔥 Volatilidade",
+        "peak_24h_section": "📈 Pico 24h",
+        "dashboard_title": "🎮 Painel",
+        "live_rankings": "📊 Classificação ao vivo",
+        "performance_trend": "📈 Tendência de desempenho",
+        "data_explorer": "📋 Explorador de dados",
+        "compare_games": "Comparar jogos:",
+        "data_date": "Data dos dados:",
+        "no_24h_data": "Nenhum dado disponível para as últimas 24 horas.",
+        "popular_releases_description": "Um jogo é considerado popular se seu pico semanal de jogadores for maior que o pico semanal de outros jogos lançados em datas similares (±7 dias).",
+        "copyright": "© 2026 infosteam — Monitoramento de dados de alto nível",
+        "release_date": "Data de lançamento",
+        "weekly_peak": "Pico semanal",
+        "game_details": "Detalhes do jogo",
+        "watch_trailer_on_steam": "Ver trailer no Steam",
+        "watch_live_streams_of": "Assistir streams ao vivo de {game_name}",
         "overview_tab": "📖 Visão geral",
         "details_tab": "ℹ️ Detalhes",
         "reviews_tab": "⭐ Avaliações",
@@ -279,6 +379,7 @@ TRANSLATIONS = {
         "reviews_label": "Avaliações",
         "current_rank": "Posição atual",
         "current_players": "Jogadores atuais",
+        "peak_24h": "📈 Pico 24h",
         "open_steam": "Abrir no Steam",
         "open_twitch": "Ver no Twitch",
         "added_to_favorites": "Adicionado aos favoritos",
@@ -467,6 +568,19 @@ def get_fallback_game_image():
     import random
     return random.choice(game_placeholders)
 
+
+def get_fallback_game_background():
+    """Get a fallback game background when Steam background is not available"""
+    background_placeholders = [
+        "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1600&h=900&fit=crop",
+        "https://images.unsplash.com/photo-1556438064-2d7646166914?w=1600&h=900&fit=crop",
+        "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=1600&h=900&fit=crop",
+        "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1600&h=900&fit=crop",
+        "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=1600&h=900&fit=crop",
+    ]
+    import random
+    return random.choice(background_placeholders)
+
 def get_game_background(appid):
     try:
         aid = int(float(appid))
@@ -613,12 +727,147 @@ def load_data():
 
 df_listado, df_info, df_detalles, df_plataformas = load_data()
 
+
+def parse_date_safe(value):
+    try:
+        if pd.isna(value):
+            return pd.NaT
+        parsed = pd.to_datetime(value, dayfirst=True, errors='coerce')
+        if pd.isna(parsed):
+            parsed = pd.to_datetime(value, dayfirst=False, errors='coerce')
+        return parsed
+    except Exception:
+        return pd.NaT
+
+
+def get_recent_releases(ref_date, days=30):
+    ref_dt = parse_date_safe(ref_date)
+    if pd.isna(ref_dt) or df_info.empty:
+        return pd.DataFrame()
+    rel = df_info.copy()
+    rel['__release_dt'] = rel['Fecha_Lanzamiento'].apply(parse_date_safe)
+    window_start = ref_dt - pd.Timedelta(days=days)
+    mask = (
+        rel['__release_dt'].notna() &
+        (rel['__release_dt'] <= ref_dt) &
+        (rel['__release_dt'] >= window_start)
+    )
+    return rel.loc[mask].copy()
+
+
+def peak_players_last_week(appid, ref_date):
+    end_dt = parse_date_safe(ref_date)
+    if pd.isna(end_dt) or df_listado.empty:
+        return 0
+    game_rows = df_listado[df_listado['AppID'] == int(appid)].copy()
+    if game_rows.empty:
+        return 0
+    game_rows['__date'] = pd.to_datetime(game_rows['Fecha'], errors='coerce')
+    window = game_rows[(game_rows['__date'] > (end_dt - pd.Timedelta(days=7))) & (game_rows['__date'] <= end_dt)]
+    if window.empty:
+        return 0
+    values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0)
+    return int(values.max())
+
+
+def get_latest_data_date():
+    if df_listado.empty:
+        return pd.Timestamp.today()
+    dates = pd.to_datetime(df_listado['Fecha'], errors='coerce')
+    return dates.max()
+
+
+def get_peak_last_24h(ref_date):
+    end_dt = parse_date_safe(ref_date)
+    if pd.isna(end_dt) or df_listado.empty:
+        return 0
+    day_rows = df_listado.copy()
+    day_rows['__date'] = pd.to_datetime(day_rows['Fecha'], errors='coerce')
+    window = day_rows[day_rows['__date'] == end_dt]
+    if window.empty:
+        return 0
+    values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0)
+    return int(values.max())
+
+
+def get_latest_release_date():
+    if df_info.empty:
+        return pd.Timestamp.today()
+    dates = df_info['Fecha_Lanzamiento'].apply(parse_date_safe)
+    return dates.max()
+
+
+def get_popular_reference_date():
+    data_ref = get_latest_data_date()
+    if not get_recent_releases(data_ref, days=30).empty:
+        return data_ref
+    return get_latest_release_date()
+
+
+def compute_popular_releases(ref_date):
+    recent = get_recent_releases(ref_date, days=30)
+    if recent.empty:
+        return pd.DataFrame(
+            columns=['AppID', 'Nombre', 'Fecha_Lanzamiento', 'peak_last_week', 'is_popular']
+        )
+
+    rows = []
+    for _, row in recent.iterrows():
+        appid = int(row.get('AppID', 0))
+        release_dt = parse_date_safe(row.get('Fecha_Lanzamiento'))
+        peak_week = peak_players_last_week(appid, ref_date)
+        rows.append({
+            'AppID': appid,
+            'Nombre': row.get('Nombre'),
+            'Fecha_Lanzamiento': release_dt,
+            'peak_last_week': peak_week,
+        })
+
+    df_recent = pd.DataFrame(rows)
+    df_recent['is_popular'] = False
+
+    for idx, row in df_recent.iterrows():
+        if pd.isna(row['Fecha_Lanzamiento']):
+            continue
+        window_start = row['Fecha_Lanzamiento'] - pd.Timedelta(days=7)
+        window_end = row['Fecha_Lanzamiento'] + pd.Timedelta(days=7)
+        peers = df_recent[(df_recent['AppID'] != row['AppID']) &
+                          (df_recent['Fecha_Lanzamiento'] >= window_start) &
+                          (df_recent['Fecha_Lanzamiento'] <= window_end)]
+        if peers.empty:
+            df_recent.at[idx, 'is_popular'] = True
+        else:
+            df_recent.at[idx, 'is_popular'] = int(row['peak_last_week']) > int(peers['peak_last_week'].max())
+
+    return df_recent.sort_values(['is_popular', 'peak_last_week'], ascending=[False, False]).reset_index(drop=True)
+
+
+def prepare_popular_releases_display(popular_releases, t):
+    if 'is_popular' in popular_releases.columns:
+        popular_releases = popular_releases.loc[popular_releases['is_popular']]
+    if 'Fecha_Lanzamiento' in popular_releases.columns:
+        popular_releases = popular_releases.copy()
+        popular_releases['Fecha_Lanzamiento'] = pd.to_datetime(
+            popular_releases['Fecha_Lanzamiento'], errors='coerce'
+        )
+        popular_releases[t['release_date']] = popular_releases['Fecha_Lanzamiento'].dt.strftime('%Y-%m-%d')
+    if popular_releases.empty:
+        return pd.DataFrame(columns=['Nombre', 'AppID', t['release_date'], t['weekly_peak']])
+    return popular_releases[['Nombre', 'AppID', t['release_date'], 'peak_last_week']].rename(
+        columns={'peak_last_week': t['weekly_peak']}
+    )
+
+
 # ---------- 6. SESSION STATE ---------- 
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
 if "show_more" not in st.session_state: st.session_state.show_more = False
 if "view" not in st.session_state: st.session_state.view = "Dashboard"
-if "language_name" not in st.session_state: st.session_state.language_name = "Español"
-if "language" not in st.session_state: st.session_state.language = LANGUAGE_CODES[st.session_state.language_name]
+if "language_name" not in st.session_state:
+    st.session_state.language_name = "Español"
+elif st.session_state.language_name not in LANGUAGE_NAMES:
+    st.session_state.language_name = LANGUAGE_CODE_TO_NAME.get(st.session_state.language_name, "Español")
+if "language" not in st.session_state:
+    st.session_state.language = LANGUAGE_CODES.get(st.session_state.language_name, "es")
 if "sel_date" not in st.session_state:
     if not df_listado.empty:
         dates = sorted(df_listado["Fecha"].unique(), reverse=True)
@@ -626,13 +875,13 @@ if "sel_date" not in st.session_state:
     else:
         st.session_state.sel_date = None
 
-if "show_chat" not in st.session_state:
-    st.session_state.show_chat = False
-
 # ---------- 6. SIDEBAR ---------- 
 with st.sidebar:
     current_t = get_translations(st.session_state.language)
-    st.selectbox(current_t["language_label"], LANGUAGE_NAMES, index=LANGUAGE_NAMES.index(st.session_state.language_name), key="language_name")
+    language_index = LANGUAGE_NAMES.index(st.session_state.language_name) if st.session_state.language_name in LANGUAGE_NAMES else 0
+    st.selectbox(current_t["language_label"], LANGUAGE_NAMES, index=language_index, key="language_name")
+    if st.session_state.language_name not in LANGUAGE_CODES:
+        st.session_state.language_name = LANGUAGE_CODE_TO_NAME.get(st.session_state.language_name, "Español")
     st.session_state.language = LANGUAGE_CODES.get(st.session_state.language_name, "es")
     t = get_translations(st.session_state.language)
 
@@ -690,10 +939,10 @@ with st.sidebar:
     st.divider()
     st.markdown(f"### {t['navigation']}")
 
-    view_menu_keys = ["Dashboard", "Market Trends", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
+    view_menu_keys = ["Dashboard", "Market Trends", "Popular Releases", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
     view_menu_labels = [
-        t["dashboard"], t["market_trends"], t["top_genres"],
-        t["top_developers"], t["price_analysis"], t["favorites"]
+        t["dashboard"], t["market_trends"], t["popular_releases"],
+        t["top_genres"], t["top_developers"], t["price_analysis"], t["favorites"]
     ]
     current_index = view_menu_keys.index(st.session_state.view) if st.session_state.view in view_menu_keys else 0
     selected_label = st.selectbox("", view_menu_labels, index=current_index, label_visibility="collapsed")
@@ -712,8 +961,6 @@ with st.sidebar:
         load_data.clear()
         st.rerun()
 
-    st.session_state.show_chat = st.checkbox("💬 Show Chat", value=st.session_state.show_chat)
-
 # ---------- 7. VIEW: GAME DETAIL ---------- 
 if st.session_state.selected_game:
     appid = st.session_state.selected_game
@@ -731,7 +978,7 @@ if st.session_state.selected_game:
     rank_num = pd.to_numeric(g_rank, errors='coerce')
     players_num = pd.to_numeric(g_players, errors='coerce')
 
-    st.title(f"🎮 {fix_nan(g_l['Nombre'] if g_l is not None else 'Game Details')}")
+    st.title(f"🎮 {fix_nan(g_l['Nombre'] if g_l is not None else t['game_details'])}")
 
     # Tabs for more detailed view
     tab1, tab2, tab3 = st.tabs([t["overview_tab"], t["details_tab"], t["reviews_tab"]])
@@ -794,7 +1041,7 @@ if st.session_state.selected_game:
                 """
                 st.components.v1.html(video_html, height=250)
             else:
-                st.markdown(f"🎥 [Watch Trailer on Steam](https://store.steampowered.com/app/{appid})")
+                st.markdown(f"🎥 [{t['watch_trailer_on_steam']}](https://store.steampowered.com/app/{appid})")
 
         with media_col2:
             st.markdown(f"### {t['twitch_streams']}")
@@ -804,7 +1051,7 @@ if st.session_state.selected_game:
                 <div style="background: linear-gradient(135deg, #9146FF 0%, #1e1e2e 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 8px 32px rgba(145, 70, 255, 0.3);">
                     <div style="font-size: 3em; margin-bottom: 10px;">🔴</div>
                     <h3 style="margin: 0 0 15px 0; color: #ffffff;">{t['twitch_streams']}</h3>
-                    <p style="margin: 0 0 20px 0; opacity: 0.8;">Ver streams en vivo de {game_name}</p>
+                    <p style="margin: 0 0 20px 0; opacity: 0.8;">{t['watch_live_streams_of'].format(game_name=game_name)}</p>
                     <a href="{twitch_url}" target="_blank" style="background: #ffffff; color: #9146FF; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; transition: all 0.3s ease;">
                         🎮 {t['open_twitch']}
                     </a>
@@ -828,7 +1075,7 @@ if st.session_state.selected_game:
         with info_col1:
             st.markdown("""
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
-                <h4 style="margin: 0 0 10px 0;">🎮 Game Details</h4>
+                <h4 style="margin: 0 0 10px 0;">🎮 {t['game_details']}</h4>
             </div>
             """, unsafe_allow_html=True)
             st.write(f"**{t['developer_label']}:** {fix_nan(g_i.get('Desarrollador'))}")
@@ -931,50 +1178,63 @@ if st.session_state.view == "Favorites":
 df_day = df_listado[df_listado["Fecha"] == st.session_state.sel_date].copy()
 
 if st.session_state.view == "Market Trends":
-    st.title("📈 Market Trends & Sales")
-    if 'Precio_USD' in df_detalles.columns:
-        st.dataframe(df_detalles[['Nombre', 'Precio_USD', 'Rating', 'Reviews']].rename(columns={'Precio_USD': 'Price (USD)'}), width='stretch', hide_index=True)
+    st.title(t["market_trends_title"])
+    market_df = df_detalles.copy()
+    market_df['Reviews'] = market_df['Reviews'].astype(str)
+    if 'Precio_USD' in market_df.columns:
+        market_df = market_df[['Nombre', 'Precio_USD', 'Rating', 'Reviews']].rename(columns={'Precio_USD': 'Price (USD)'})
     else:
-        st.dataframe(df_detalles[['Nombre', 'Precio', 'Rating', 'Reviews']], width='stretch', hide_index=True)
+        market_df = market_df[['Nombre', 'Precio', 'Rating', 'Reviews']]
+    st.dataframe(market_df, width='stretch', hide_index=True)
     st.stop()
 
 elif st.session_state.view == "Top Genres":
-    st.title("📂 Genre Popularity")
+    st.title(t["genre_popularity_title"])
     counts = df_info['Géneros'].str.split(', ').explode().value_counts()
     st.bar_chart(counts)
     st.dataframe(df_info[['Nombre', 'Géneros', 'Desarrollador']], width='stretch', hide_index=True)
     st.stop()
 
 elif st.session_state.view == "Top Developers":
-    st.title("👨‍💻 Top Developers")
+    st.title(t["top_developers_title"])
     devs = df_info['Desarrollador'].value_counts().head(15)
     st.bar_chart(devs)
     st.dataframe(df_info[['Desarrollador', 'Nombre', 'Géneros']], width='stretch', hide_index=True)
     st.stop()
 
+elif st.session_state.view == "Popular Releases":
+    st.title(t["popular_releases_title"])
+    popular_ref_date = get_popular_reference_date()
+    popular_releases = compute_popular_releases(popular_ref_date)
+    display_df = prepare_popular_releases_display(popular_releases, t)
+    st.dataframe(display_df, width='stretch', hide_index=True)
+    st.stop()
+
 elif st.session_state.view == "Price Analysis":
-    st.title("💰 Price Analysis")
+    st.title(t["price_analysis_title"])
     df_p = df_detalles.copy()
     df_p['Price_Val'] = df_p['Precio'].apply(convert_to_usd_numeric)
     st.bar_chart(df_p.sort_values('Price_Val', ascending=False).head(20).set_index('Nombre')['Price_Val'])
+    sorted_df = df_p.sort_values('Price_Val', ascending=False)
     if 'Precio_USD' in df_p.columns:
-        st.dataframe(df_p[['Nombre', 'Precio_USD', 'Rating']].rename(columns={'Precio_USD': 'Price (USD)'}).sort_values('Price_Val', ascending=False), width='stretch', hide_index=True)
+        st.dataframe(sorted_df[['Nombre', 'Precio_USD', 'Rating']].rename(columns={'Precio_USD': 'Price (USD)'}), width='stretch', hide_index=True)
     else:
-        st.dataframe(df_p[['Nombre', 'Precio', 'Rating']].sort_values('Price_Val', ascending=False), width='stretch', hide_index=True)
+        st.dataframe(sorted_df[['Nombre', 'Precio', 'Rating']], width='stretch', hide_index=True)
     st.stop()
 
 # ---------- 10. MAIN DASHBOARD ---------- 
-st.title("🎮 Dashboard")
+st.title(t["dashboard_title"])
 
 # Dashboard metrics
-m1, m2, m3 = st.columns(3)
+m1, m2, m3, m4 = st.columns(4)
 m1.metric(t["players_online"], f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
 m2.metric(t["games_tracked"], f"{len(df_day)}")
 m3.metric(t["top_game"], fix_nan(df_day.iloc[0]["Nombre"]) if len(df_day) > 0 else "N/A")
+m4.metric(t["peak_24h"], f"{get_peak_last_24h(get_latest_data_date()):,}")
 
 st.divider()
 
-t1, t2, t3 = st.tabs(["📊 Live Rankings", "📈 Performance Trend", "📋 Data Explorer"])
+t1, t2, t3, t4, t5 = st.tabs([t["live_rankings"], t["performance_trend"], t["data_explorer"], t["peak_24h_section"], t["popular_releases_title"]])
 
 with t1:
     # AHORA MUESTRA 100 JUEGOS EN VEZ DE 50
@@ -1011,88 +1271,50 @@ with t1:
         st.rerun()
 
 with t2:
-    st.header("📈 Historical Trends & Market Share")
+    st.header(t["historical_trends_header"])
     dates_list = sorted(df_listado["Fecha"].unique(), reverse=True)
     d_idx = dates_list.index(st.session_state.sel_date)
     tr_dates = dates_list[max(0, d_idx):min(len(dates_list), d_idx + 7)]
     df_trend_all = df_listado[df_listado["Fecha"].isin(tr_dates)].copy()
-    sel_g = st.multiselect("Compare Games:", sorted(df_trend_all["Nombre"].unique()), default=df_day.head(5)["Nombre"].tolist())
+    sel_g = st.multiselect(t["compare_games"], sorted(df_trend_all["Nombre"].unique()), default=df_day.head(5)["Nombre"].tolist())
     if sel_g:
         pivot = df_trend_all[df_trend_all["Nombre"].isin(sel_g)].pivot_table(index="Fecha", columns="Nombre", values="JugadoresConcurrentes")
         st.line_chart(pivot)
         st.divider()
         cl, cr = st.columns(2)
         with cl:
-            st.subheader("🎭 Market Share")
+            st.subheader(t["market_share"])
             st.area_chart(pivot)
         with cr:
-            st.subheader("🔥 Volatility")
+            st.subheader(t["volatility"])
             st.bar_chart(df_trend_all[df_trend_all["Nombre"].isin(sel_g)].groupby("Nombre")["JugadoresConcurrentes"].agg(["max", "min"]))
 
 with t3:
     st.dataframe(df_day[["Posicion", "Nombre", "JugadoresConcurrentes", "AppID"]], width='stretch', hide_index=True)
 
+with t4:
+    st.subheader(t["peak_24h_section"])
+    peak_value = get_peak_last_24h(get_latest_data_date())
+    st.metric(t["peak_24h"], f"{peak_value:,}")
+    latest_date = get_latest_data_date()
+    if not pd.isna(latest_date):
+        st.write(f"{t['data_date']} {latest_date.strftime('%Y-%m-%d')}")
+
+    if len(df_day) > 0:
+        top24_df = df_day.sort_values("JugadoresConcurrentes", ascending=False).head(15)
+        st.bar_chart(top24_df.set_index("Nombre")["JugadoresConcurrentes"])
+        st.dataframe(top24_df[["Posicion", "Nombre", "JugadoresConcurrentes"]], width='stretch', hide_index=True)
+    else:
+        st.info(t["no_24h_data"])
+
+with t5:
+    st.subheader(t["popular_releases_title"])
+    st.markdown(t["popular_releases_description"])
+    popular_ref_date = get_popular_reference_date()
+    popular_releases = compute_popular_releases(popular_ref_date)
+    popular_releases = popular_releases.loc[popular_releases['is_popular']] if 'is_popular' in popular_releases.columns else popular_releases
+    display_df = prepare_popular_releases_display(popular_releases, t)
+    st.dataframe(display_df, width='stretch', hide_index=True)
+
 st.divider()
-st.caption("© 2026 infosteam — High-End Data Monitoring")
-
-# Floating chat
-if st.session_state.get('show_chat', False):
-    with st.sidebar:
-        st.subheader("💬 Game Chat")
-
-        # Initialize chat history
-        if "global_chat_history" not in st.session_state:
-            st.session_state.global_chat_history = []
-
-        # Display chat history
-        chat_container = st.container(height=400)
-        with chat_container:
-            for message in st.session_state.global_chat_history:
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
-
-        # Chat input
-        user_input = st.chat_input("Ask about any game...")
-        if user_input:
-            st.session_state.global_chat_history.append({"role": "user", "content": user_input})
-
-            # Find game mentioned in question - improved search
-            game_data = None
-            user_lower = user_input.lower()
-
-            # More flexible game name matching
-            for _, row in df_listado.iterrows():
-                game_name = str(row.get('Nombre', '')).lower()
-                if game_name:
-                    # Check if game name is mentioned (partial match)
-                    game_words = game_name.split()
-                    if any(word in user_lower for word in game_words if len(word) > 3):  # Only words longer than 3 chars
-                        appid = row.get('AppID')
-                        g_i = df_info[df_info["AppID"] == appid].iloc[0] if not df_info[df_info["AppID"] == appid].empty else pd.Series()
-                        g_d = df_detalles[df_detalles["AppID"] == appid].iloc[0] if not df_detalles[df_detalles["AppID"] == appid].empty else pd.Series()
-
-                        game_data = {
-                            "name": fix_nan(row.get('Nombre')),
-                            "price": g_d.get('Precio', 'N/A'),
-                            "developer": fix_nan(g_i.get('Desarrollador')),
-                            "genres": fix_nan(g_i.get('Géneros')),
-                            "rating": fix_nan(g_d.get('Rating')),
-                            "reviews": fix_nan(g_d.get('Reviews')),
-                            "release_date": fix_nan(g_i.get('Fecha_Lanzamiento')),
-                            "platforms": fix_nan(g_i.get('Plataformas'))
-                        }
-                        break
-
-            if game_data:
-                bot_response = get_ai_response(user_input, game_data)
-            else:
-                bot_response = (
-                    "I couldn't find a specific game in your question. "
-                    "Please mention an exact game name from the database, such as 'Counter-Strike 2' or 'Dota 2'. "
-                    "If you need more details, select the game from the dashboard. " 
-                )
-
-            st.session_state.global_chat_history.append({"role": "assistant", "content": bot_response})
-            st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+st.caption(t["copyright"])
