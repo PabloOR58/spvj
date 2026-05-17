@@ -11,6 +11,28 @@ st.set_page_config(
     layout="wide"
 )
 
+# Global styles for animated cards
+st.markdown("""
+<style>
+.game-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .25s ease, box-shadow .25s ease; }
+.game-card img { width:100%; height:140px; object-fit:cover; transition: transform .35s ease; display:block; }
+.game-card:hover { transform: translateY(-6px) scale(1.02); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
+.game-card:hover img { transform: scale(1.04); }
+.game-card .meta { padding-top:6px; color: #cbd5e1; font-size:13px; }
+.game-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.92); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(12px); transition: opacity .25s ease, transform .25s ease; font-size:12px; line-height:1.4; z-index:2; }
+.game-card:hover .game-card__overlay { opacity:1; transform: translateY(0); }
+.badge { position:absolute; right:8px; top:8px; padding:4px 8px; border-radius:12px; font-weight:700; font-size:12px; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 70% { box-shadow: 0 0 0 10px rgba(155,92,255,0);} 100% { box-shadow: 0 0 0 0 rgba(155,92,255,0);} }
+.badge.pulse { animation: pulse 2s infinite; }
+.dashboard-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease; }
+.dashboard-card img { width:100%; height:110px; object-fit:cover; transition: transform .3s ease; display:block; }
+.dashboard-card:hover { transform: translateY(-4px); box-shadow:0 10px 26px rgba(0,0,0,0.35); }
+.dashboard-card:hover img { transform: scale(1.03); filter:brightness(1); }
+.dashboard-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.95); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(14px); transition: opacity .2s ease, transform .2s ease; font-size:12px; line-height:1.4; z-index:2; }
+.dashboard-card:hover .dashboard-card__overlay { opacity:1; transform: translateY(0); }
+</style>
+""", unsafe_allow_html=True)
+
 IMG_ERROR = "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=460&h=215&fit=crop"
 
 GAME_IMAGE_OVERRIDES = {
@@ -131,6 +153,7 @@ TRANSLATIONS = {
         "open_steam": "Abrir en Steam",
         "open_twitch": "Ver en Twitch",
         "added_to_favorites": "Añadido a favoritos",
+        "add_to_favorites": "Añadir a favoritos",
         "remove_from_favorites": "Quitar de favoritos",
     },
     "en": {
@@ -215,6 +238,7 @@ TRANSLATIONS = {
         "open_steam": "Open in Steam",
         "open_twitch": "Watch on Twitch",
         "added_to_favorites": "Added to favorites",
+        "add_to_favorites": "Add to favorites",
         "remove_from_favorites": "Remove from favorites",
     },
     "fr": {
@@ -299,6 +323,7 @@ TRANSLATIONS = {
         "open_steam": "Ouvrir sur Steam",
         "open_twitch": "Voir sur Twitch",
         "added_to_favorites": "Ajouté aux favoris",
+        "add_to_favorites": "Ajouter aux favoris",
         "remove_from_favorites": "Retirer des favoris",
     },
     "pt": {
@@ -383,6 +408,7 @@ TRANSLATIONS = {
         "open_steam": "Abrir no Steam",
         "open_twitch": "Ver no Twitch",
         "added_to_favorites": "Adicionado aos favoritos",
+        "add_to_favorites": "Adicionar aos favoritos",
         "remove_from_favorites": "Remover dos favoritos",
     },
 }
@@ -858,6 +884,226 @@ def prepare_popular_releases_display(popular_releases, t):
     )
 
 
+def safe_appid(value):
+    try:
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return None
+        return int(float(value))
+    except Exception:
+        return None
+
+
+def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
+    """Render details + favorite add/remove controls with consistent keys and behavior."""
+    safe_id = safe_appid(aid)
+    det_key = f"{key_prefix}_det_dash" if compact else f"{key_prefix}_det"
+    remove_key = f"{key_prefix}_removefav_dash" if compact else f"{key_prefix}_removefav"
+    add_key = f"{key_prefix}_addfav_dash" if compact else f"{key_prefix}_addfav"
+
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        if safe_id is None:
+            st.button(t["details"], key=det_key, disabled=True)
+        elif st.button(t["details"], key=det_key):
+            st.session_state.selected_game = safe_id
+            st.rerun()
+    with c2:
+        # Only allow favorites actions when a user is logged in
+        if "user" not in st.session_state:
+            st.info(t.get('please_login_favorites', 'Por favor inicia sesión para ver tus favoritos.'))
+            return
+        try:
+            f_df = pd.read_csv(FAV_FILE)
+        except:
+            f_df = pd.DataFrame(columns=["username", "appid"])
+        if is_fav:
+            if safe_id is not None and st.button(t.get('remove_from_favorites', 'Quitar de favoritos'), key=remove_key):
+                f_df = f_df[~((f_df['username'] == st.session_state['user']) & (f_df['appid'] == safe_id))]
+                f_df.to_csv(FAV_FILE, index=False)
+                st.success(t.get('remove_from_favorites', 'Quitar de favoritos'))
+                st.rerun()
+        else:
+            # Use imperative label for add button
+            if safe_id is not None and st.button(t.get('add_to_favorites', 'Añadir a favoritos'), key=add_key):
+                new_fav = pd.DataFrame([[st.session_state['user'], safe_id]], columns=["username", "appid"])
+                pd.concat([f_df, new_fav], ignore_index=True).to_csv(FAV_FILE, index=False)
+                st.success(f"{t.get('saved', 'Guardado')} {name}")
+                st.rerun()
+
+
+
+def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, rating=None, reviews=None, rel_dt=None, extra_caption=None):
+    """Render a standardized game card inside the current Streamlit column."""
+    title_attr = f"{name}"
+    img_url = get_enhanced_game_image(aid, name)
+    # determine favorite state to show badge
+    badge_html = ''
+    is_fav = False
+    safe_id = safe_appid(aid)
+    if "user" in st.session_state and safe_id is not None:
+        try:
+            f_df = pd.read_csv(FAV_FILE)
+            is_fav = ((f_df['username'] == st.session_state['user']) & (f_df['appid'] == safe_id)).any()
+        except:
+            is_fav = False
+        # show filled heart when favorite, else show an outlined star to indicate addable
+        if is_fav:
+            badge_html = '<div class="badge pulse" style="position:absolute; right:8px; top:8px; background:transparent; color:#ff6b81; padding:4px 6px; border-radius:12px; font-weight:900; font-size:18px;" title="Favorito" aria-label="Favorito">❤️</div>'
+        else:
+            badge_html = '<div class="badge" style="position:absolute; right:8px; top:8px; background:transparent; color:#bdbdbd; padding:4px 6px; border-radius:12px; font-weight:700; font-size:16px;" title="'+t.get('add_to_favorites','Añadir a favoritos')+'" aria-label="'+t.get('add_to_favorites','Añadir a favoritos')+'">☆</div>'
+
+    overlay_lines = []
+    if rel_dt is not None:
+        try:
+            rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt)
+            overlay_lines.append(f"{t['release_date']}: {rel_str}")
+        except:
+            pass
+    if price_raw is not None:
+        overlay_lines.append(f"{t['price']}: {format_local_price(price_raw, st.session_state.language)}")
+    if genres_raw:
+        overlay_lines.append(f"{t['genres_label']}: {fix_nan(genres_raw)}")
+    if rating is not None:
+        overlay_lines.append(f"{t['rating_label']}: {fix_nan(rating)}")
+    if reviews is not None and not pd.isna(reviews):
+        overlay_lines.append(f"{t['reviews_label']}: {int(pd.to_numeric(reviews, errors='coerce')):,}")
+    if safe_id is not None:
+        try:
+            info_row = df_info[df_info['AppID'] == safe_id]
+            det_row = df_detalles[df_detalles['AppID'] == safe_id]
+            if not info_row.empty:
+                dev = fix_nan(info_row['Desarrollador'].iloc[0])
+                if dev and dev.lower() != 'nan':
+                    overlay_lines.insert(0, f"{t['developer_label']}: {dev}")
+                platforms = display_platforms_section(aid, st.session_state.language)
+                if platforms:
+                    overlay_lines.append(platforms)
+            if not det_row.empty and rating is None:
+                det_rating = fix_nan(det_row['Rating'].iloc[0], None)
+                if pd.notna(det_rating):
+                    overlay_lines.append(f"{t['rating_label']}: {det_rating}")
+            if not det_row.empty and (reviews is None or pd.isna(reviews)):
+                det_reviews = pd.to_numeric(det_row['Reviews'].iloc[0], errors='coerce')
+                if not pd.isna(det_reviews):
+                    overlay_lines.append(f"{t['reviews_label']}: {int(det_reviews):,}")
+        except:
+            pass
+    if extra_caption:
+        overlay_lines.append(extra_caption)
+    overlay_html = ''
+    if overlay_lines:
+        overlay_html = '<div class="game-card__overlay">' + '<br>'.join(overlay_lines) + '</div>'
+
+    st.markdown(f'<div class="game-card" style="height: 140px; overflow: hidden; border-radius: 8px; background: #161921; position:relative;"><img src="{img_url}" onerror=\'this.src="{IMG_ERROR}";\' title="{title_attr}">{overlay_html}{badge_html}</div>', unsafe_allow_html=True)
+    st.markdown(f"**{name}**")
+    lines = []
+    if rel_dt is not None:
+        try:
+            rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt)
+            lines.append(f"{t['release_date']}: {rel_str}")
+        except:
+            pass
+    if extra_caption:
+        lines.append(extra_caption)
+    if lines:
+        st.caption("  •  ".join(lines))
+
+    price_display = format_local_price(price_raw if price_raw is not None else 'N/A', st.session_state.language)
+    st.write(f"**{t['price']}:** {price_display}")
+    if genres_raw:
+        st.write(f"**{t['genres_label']}:** {fix_nan(genres_raw)}")
+    if rating is not None:
+        st.write(f"**{t['rating_label']}:** {fix_nan(rating)}")
+    if reviews is not None and not pd.isna(reviews):
+        st.write(f"**{t['reviews_label']}:** {int(pd.to_numeric(reviews, errors='coerce')):,}")
+
+    # consistent controls (details + add/remove favorite)
+    render_card_controls(aid, name, key_prefix, is_fav, t, compact=False)
+
+
+def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badge=None, players=None, peak=None):
+    """Render a compact card used in dashboard tabs to differentiate from full navigation views."""
+    img_url = get_enhanced_game_image(aid, name)
+    # Determine badge color and background based on context
+    badge_color = '#ffbf47'
+    card_gradient = 'linear-gradient(135deg, #0f1720 0%, #111827 100%)'
+    try:
+        if badge == 'POP':
+            badge_color = '#9b5cff'  # purple for popular
+            card_gradient = 'linear-gradient(135deg, #6b21a8 0%, #111827 100%)'
+        elif badge == '▲':
+            badge_color = '#16a34a'  # green for growth
+            card_gradient = 'linear-gradient(135deg, #052e18 0%, #08301a 100%)'
+        elif peak is not None and float(peak) < 0:
+            badge_color = '#ef4444'  # red for decline
+            card_gradient = 'linear-gradient(135deg, #2b0f0f 0%, #111827 100%)'
+        elif players is not None and int(players) > 100000:
+            badge_color = '#f97316'  # orange for very large
+            card_gradient = 'linear-gradient(135deg, #3a0f00 0%, #111827 100%)'
+    except:
+        pass
+    pulse_class = ' pulse' if badge == 'POP' else ''
+    badge_html = f'<div class="badge{pulse_class}" style="background:{badge_color};">{badge}</div>' if badge else ''
+    # check favorites to show small fav badge (heart when favorited, star when not)
+    fav_badge_html = ''
+    is_fav_dash = False
+    safe_id = safe_appid(aid)
+    if "user" in st.session_state and safe_id is not None:
+        try:
+            f_df = pd.read_csv(FAV_FILE)
+            is_fav_dash = ((f_df['username'] == st.session_state['user']) & (f_df['appid'] == safe_id)).any()
+            if is_fav_dash:
+                fav_badge_html = '<div class="badge" style="position:absolute; left:8px; top:8px; background:transparent; color:#ff6b81; padding:4px 6px; border-radius:12px; font-weight:900; font-size:16px;" title="Favorito" aria-label="Favorito">❤️</div>'
+            else:
+                fav_badge_html = '<div class="badge" style="position:absolute; left:8px; top:8px; background:transparent; color:#bdbdbd; padding:4px 6px; border-radius:12px; font-weight:700; font-size:14px;" title="'+t.get('add_to_favorites','Añadir a favoritos')+'" aria-label="'+t.get('add_to_favorites','Añadir a favoritos')+'">☆</div>'
+        except:
+            is_fav_dash = False
+
+    overlay_lines = []
+    try:
+        info_row = df_info[df_info['AppID'] == aid]
+        details_row = df_detalles[df_detalles['AppID'] == aid]
+        if not info_row.empty:
+            developer = fix_nan(info_row['Desarrollador'].iloc[0])
+            if developer and developer.lower() != 'nan':
+                overlay_lines.append(f"{t['developer_label']}: {developer}")
+            release_date = parse_date_safe(info_row['Fecha_Lanzamiento'].iloc[0])
+            if pd.notna(release_date):
+                overlay_lines.append(f"{t['release_date']}: {release_date.strftime('%Y-%m-%d')}")
+            genres = fix_nan(info_row['Géneros'].iloc[0])
+            if genres and genres.lower() != 'nan':
+                overlay_lines.append(f"{t['genres_label']}: {genres}")
+            platforms = display_platforms_section(aid, st.session_state.language)
+            if platforms:
+                overlay_lines.append(platforms)
+        if not details_row.empty:
+            price_raw = details_row['Precio'].iloc[0]
+            if pd.notna(price_raw):
+                overlay_lines.append(f"{t['price']}: {format_local_price(price_raw, st.session_state.language)}")
+    except:
+        pass
+    if players is not None:
+        overlay_lines.append(f"👥 {int(players):,}")
+    if peak is not None:
+        overlay_lines.append(f"🔥 {int(peak):,}")
+    overlay_html = ''
+    if overlay_lines:
+        overlay_html = '<div class="dashboard-card__overlay">' + '<br>'.join(overlay_lines[:4]) + '</div>'
+
+    st.markdown(f'<div class="dashboard-card" style="position:relative; height:{small_image_height}px; overflow:hidden; border-radius:8px; background:{card_gradient}; box-shadow:0 6px 18px rgba(0,0,0,0.4);"><img src="{img_url}" onerror=\'this.src="{IMG_ERROR}";\'>{overlay_html}{badge_html}{fav_badge_html}</div>', unsafe_allow_html=True)
+    st.markdown(f"**{name}**")
+    meta = []
+    if players is not None:
+        meta.append(f"👥 {int(players):,}")
+    if peak is not None:
+        meta.append(f"🔥 {int(peak):,}")
+    if meta:
+        st.caption("  •  ".join(meta))
+
+    # Use shared controls to keep details + favorites consistent across views
+    render_card_controls(aid, name, key_prefix, is_fav_dash, t, compact=True)
+
+
 # ---------- 6. SESSION STATE ---------- 
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
 if "show_more" not in st.session_state: st.session_state.show_more = False
@@ -962,8 +1208,10 @@ with st.sidebar:
         st.rerun()
 
 # ---------- 7. VIEW: GAME DETAIL ---------- 
-if st.session_state.selected_game:
-    appid = st.session_state.selected_game
+selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None
+if selected_game_id:
+    appid = selected_game_id
+    st.session_state.selected_game = selected_game_id
     g_l = df_listado[df_listado["AppID"] == appid].iloc[0] if not df_listado[df_listado["AppID"] == appid].empty else None
     g_i = df_info[df_info["AppID"] == appid].iloc[0] if not df_info[df_info["AppID"] == appid].empty else pd.Series()
     g_d = df_detalles[df_detalles["AppID"] == appid].iloc[0] if not df_detalles[df_detalles["AppID"] == appid].empty else pd.Series()
@@ -1127,20 +1375,15 @@ if st.session_state.selected_game:
         else:
             st.write(f"**{t['reviews_label']}:** N/A")
 
-        # Add favorite functionality in game detail view
+        # Use unified controls for details/favorites in game detail view
         if "user" in st.session_state:
-            f_df = pd.read_csv(FAV_FILE)
-            is_fav = ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == appid)).any()
-            if is_fav:
-                if st.button(t["remove_from_favorites"], width='stretch'):
-                    f_df = f_df[~((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == appid))]
-                    f_df.to_csv(FAV_FILE, index=False)
-                    st.rerun()
-            else:
-                if st.button(t["added_to_favorites"], width='stretch'):
-                    new_fav = pd.DataFrame([[st.session_state["user"], appid]], columns=["username","appid"])
-                    pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
-                    st.success(t["added_to_favorites"])
+            game_title = fix_nan(g_l.get('Nombre') if g_l is not None else t['game_details'])
+            try:
+                f_df = pd.read_csv(FAV_FILE)
+                is_fav = ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == appid)).any()
+            except:
+                is_fav = False
+            render_card_controls(appid, game_title, "detail", is_fav, t, compact=False)
     st.stop()
 
 # ---------- 8. VIEW: FAVORITES ---------- 
@@ -1154,24 +1397,35 @@ if st.session_state.view == "Favorites":
         if user_favs.empty:
             st.info(t["favorites_empty"])
         else:
-            for idx, row in user_favs.iterrows():
-                aid = int(row["appid"])
-                g_data = df_listado[df_listado["AppID"] == aid]
-                g_name = g_data["Nombre"].iloc[0] if not g_data.empty else f"AppID: {aid}"
+            favs_list = user_favs.reset_index(drop=True)
+            cols_per_row = 4
+            for r in range(0, len(favs_list), cols_per_row):
+                cols = st.columns(cols_per_row)
+                for i, col in enumerate(cols):
+                    idx = r + i
+                    if idx < len(favs_list):
+                        row = favs_list.iloc[idx]
+                        aid = int(row["appid"])
+                        # gather info
+                        g_name = None
+                        g_row = df_listado[df_listado['AppID'] == aid]
+                        if not g_row.empty:
+                            g_name = g_row['Nombre'].iloc[0]
+                        else:
+                            info_row = df_info[df_info['AppID'] == aid]
+                            if not info_row.empty:
+                                g_name = info_row['Nombre'].iloc[0]
+                        if not g_name:
+                            g_name = f"AppID: {aid}"
 
-                c1, c2, c3 = st.columns([1, 4, 1])
-                with c1:
-                    st.markdown(f'<img src="{get_enhanced_game_image(aid, g_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; height:auto; border-radius:10px;" title="{g_name}">', unsafe_allow_html=True)
-                with c2: 
-                    st.markdown(f"### {g_name}")
-                    if st.button(t["view_info"], key=f"fav_view_{aid}"):
-                        st.session_state.selected_game = aid
-                        st.rerun()
-                with c3:
-                    if st.button(t["remove"], key=f"del_{aid}_{idx}", width='stretch'):
-                        favs_df = favs_df.drop(idx)
-                        favs_df.to_csv(FAV_FILE, index=False)
-                        st.rerun()
+                        with col:
+                            # use render helper
+                            det_row = df_detalles[df_detalles['AppID'] == aid]
+                            price_raw = det_row['Precio'].iloc[0] if not det_row.empty else None
+                            info_row = df_info[df_info['AppID'] == aid]
+                            genres_raw = info_row['Géneros'].iloc[0] if not info_row.empty else None
+                            rel_dt = info_row['Fecha_Lanzamiento'].iloc[0] if not info_row.empty else None
+                            render_game_card(aid, fix_nan(g_name), t, f"fav_{idx}", price_raw=price_raw, genres_raw=genres_raw, rel_dt=rel_dt)
     st.stop()
 
 # ---------- 9. ANALYTICS VIEWS ---------- 
@@ -1179,35 +1433,111 @@ df_day = df_listado[df_listado["Fecha"] == st.session_state.sel_date].copy()
 
 if st.session_state.view == "Market Trends":
     st.title(t["market_trends_title"])
+    st.markdown(t.get('market_trends_title', ''))
     market_df = df_detalles.copy()
-    market_df['Reviews'] = market_df['Reviews'].astype(str)
-    if 'Precio_USD' in market_df.columns:
-        market_df = market_df[['Nombre', 'Precio_USD', 'Rating', 'Reviews']].rename(columns={'Precio_USD': 'Price (USD)'})
+    market_df['Reviews_Num'] = pd.to_numeric(market_df['Reviews'], errors='coerce').fillna(0)
+    top = market_df.sort_values('Reviews_Num', ascending=False).head(24)
+    if top.empty:
+        st.info("No data available")
     else:
-        market_df = market_df[['Nombre', 'Precio', 'Rating', 'Reviews']]
-    st.dataframe(market_df, width='stretch', hide_index=True)
+        cols_per_row = 4
+        for r in range(0, len(top), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for i, col in enumerate(cols):
+                idx = r + i
+                if idx < len(top):
+                    row = top.iloc[idx]
+                    aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+                    with col:
+                        render_game_card(aid, fix_nan(row.get('Nombre')), t, f"mt_{idx}", price_raw=row.get('Precio'), rating=row.get('Rating'), reviews=row.get('Reviews'))
     st.stop()
 
 elif st.session_state.view == "Top Genres":
     st.title(t["genre_popularity_title"])
     counts = df_info['Géneros'].str.split(', ').explode().value_counts()
     st.bar_chart(counts)
-    st.dataframe(df_info[['Nombre', 'Géneros', 'Desarrollador']], width='stretch', hide_index=True)
+    # Show representative games for genres as cards
+    sample = df_info.head(24)
+    cols_per_row = 4
+    for r in range(0, len(sample), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for i, col in enumerate(cols):
+            idx = r + i
+            if idx < len(sample):
+                row = sample.iloc[idx]
+                aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+                with col:
+                    render_game_card(aid, fix_nan(row.get('Nombre')), t, f"tg_{idx}", genres_raw=row.get('Géneros'), rel_dt=row.get('Fecha_Lanzamiento'))
     st.stop()
 
 elif st.session_state.view == "Top Developers":
     st.title(t["top_developers_title"])
     devs = df_info['Desarrollador'].value_counts().head(15)
     st.bar_chart(devs)
-    st.dataframe(df_info[['Desarrollador', 'Nombre', 'Géneros']], width='stretch', hide_index=True)
+    sample = df_info.sort_values('Desarrollador').head(24)
+    cols_per_row = 4
+    for r in range(0, len(sample), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for i, col in enumerate(cols):
+            idx = r + i
+            if idx < len(sample):
+                row = sample.iloc[idx]
+                aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+                with col:
+                    render_game_card(aid, fix_nan(row.get('Nombre')), t, f"td_{idx}", genres_raw=row.get('Géneros'), rel_dt=row.get('Fecha_Lanzamiento'))
     st.stop()
 
 elif st.session_state.view == "Popular Releases":
     st.title(t["popular_releases_title"])
+    st.subheader(t["popular_releases_title"])
+    st.markdown(t["popular_releases_description"])
     popular_ref_date = get_popular_reference_date()
     popular_releases = compute_popular_releases(popular_ref_date)
+    popular_releases = popular_releases.loc[popular_releases['is_popular']] if 'is_popular' in popular_releases.columns else popular_releases
     display_df = prepare_popular_releases_display(popular_releases, t)
-    st.dataframe(display_df, width='stretch', hide_index=True)
+    # Show as cards similar to the main dashboard
+    popular_list = popular_releases.reset_index(drop=True)
+    if popular_list.empty:
+        st.info("No popular releases found.")
+    else:
+        cols_per_row = 4
+        for r in range(0, len(popular_list), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for i, col in enumerate(cols):
+                idx = r + i
+                if idx < len(popular_list):
+                    row = popular_list.iloc[idx]
+                    aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+                    name = fix_nan(row.get('Nombre'))
+                    rel_dt = row.get('Fecha_Lanzamiento')
+                    rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt)
+                    peak = int(row.get('peak_last_week', 0)) if not pd.isna(row.get('peak_last_week', 0)) else 0
+
+                    with col:
+                        title_attr = f"{name} - {t['weekly_peak']}: {peak}"
+                        st.markdown(f'<div style="height: 140px; overflow: hidden; border-radius: 8px; background: #161921;"><img src="{get_enhanced_game_image(aid, name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width:100%; height:100%; object-fit:cover;" title="{title_attr}"></div>', unsafe_allow_html=True)
+                        st.markdown(f"**{name}**")
+                        st.caption(f"{t['release_date']}: {rel_str}  •  {t['weekly_peak']}: {peak}")
+
+                        # Price and genres
+                        try:
+                            price_row = df_detalles[df_detalles['AppID'] == aid]
+                            price_raw = price_row['Precio'].iloc[0] if not price_row.empty else None
+                        except:
+                            price_raw = None
+                        try:
+                            info_row = df_info[df_info['AppID'] == aid]
+                            genres_raw = info_row['Géneros'].iloc[0] if not info_row.empty else None
+                        except:
+                            genres_raw = None
+
+                        price_display = format_local_price(price_raw if price_raw is not None else 'N/A', st.session_state.language)
+                        genres_display = fix_nan(genres_raw, 'N/A')
+                        st.write(f"**{t['price']}:** {price_display}")
+                        st.write(f"**{t['genres_label']}:** {genres_display}")
+
+                        # Use unified card renderer (includes details + favorites controls)
+                        render_game_card(aid, name, t, f"pop_{idx}", price_raw=price_raw, genres_raw=genres_raw, rel_dt=rel_dt, extra_caption=f"{t['weekly_peak']}: {peak}")
     st.stop()
 
 elif st.session_state.view == "Price Analysis":
@@ -1215,11 +1545,17 @@ elif st.session_state.view == "Price Analysis":
     df_p = df_detalles.copy()
     df_p['Price_Val'] = df_p['Precio'].apply(convert_to_usd_numeric)
     st.bar_chart(df_p.sort_values('Price_Val', ascending=False).head(20).set_index('Nombre')['Price_Val'])
-    sorted_df = df_p.sort_values('Price_Val', ascending=False)
-    if 'Precio_USD' in df_p.columns:
-        st.dataframe(sorted_df[['Nombre', 'Precio_USD', 'Rating']].rename(columns={'Precio_USD': 'Price (USD)'}), width='stretch', hide_index=True)
-    else:
-        st.dataframe(sorted_df[['Nombre', 'Precio', 'Rating']], width='stretch', hide_index=True)
+    sorted_df = df_p.sort_values('Price_Val', ascending=False).head(24)
+    cols_per_row = 4
+    for r in range(0, len(sorted_df), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for i, col in enumerate(cols):
+            idx = r + i
+            if idx < len(sorted_df):
+                row = sorted_df.iloc[idx]
+                aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+                with col:
+                    render_game_card(aid, fix_nan(row.get('Nombre')), t, f"pa_{idx}", price_raw=row.get('Precio'), rating=row.get('Rating'))
     st.stop()
 
 # ---------- 10. MAIN DASHBOARD ---------- 
@@ -1250,47 +1586,61 @@ with t1:
                 with col:
                     game_name = fix_nan(game.get("Nombre"))
                     game_title = f'{game_name} - Rank #{int(game.get("Posicion", 0))} - {int(game.get("JugadoresConcurrentes", 0))} players'
-                    st.markdown(f'<div style="height: 140px; overflow: hidden; border-radius: 5px; background: #161921;"><img src="{get_enhanced_game_image(aid, game_name)}" onerror=\'this.src="{IMG_ERROR}";\' style="width: 100%; height: 100%; object-fit: cover;" title="{game_title}"></div>', unsafe_allow_html=True)
-                    st.markdown(f"**#{int(game.get('Posicion', 0))} {game_name}**")
-                    
-                    if st.button(t["details"], key=f"btn_{idx}", width='stretch'):
-                        st.session_state.selected_game = aid
-                        st.rerun()
-
-                    if "user" in st.session_state:
-                        f_df = pd.read_csv(FAV_FILE)
-                        if ((f_df['username'] == st.session_state["user"]) & (f_df['appid'] == aid)).any():
-                            if st.button(f"❤️ {t['favorite']}", key=f"fav_{idx}", width='stretch'):
-                                st.info(t["already_in_favorites"])
-                        elif st.button(f"<3 {t['favorite']}", key=f"fav_{idx}", width='stretch'):
-                                new_fav = pd.DataFrame([[st.session_state["user"], aid]], columns=["username","appid"])
-                                pd.concat([f_df, new_fav]).to_csv(FAV_FILE, index=False)
-                                st.success(f"{t['saved']} {game.get('Nombre')}")
+                    # Use unified game card (image, title, meta, details + favorites)
+                    pos = int(game.get('Posicion', 0)) if not pd.isna(game.get('Posicion', 0)) else 0
+                    players = int(game.get('JugadoresConcurrentes', 0)) if not pd.isna(game.get('JugadoresConcurrentes', 0)) else 0
+                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  👥 {players:,}")
     if st.button(t["toggle_top"]):
         st.session_state.show_more = not st.session_state.show_more
         st.rerun()
 
 with t2:
     st.header(t["historical_trends_header"])
+    # Show compact performance trend summary and top movers
     dates_list = sorted(df_listado["Fecha"].unique(), reverse=True)
-    d_idx = dates_list.index(st.session_state.sel_date)
-    tr_dates = dates_list[max(0, d_idx):min(len(dates_list), d_idx + 7)]
-    df_trend_all = df_listado[df_listado["Fecha"].isin(tr_dates)].copy()
-    sel_g = st.multiselect(t["compare_games"], sorted(df_trend_all["Nombre"].unique()), default=df_day.head(5)["Nombre"].tolist())
-    if sel_g:
-        pivot = df_trend_all[df_trend_all["Nombre"].isin(sel_g)].pivot_table(index="Fecha", columns="Nombre", values="JugadoresConcurrentes")
-        st.line_chart(pivot)
+    if len(dates_list) < 2:
+        st.info(t.get('no_24h_data', 'Not enough data for trends'))
+    else:
+        prev_date = dates_list[1]
+        cur = df_listado[df_listado['Fecha'] == st.session_state.sel_date]
+        prev = df_listado[df_listado['Fecha'] == prev_date]
+        merged = cur.set_index('AppID')[['JugadoresConcurrentes']].rename(columns={'JugadoresConcurrentes':'cur_players'}).join(prev.set_index('AppID')[['JugadoresConcurrentes']].rename(columns={'JugadoresConcurrentes':'prev_players'}), how='left').fillna(0)
+        merged['growth'] = merged['cur_players'].astype(float) - merged['prev_players'].astype(float)
+        movers = merged.sort_values('growth', ascending=False).head(8).reset_index()
+
+        cols_per_row = 4
+        for r in range(0, len(movers), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for i, col in enumerate(cols):
+                idx = r + i
+                if idx < len(movers):
+                    row = movers.iloc[idx]
+                    aid = int(row['AppID'])
+                    g_row = df_listado[df_listado['AppID'] == aid]
+                    name = g_row['Nombre'].iloc[0] if not g_row.empty else f"AppID: {aid}"
+                    with col:
+                        render_dashboard_card(aid, fix_nan(name), t, f"trend_{idx}", players=row['cur_players'], peak=row['growth'], badge='▲')
         st.divider()
-        cl, cr = st.columns(2)
-        with cl:
-            st.subheader(t["market_share"])
-            st.area_chart(pivot)
-        with cr:
-            st.subheader(t["volatility"])
-            st.bar_chart(df_trend_all[df_trend_all["Nombre"].isin(sel_g)].groupby("Nombre")["JugadoresConcurrentes"].agg(["max", "min"]))
+        st.subheader(t["market_share"])
+        sel_g = st.multiselect(t["compare_games"], sorted(df_listado["Nombre"].unique()), default=df_day.head(5)["Nombre"].tolist())
+        if sel_g:
+            pivot = df_listado[df_listado["Nombre"].isin(sel_g)].pivot_table(index="Fecha", columns="Nombre", values="JugadoresConcurrentes")
+            st.line_chart(pivot)
 
 with t3:
-    st.dataframe(df_day[["Posicion", "Nombre", "JugadoresConcurrentes", "AppID"]], width='stretch', hide_index=True)
+    st.header(t.get('data_explorer', t['data_explorer']))
+    # Compact explorer: show top items for selected date (no freeform search)
+    sample = df_day.head(12).reset_index(drop=True)
+    cols_per_row = 4
+    for r in range(0, len(sample), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for i, col in enumerate(cols):
+            idx = r + i
+            if idx < len(sample):
+                row = sample.iloc[idx]
+                aid = int(row.get('AppID', 0))
+                with col:
+                    render_dashboard_card(aid, fix_nan(row.get('Nombre')), t, f"de_{idx}", players=row.get('JugadoresConcurrentes'))
 
 with t4:
     st.subheader(t["peak_24h_section"])
@@ -1301,9 +1651,20 @@ with t4:
         st.write(f"{t['data_date']} {latest_date.strftime('%Y-%m-%d')}")
 
     if len(df_day) > 0:
-        top24_df = df_day.sort_values("JugadoresConcurrentes", ascending=False).head(15)
-        st.bar_chart(top24_df.set_index("Nombre")["JugadoresConcurrentes"])
-        st.dataframe(top24_df[["Posicion", "Nombre", "JugadoresConcurrentes"]], width='stretch', hide_index=True)
+        # Ensure numeric players and unique AppID to avoid duplicates
+        tmp = df_day.copy()
+        tmp['JugadoresConcurrentes'] = pd.to_numeric(tmp['JugadoresConcurrentes'], errors='coerce').fillna(0)
+        top24_df = tmp.sort_values('JugadoresConcurrentes', ascending=False).drop_duplicates(subset='AppID').head(12).reset_index(drop=True)
+        cols_per_row = 4
+        for r in range(0, len(top24_df), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for i, col in enumerate(cols):
+                idx = r + i
+                if idx < len(top24_df):
+                    row = top24_df.iloc[idx]
+                    aid = int(row.get('AppID', 0))
+                    with col:
+                        render_dashboard_card(aid, fix_nan(row.get('Nombre')), t, f"p24_{idx}", players=row.get('JugadoresConcurrentes'))
     else:
         st.info(t["no_24h_data"])
 
@@ -1313,8 +1674,18 @@ with t5:
     popular_ref_date = get_popular_reference_date()
     popular_releases = compute_popular_releases(popular_ref_date)
     popular_releases = popular_releases.loc[popular_releases['is_popular']] if 'is_popular' in popular_releases.columns else popular_releases
-    display_df = prepare_popular_releases_display(popular_releases, t)
-    st.dataframe(display_df, width='stretch', hide_index=True)
+    popular_short = popular_releases.sort_values('peak_last_week', ascending=False).head(8).reset_index(drop=True)
+    cols_per_row = 4
+    for r in range(0, len(popular_short), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for i, col in enumerate(cols):
+            idx = r + i
+            if idx < len(popular_short):
+                row = popular_short.iloc[idx]
+                aid = int(row.get('AppID', 0))
+                name = fix_nan(row.get('Nombre'))
+                with col:
+                    render_dashboard_card(aid, name, t, f"popdash_{idx}", peak=row.get('peak_last_week'), badge='POP')
 
 st.divider()
 st.caption(t["copyright"])
