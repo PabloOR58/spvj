@@ -1698,13 +1698,9 @@ elif st.session_state.view == "Top Developers":
     st.stop()
 
 elif st.session_state.view == "Popular Releases":
-    col_main, col_formula = st.columns([2, 1], gap='large')
-    with col_main:
-        st.title(t["popular_releases_title"])
-        st.subheader(t["popular_releases_title"])
-        st.markdown(t["popular_releases_description"])
-    with col_formula:
-        render_trend_formula_card(t)
+    st.title(t["popular_releases_title"])
+    st.subheader(t["popular_releases_title"])
+    st.markdown(t["popular_releases_description"])
 
     popular_ref_date = get_popular_reference_date()
     popular_releases = compute_popular_releases(popular_ref_date)
@@ -1973,41 +1969,37 @@ with t4:
         st.info(t["no_24h_data"])
 
 with t5:
-    col_left, col_right = st.columns([3, 1], gap='large')
-    with col_left:
-        st.subheader(t["popular_releases_title"])
-        st.markdown(t["popular_releases_description"])
+    st.subheader(t["popular_releases_title"])
+    st.markdown(t["popular_releases_description"])
 
-        popular_ref_date = get_popular_reference_date()
-        popular_releases = compute_popular_releases(popular_ref_date)
-        if 'is_popular' in popular_releases.columns:
-            popular_releases = popular_releases.loc[popular_releases['is_popular']]
-        popular_releases = popular_releases.loc[popular_releases['peak_last_week'] > 0]
-        if len(popular_releases) < 3:
-            fallback_releases = compute_popular_releases(popular_ref_date)
-            fallback_releases = fallback_releases.loc[fallback_releases['peak_last_week'] > 0].sort_values('peak_last_week', ascending=False)
-            popular_releases = fallback_releases.head(3)
-        popular_short = popular_releases.sort_values('peak_last_week', ascending=False).head(3).reset_index(drop=True)
-        if popular_short.empty:
-            st.info(t.get('no_filtered_results', 'No popular releases found.'))
-        else:
-            cols_per_row = 3
-            cols = st.columns(cols_per_row)
-            for idx, col in enumerate(cols):
-                if idx < len(popular_short):
-                    row = popular_short.iloc[idx]
-                    aid = int(row.get('AppID', 0))
-                    name = fix_nan(row.get('Nombre'))
-                    badge = f"TOP {idx + 1}"
-                    with col:
-                        render_dashboard_card(aid, name, t, f"popdash_{idx}", peak=row.get('peak_last_week'), badge=badge)
-
-    with col_right:
-        render_trend_formula_card(t)
+    popular_ref_date = get_popular_reference_date()
+    popular_releases = compute_popular_releases(popular_ref_date)
+    if 'is_popular' in popular_releases.columns:
+        popular_releases = popular_releases.loc[popular_releases['is_popular']]
+    popular_releases = popular_releases.loc[popular_releases['peak_last_week'] > 0]
+    if len(popular_releases) < 3:
+        fallback_releases = compute_popular_releases(popular_ref_date)
+        fallback_releases = fallback_releases.loc[fallback_releases['peak_last_week'] > 0].sort_values('peak_last_week', ascending=False)
+        popular_releases = fallback_releases.head(3)
+    popular_short = popular_releases.sort_values('peak_last_week', ascending=False).head(3).reset_index(drop=True)
+    if popular_short.empty:
+        st.info(t.get('no_filtered_results', 'No popular releases found.'))
+    else:
+        cols_per_row = 3
+        cols = st.columns(cols_per_row)
+        for idx, col in enumerate(cols):
+            if idx < len(popular_short):
+                row = popular_short.iloc[idx]
+                aid = int(row.get('AppID', 0))
+                name = fix_nan(row.get('Nombre'))
+                badge = f"TOP {idx + 1}"
+                with col:
+                    render_dashboard_card(aid, name, t, f"popdash_{idx}", peak=row.get('peak_last_week'), badge=badge)
 
 with t6:
     st.subheader(t["trend_forecast_title"])
     st.markdown(t["trend_forecast_description"])
+    render_trend_formula_card(t)
     
     trend_ref_date = get_latest_data_date()
     trend_df = compute_trend_scores(trend_ref_date, limit=12)
