@@ -1348,12 +1348,11 @@ if selected_game_id:
         st.markdown("---")
         st.subheader(t["about_game"])
         st.markdown(
-            f"**{t['developer_label']}:** {fix_nan(g_i.get('Desarrollador'))}  \n"
-            f"**{t['platforms_label']}:** {display_platforms_section(appid, st.session_state.language)}  \n"
-            f"**{t['release_information']}:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}  \n"
             f"**{t['price']}:** {format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language)}  \n"
             f"**⭐ {t['rating_label']}:** {rating}  \n"
-            f"**💬 {t['reviews_label']}:** {reviews}  \n\n"
+            f"**💬 {t['reviews_label']}:** {reviews}  \n"
+            f"**{t['current_rank']}:** {fix_nan(g_rank)}  \n"
+            f"**{t['current_players']}:** {fix_nan(g_players)}  \n\n"
             f"{t['summary_hint']}"
         )
 
