@@ -142,6 +142,9 @@ TRANSLATIONS = {
         "data_date": "Fecha de datos:",
         "no_24h_data": "No hay datos disponibles para las últimas 24 horas.",
         "popular_releases_description": "Un juego se considera popular si su pico de jugadores en la última semana supera al pico semanal de otros juegos lanzados en fechas similares (±7 días).",
+        "future_trending": "Trendin a futuro",
+        "future_trending_title": "Trendin a futuro",
+        "future_trending_description": "Proyección de los juegos con mayor potencial ascendente usando el Trend Score.",
         "copyright": "© 2026 infosteam — Monitorización de datos de alto nivel",
         "release_date": "Fecha de lanzamiento",
         "weekly_peak": "Pico última semana",
@@ -162,9 +165,9 @@ TRANSLATIONS = {
         "rating_label": "Rating",
         "reviews_label": "Reseñas",
         "trend_formula_title": "📊 Fórmula de tendencia",
-        "trend_formula_description": "Score estimado para proyectar la evolución de cada juego.",
-        "trend_formula_equation": "Trend Score = (PicoÚltimaSemana × 0.6) + (Crecimiento7d × 0.3) + (Recencia × 0.1)",
-        "trend_formula_note": "Valores más altos indican una probabilidad mayor de alza en la próxima semana.",
+        "trend_formula_description": "Puntuación estimada para proyectar la evolución de cada juego.",
+        "trend_formula_equation": "Trend Score = (Pico última semana × 0.6) + (Crecimiento 7d × 0.3) + (Recencia × 0.1)",
+        "trend_formula_note": "Valores más altos indican una mayor probabilidad de alza en la próxima semana.",
         "trend_forecast_title": "📈 Tendencias",
         "trend_forecast_description": "Clasificación de juegos según el score de tendencia calculado.",
         "trend_forecast_chart": "Top juegos por Trend Score",
@@ -247,6 +250,9 @@ TRANSLATIONS = {
         "data_date": "Data date:",
         "no_24h_data": "No data available for the latest 24 hours.",
         "popular_releases_description": "A game is considered popular if its weekly peak players exceed the weekly peak of other games released on similar dates (±7 days).",
+        "future_trending": "Future Trending",
+        "future_trending_title": "Future Trending",
+        "future_trending_description": "Projected games with the highest upward potential using the Trend Score.",
         "copyright": "© 2026 infosteam — High-End Data Monitoring",
         "release_date": "Release Date",
         "weekly_peak": "Weekly peak",
@@ -375,6 +381,9 @@ TRANSLATIONS = {
         "trend_formula_description": "Score estimé pour projeter l'évolution de chaque jeu.",
         "trend_formula_equation": "Score de tendance = (Pic hebdo × 0.6) + (Croissance 7j × 0.3) + (Récence × 0.1)",
         "trend_formula_note": "Les valeurs plus élevées indiquent une trajectoire ascendante plus probable.",
+        "future_trending": "Tendance future",
+        "future_trending_title": "Tendance future",
+        "future_trending_description": "Jeux projetés avec le plus fort potentiel de hausse selon le Trend Score.",
         "trend_forecast_title": "📈 Tendances",
         "trend_forecast_description": "Classement des jeux par leur score de tendance calculé.",
         "trend_forecast_chart": "Top jeux par Trend Score",
@@ -480,6 +489,9 @@ TRANSLATIONS = {
         "trend_formula_description": "Pontuação estimada para projetar a evolução de cada jogo.",
         "trend_formula_equation": "Trend Score = (Pico Semanal × 0.6) + (Crescimento 7d × 0.3) + (Recência × 0.1)",
         "trend_formula_note": "Valores maiores indicam uma tendência de alta mais forte.",
+        "future_trending": "Tendência futura",
+        "future_trending_title": "Tendência futura",
+        "future_trending_description": "Jogos projetados com maior potencial de alta usando o Trend Score.",
         "trend_forecast_title": "📈 Tendências",
         "trend_forecast_description": "Rankeie os jogos pelo score de tendência calculado.",
         "trend_forecast_chart": "Top jogos por Trend Score",
@@ -1374,13 +1386,13 @@ with st.sidebar:
     st.divider()
     st.markdown(f"### {t['navigation']}")
 
-    view_menu_keys = ["Dashboard", "Market Trends", "Popular Releases", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
+    view_menu_keys = ["Dashboard", "Market Trends", "Popular Releases", "Future Trending", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
     view_menu_labels = [
-        t["dashboard"], t["market_trends"], t["popular_releases"],
+        t["dashboard"], t["market_trends"], t["popular_releases"], t["future_trending"],
         t["top_genres"], t["top_developers"], t["price_analysis"], t["favorites"]
     ]
     current_index = view_menu_keys.index(st.session_state.view) if st.session_state.view in view_menu_keys else 0
-    selected_label = st.selectbox("", view_menu_labels, index=current_index, label_visibility="collapsed")
+    selected_label = st.selectbox("Seleccionar vista", view_menu_labels, index=current_index, label_visibility="collapsed")
     st.session_state.view = view_menu_keys[view_menu_labels.index(selected_label)]
 
     if not df_listado.empty:
@@ -1720,6 +1732,32 @@ elif st.session_state.view == "Popular Releases":
                 st.caption(f"{t['release_date']}: {rel_str}  •  {t['weekly_peak']}: {peak}")
     st.stop()
 
+elif st.session_state.view == "Future Trending":
+    st.title(t["future_trending_title"])
+    st.subheader(t["future_trending_title"])
+    st.markdown(t["future_trending_description"])
+    render_trend_formula_card(t)
+
+    trend_ref_date = get_latest_data_date()
+    trend_df = compute_trend_scores(trend_ref_date, limit=12)
+    if trend_df.empty:
+        st.info(t.get("no_trend_data", "No trend data available."))
+    else:
+        st.markdown(f"### {t.get('trend_forecast_chart', 'Top Trend Games')}")
+        st.bar_chart(trend_df.set_index('Nombre')['Trend Score'], use_container_width=True)
+        st.markdown("### " + t.get('trend_formula_title', '📊 Trend Formula'))
+        st.dataframe(trend_df[['Nombre', 'Weekly peak', 'Growth 7d', 'Recency', 'Trend Score']].rename(columns={
+            'Nombre': t.get('name_filter', 'Name'),
+            'Weekly peak': t.get('weekly_peak', 'Weekly peak'),
+            'Growth 7d': 'Growth 7d',
+            'Recency': 'Recency',
+            'Trend Score': 'Trend Score'
+        }))
+
+        with st.expander(t.get('trend_formula_title', '📊 Trend Formula')):
+            st.markdown(t['trend_formula_equation'])
+            st.markdown(t['trend_formula_note'])
+
 elif st.session_state.view == "Price Analysis":
     st.title(t["price_analysis_title"])
     df_p = df_detalles.copy()
@@ -1750,7 +1788,7 @@ m4.metric(t["peak_24h"], f"{get_peak_last_24h(get_latest_data_date()):,}")
 
 st.divider()
 
-t1, t2, t3, t4, t5, t6 = st.tabs([t["live_rankings"], t["performance_trend"], t["data_explorer"], t["peak_24h_section"], t["popular_releases_title"], t["trend_forecastases_title"], t["trend_forecast_title"]])
+t1, t2, t3, t4, t5, t6 = st.tabs([t["live_rankings"], t["performance_trend"], t["data_explorer"], t["peak_24h_section"], t["popular_releases_title"], t["trend_forecast_title"]])
 
 with t1:
     # AHORA MUESTRA 100 JUEGOS EN VEZ DE 50
