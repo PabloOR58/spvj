@@ -155,6 +155,7 @@ TRANSLATIONS = {
         "added_to_favorites": "Añadido a favoritos",
         "add_to_favorites": "Añadir a favoritos",
         "remove_from_favorites": "Quitar de favoritos",
+        "summary_hint": "Este resumen usa las valoraciones y el número de reseñas del conjunto de datos para describir el juego seleccionado.",
     },
     "en": {
         "language_label": "🌐 Language",
@@ -240,6 +241,7 @@ TRANSLATIONS = {
         "added_to_favorites": "Added to favorites",
         "add_to_favorites": "Add to favorites",
         "remove_from_favorites": "Remove from favorites",
+        "summary_hint": "This summary uses the rating and review counts from the dataset to describe the selected game.",
     },
     "fr": {
         "language_label": "🌐 Langue",
@@ -325,6 +327,7 @@ TRANSLATIONS = {
         "added_to_favorites": "Ajouté aux favoris",
         "add_to_favorites": "Ajouter aux favoris",
         "remove_from_favorites": "Retirer des favoris",
+        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données pour décrire le jeu sélectionné.",
     },
     "pt": {
         "language_label": "🌐 Idioma",
@@ -410,6 +413,7 @@ TRANSLATIONS = {
         "added_to_favorites": "Adicionado aos favoritos",
         "add_to_favorites": "Adicionar aos favoritos",
         "remove_from_favorites": "Remover dos favoritos",
+        "summary_hint": "Este resumo usa as classificações e o número de avaliações do conjunto de dados para descrever o jogo selecionado.",
     },
 }
 CURRENCY_CONFIG = {
@@ -1321,9 +1325,9 @@ if selected_game_id:
         info_col1, info_col2 = st.columns(2)
 
         with info_col1:
-            st.markdown("""
+            st.markdown(f"""
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
-                <h4 style="margin: 0 0 10px 0;">🎮 {t['game_details']}</h4>
+                <h4 style="margin: 0 0 10px 0;">{t['about_game']}</h4>
             </div>
             """, unsafe_allow_html=True)
             st.write(f"**{t['developer_label']}:** {fix_nan(g_i.get('Desarrollador'))}")
@@ -1343,10 +1347,14 @@ if selected_game_id:
 
         st.markdown("---")
         st.subheader(t["about_game"])
-        st.write(
-            f"⭐ {t['rating_label']}: {rating}\n"
-            f"💬 {t['reviews_label']}: {reviews}\n\n"
-            "This summary uses the rating and review counts from the dataset to describe the selected game."
+        st.markdown(
+            f"**{t['developer_label']}:** {fix_nan(g_i.get('Desarrollador'))}  \n"
+            f"**{t['platforms_label']}:** {display_platforms_section(appid, st.session_state.language)}  \n"
+            f"**{t['release_information']}:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}  \n"
+            f"**{t['price']}:** {format_local_price(g_d.get('Precio', 'N/A'), st.session_state.language)}  \n"
+            f"**⭐ {t['rating_label']}:** {rating}  \n"
+            f"**💬 {t['reviews_label']}:** {reviews}  \n\n"
+            f"{t['summary_hint']}"
         )
 
     with tab2:
