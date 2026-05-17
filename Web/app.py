@@ -98,7 +98,7 @@ TRANSLATIONS = {
         "user_exists": "¡El usuario ya existe!",
         "user_registered": "¡Usuario registrado!",
         "wrong_credentials": "Credenciales incorrectas",
-        "please_login_favorites": "Por favor inicia sesión para ver tus favoritos.",
+        "please_login_favorites": "Por favor, inicia sesión para revisar tus favoritos.",
         "favorites_empty": "Tu lista de favoritos está vacía.",
         "saved": "Guardado:",
         "already_in_favorites": "Ya está en favoritos",
@@ -794,14 +794,17 @@ def update_data_source():
     try:
         result = subprocess.run(
             [sys.executable, DOWNLOAD_SCRIPT],
+            cwd=BASE_DIR,
             capture_output=True,
             text=True,
             timeout=180
         )
         if result.returncode != 0:
-            return False, result.stderr or result.stdout or "Error al ejecutar la actualización."
+            return False, result.stderr.strip() or result.stdout.strip() or "Error al ejecutar la actualización."
         load_data.clear()
-        return True, result.stdout
+        return True, result.stdout.strip()
+    except subprocess.TimeoutExpired as e:
+        return False, f"Tiempo de actualización agotado después de {e.timeout} segundos."
     except Exception as e:
         return False, str(e)
 
@@ -962,7 +965,6 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
     with c2:
         # Only allow favorites actions when a user is logged in
         if "user" not in st.session_state:
-            st.info(t.get('please_login_favorites', 'Por favor inicia sesión para ver tus favoritos.'))
             return
         try:
             f_df = pd.read_csv(FAV_FILE)
@@ -1657,51 +1659,125 @@ with t1:
 
 with t2:
     st.header(t["historical_trends_header"])
-    # Show compact performance trend summary and top movers
     dates_list = sorted(df_listado["Fecha"].unique(), reverse=True)
     if len(dates_list) < 2:
         st.info(t.get('no_24h_data', 'Not enough data for trends'))
     else:
-        prev_date = dates_list[1]
-        cur = df_listado[df_listado['Fecha'] == st.session_state.sel_date]
-        prev = df_listado[df_listado['Fecha'] == prev_date]
-        merged = cur.set_index('AppID')[['JugadoresConcurrentes']].rename(columns={'JugadoresConcurrentes':'cur_players'}).join(prev.set_index('AppID')[['JugadoresConcurrentes']].rename(columns={'JugadoresConcurrentes':'prev_players'}), how='left').fillna(0)
-        merged['growth'] = merged['cur_players'].astype(float) - merged['prev_players'].astype(float)
-        movers = merged.sort_values('growth', ascending=False).head(8).reset_index()
-
-        cols_per_row = 4
-        for r in range(0, len(movers), cols_per_row):
-            cols = st.columns(cols_per_row)
-            for i, col in enumerate(cols):
-                idx = r + i
-                if idx < len(movers):
-                    row = movers.iloc[idx]
-                    aid = int(row['AppID'])
-                    g_row = df_listado[df_listado['AppID'] == aid]
-                    name = g_row['Nombre'].iloc[0] if not g_row.empty else f"AppID: {aid}"
-                    with col:
-                        render_dashboard_card(aid, fix_nan(name), t, f"trend_{idx}", players=row['cur_players'], peak=row['growth'], badge='▲')
-        st.divider()
         st.subheader(t["market_share"])
         sel_g = st.multiselect(t["compare_games"], sorted(df_listado["Nombre"].unique()), default=df_day.head(5)["Nombre"].tolist())
         if sel_g:
-            pivot = df_listado[df_listado["Nombre"].isin(sel_g)].pivot_table(index="Fecha", columns="Nombre", values="JugadoresConcurrentes")
-            st.line_chart(pivot)
+            selected_date = pd.to_datetime(st.session_state.sel_date, format="%Y-%m-%d", errors="coerce")
+            if pd.isna(selected_date):
+                st.info("Fecha seleccionada no válida para el filtro de una semana.")
+            else:
+                one_week_ago = selected_date - pd.Timedelta(days=6)
+                filtered = df_listado[df_listado["Nombre"].isin(sel_g)].copy()
+                filtered["Fecha_dt"] = pd.to_datetime(filtered["Fecha"], format="%Y-%m-%d", errors="coerce")
+                filtered = filtered[(filtered["Fecha_dt"] >= one_week_ago) & (filtered["Fecha_dt"] <= selected_date)]
+                pivot = (
+                    filtered.pivot_table(index="Fecha_dt", columns="Nombre", values="JugadoresConcurrentes")
+                    .fillna(0)
+                )
+                if not pivot.empty:
+                    st.line_chart(pivot.sort_index())
+                else:
+                    st.info("No hay datos suficientes para la última semana con los juegos seleccionados.")
+        else:
+            st.info("Selecciona al menos un juego para comparar")
+
+        top_today = df_day.sort_values("JugadoresConcurrentes", ascending=False).head(10)
+        if not top_today.empty:
+            st.subheader("Top 10 juegos hoy por jugadores concurrentes")
+            st.bar_chart(top_today.set_index("Nombre")["JugadoresConcurrentes"])
+
+        prev_date = dates_list[1]
+        cur = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
+        prev = df_listado[df_listado["Fecha"] == prev_date]
+        merged = (
+            cur.set_index('AppID')[['JugadoresConcurrentes']]
+            .rename(columns={'JugadoresConcurrentes': 'cur_players'})
+            .join(
+                prev.set_index('AppID')[['JugadoresConcurrentes']]
+                .rename(columns={'JugadoresConcurrentes': 'prev_players'}),
+                how='left'
+            )
+            .fillna(0)
+        )
+        merged['growth'] = merged['cur_players'].astype(float) - merged['prev_players'].astype(float)
+        movers = merged.sort_values('growth', ascending=False).head(10).reset_index()
+        if not movers.empty:
+            movers = movers.merge(df_listado[['AppID', 'Nombre']].drop_duplicates(subset=['AppID']), on='AppID', how='left')
+            st.subheader("Top 10 crecimiento diario")
+            st.bar_chart(movers.set_index('Nombre')['growth'])
 
 with t3:
     st.header(t.get('data_explorer', t['data_explorer']))
-    # Compact explorer: show top items for selected date (no freeform search)
-    sample = df_day.head(12).reset_index(drop=True)
-    cols_per_row = 4
-    for r in range(0, len(sample), cols_per_row):
-        cols = st.columns(cols_per_row)
-        for i, col in enumerate(cols):
-            idx = r + i
-            if idx < len(sample):
-                row = sample.iloc[idx]
-                aid = int(row.get('AppID', 0))
-                with col:
-                    render_dashboard_card(aid, fix_nan(row.get('Nombre')), t, f"de_{idx}", players=row.get('JugadoresConcurrentes'))
+
+    explorer_df = df_day.copy()
+    explorer_df = explorer_df.merge(
+        df_info[['AppID', 'Géneros', 'Desarrollador']], on='AppID', how='left'
+    ).merge(
+        df_detalles[['AppID', 'Precio', 'Rating']], on='AppID', how='left'
+    )
+    platform_df = df_plataformas[df_plataformas['Fecha'] == st.session_state.sel_date][['AppID', 'Plataformas']]
+    explorer_df = explorer_df.merge(platform_df, on='AppID', how='left')
+
+    explorer_df['Precio'] = pd.to_numeric(explorer_df['Precio'], errors='coerce')
+    explorer_df['JugadoresConcurrentes'] = pd.to_numeric(explorer_df['JugadoresConcurrentes'], errors='coerce').fillna(0)
+
+    genre_options = sorted({g.strip() for row in explorer_df['Géneros'].dropna().astype(str).str.split(',') for g in row if g.strip()})
+    dev_options = sorted(explorer_df['Desarrollador'].dropna().astype(str).unique())
+    platform_options = sorted({p.strip() for row in explorer_df['Plataformas'].dropna().astype(str).str.split(',') for p in row if p.strip()})
+
+    pmin = int(explorer_df['Precio'].min()) if not explorer_df['Precio'].dropna().empty else 0
+    pmax = int(explorer_df['Precio'].max()) if not explorer_df['Precio'].dropna().empty else 0
+    jmin = int(explorer_df['JugadoresConcurrentes'].min()) if not explorer_df['JugadoresConcurrentes'].empty else 0
+    jmax = int(explorer_df['JugadoresConcurrentes'].max()) if not explorer_df['JugadoresConcurrentes'].empty else 0
+
+    st.subheader('Filtros de juegos')
+    f1, f2 = st.columns(2)
+    with f1:
+        selected_genres = st.multiselect('Género', genre_options, default=[])
+        selected_developers = st.multiselect('Desarrollador', dev_options, default=[])
+    with f2:
+        selected_platforms = st.multiselect('Plataforma', platform_options, default=[])
+        selected_price = st.slider('Rango de precio', pmin, pmax, (pmin, pmax)) if pmin < pmax else (pmin, pmax)
+        selected_players = st.slider('Rango de jugadores', jmin, jmax, (jmin, jmax)) if jmin < jmax else (jmin, jmax)
+
+    filtered = explorer_df.copy()
+    if selected_genres:
+        filtered = filtered[filtered['Géneros'].fillna('').apply(lambda x: any(genre in [g.strip() for g in x.split(',')] for genre in selected_genres))]
+    if selected_developers:
+        filtered = filtered[filtered['Desarrollador'].isin(selected_developers)]
+    if selected_platforms:
+        filtered = filtered[filtered['Plataformas'].fillna('').apply(lambda x: any(platform in [p.strip() for p in x.split(',')] for platform in selected_platforms))]
+    if selected_price:
+        filtered = filtered[(filtered['Precio'].fillna(0) >= selected_price[0]) & (filtered['Precio'].fillna(0) <= selected_price[1])]
+    if selected_players:
+        filtered = filtered[(filtered['JugadoresConcurrentes'] >= selected_players[0]) & (filtered['JugadoresConcurrentes'] <= selected_players[1])]
+
+    st.markdown(f"**Resultados:** {len(filtered)} juegos filtrados")
+
+    if filtered.empty:
+        st.info('No hay juegos que cumplan esos filtros.')
+    else:
+        sample = filtered.sort_values('JugadoresConcurrentes', ascending=False).head(12).reset_index(drop=True)
+        cols_per_row = 4
+        for r in range(0, len(sample), cols_per_row):
+            cols = st.columns(cols_per_row)
+            for i, col in enumerate(cols):
+                idx = r + i
+                if idx < len(sample):
+                    row = sample.iloc[idx]
+                    aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+                    with col:
+                        render_dashboard_card(
+                            aid,
+                            fix_nan(row.get('Nombre')),
+                            t,
+                            f"de_{idx}",
+                            players=row.get('JugadoresConcurrentes')
+                        )
 
 with t4:
     st.subheader(t["peak_24h_section"])

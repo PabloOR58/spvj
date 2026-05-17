@@ -3,6 +3,9 @@ from datetime import datetime
 import csv
 import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CLEAN_DIR = os.path.join(BASE_DIR, "Clean")
+
 # ========================================
 # CREAR CSV SI NO EXISTE
 # ========================================
@@ -62,14 +65,14 @@ def get_platforms(appid):
 # ========================================
 def generar_datos():
 
-    os.makedirs("Clean", exist_ok=True)
+    os.makedirs(CLEAN_DIR, exist_ok=True)
     fecha = datetime.now().strftime("%Y-%m-%d")
 
     # =========================
     # TOP JUGADOS
     # =========================
-    path_jugados = "Clean/listado_juegos.csv"
-    path_plataformas = "Clean/plataformas_juegos.csv"
+    path_jugados = os.path.join(CLEAN_DIR, "listado_juegos.csv")
+    path_plataformas = os.path.join(CLEAN_DIR, "plataformas_juegos.csv")
 
     crear_csv(path_jugados, [
         "Fecha",
@@ -89,7 +92,10 @@ def generar_datos():
     eliminar_fecha(path_plataformas, fecha)
 
     url = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
-    juegos = requests.get(url).json().get("response", {}).get("ranks", [])
+    try:
+        juegos = requests.get(url, timeout=10).json().get("response", {}).get("ranks", [])
+    except Exception:
+        juegos = []
 
     with open(path_jugados, "a", newline="", encoding="utf-8") as f1, \
          open(path_plataformas, "a", newline="", encoding="utf-8") as f2:
@@ -132,15 +138,17 @@ def generar_datos():
     # =========================
     # TOP VENDIDOS
     # =========================
-    path_vendidos = "Clean/top_vendidos.csv"
+    path_vendidos = os.path.join(CLEAN_DIR, "top_vendidos.csv")
 
     crear_csv(path_vendidos, ["Fecha", "Posicion", "ID", "Nombre"])
     eliminar_fecha(path_vendidos, fecha)
 
     url = "https://store.steampowered.com/api/featuredcategories"
-    data = requests.get(url).json()
-
-    top = data.get("top_sellers", {}).get("items", [])
+    try:
+        data = requests.get(url, timeout=10).json()
+        top = data.get("top_sellers", {}).get("items", [])
+    except Exception:
+        top = []
 
     with open(path_vendidos, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
