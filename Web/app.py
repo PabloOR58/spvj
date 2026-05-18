@@ -579,6 +579,42 @@ def convert_to_usd_numeric(price_str):
     except:
         return 0.0
 
+def normalize_genre_token(token):
+    if pd.isna(token):
+        return None
+    token_text = str(token).strip()
+    if not token_text:
+        return None
+    token_text = re.sub(r"[\|/;]+", ",", token_text)
+    token_text = re.sub(r"\s+", " ", token_text)
+    token_text = token_text.title()
+    replacements = {
+        "Rpg": "RPG",
+        "Abenteuer": "Adventure",
+        "Kostenlos Spielbar": None,
+        "Free To Play": None,
+        "Gratis": None,
+        "Free": None,
+        "N/A": None,
+        "None": None,
+        "Unknown": None,
+    }
+    if token_text in replacements:
+        return replacements[token_text]
+    if token_text.isdigit() or len(token_text) <= 1:
+        return None
+    return token_text
+
+def get_genre_tokens(genre_text):
+    if pd.isna(genre_text):
+        return []
+    tokens = []
+    for raw in re.split(r"[;,|/]+", str(genre_text)):
+        normalized = normalize_genre_token(raw)
+        if normalized:
+            tokens.append(normalized)
+    return tokens
+
 def format_usd(price_str):
     val = convert_to_usd_numeric(price_str)
     return "Free to Play" if val == 0.0 else f"${round(val, 2)}"
@@ -1664,10 +1700,23 @@ if st.session_state.view == "Market Trends":
 
 elif st.session_state.view == "Top Genres":
     st.title(t["genre_popularity_title"])
-    counts = df_info['Géneros'].str.split(', ').explode().value_counts()
+    genre_df = df_info[['AppID', 'Nombre', 'Géneros', 'Fecha_Lanzamiento']].copy()
+    genre_df['Genre_List'] = genre_df['Géneros'].apply(get_genre_tokens)
+
+    flattened = [genre for row in genre_df['Genre_List'] for genre in row]
+    counts = pd.Series(flattened).value_counts()
     st.bar_chart(counts)
-    # Show representative games for genres as cards
-    sample = df_info.head(24)
+
+    # Use reviews and current player counts to order representative games
+    popularity_df = genre_df.merge(df_detalles[['AppID', 'Reviews']], on='AppID', how='left')
+    popularity_df['Reviews_Num'] = pd.to_numeric(popularity_df['Reviews'], errors='coerce').fillna(0)
+    if not df_day.empty:
+        player_map = df_day.set_index('AppID')['JugadoresConcurrentes'].to_dict()
+        popularity_df['Current_Players'] = popularity_df['AppID'].map(player_map).fillna(0)
+    else:
+        popularity_df['Current_Players'] = 0
+
+    sample = popularity_df.sort_values(['Current_Players', 'Reviews_Num'], ascending=False).head(24)
     cols_per_row = 4
     for r in range(0, len(sample), cols_per_row):
         cols = st.columns(cols_per_row)
@@ -1677,7 +1726,14 @@ elif st.session_state.view == "Top Genres":
                 row = sample.iloc[idx]
                 aid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
                 with col:
-                    render_game_card(aid, fix_nan(row.get('Nombre')), t, f"tg_{idx}", genres_raw=row.get('Géneros'), rel_dt=row.get('Fecha_Lanzamiento'))
+                    render_game_card(
+                        aid,
+                        fix_nan(row.get('Nombre')),
+                        t,
+                        f"tg_{idx}",
+                        genres_raw=', '.join(row.get('Genre_List', [])),
+                        rel_dt=row.get('Fecha_Lanzamiento')
+                    )
     st.stop()
 
 elif st.session_state.view == "Top Developers":
@@ -1876,8 +1932,9 @@ with t3:
 
     explorer_df['Precio'] = explorer_df['Precio'].apply(convert_to_usd_numeric)
     explorer_df['JugadoresConcurrentes'] = pd.to_numeric(explorer_df['JugadoresConcurrentes'], errors='coerce').fillna(0)
+    explorer_df['Genre_List'] = explorer_df['Géneros'].apply(get_genre_tokens)
 
-    genre_options = sorted({g.strip() for row in explorer_df['Géneros'].dropna().astype(str).str.split(',') for g in row if g.strip()})
+    genre_options = sorted({genre for row in explorer_df['Genre_List'] for genre in row})
     dev_options = sorted(explorer_df['Desarrollador'].dropna().astype(str).unique())
     platform_options = sorted({p.strip() for row in explorer_df['Plataformas'].dropna().astype(str).str.split(',') for p in row if p.strip()})
 
@@ -1903,7 +1960,7 @@ with t3:
         filtered = filtered[filtered['Nombre'].fillna('').astype(str).apply(lambda x: x.strip().lower() in normalized_names)]
     if selected_genres:
         normalized = [genre.strip().lower() for genre in selected_genres]
-        filtered = filtered[filtered['Géneros'].fillna('').apply(lambda x: any(genre in [g.strip().lower() for g in x.split(',')] for genre in normalized))]
+        filtered = filtered[filtered['Genre_List'].apply(lambda genres: any(genre in [g.lower() for g in genres] for genre in normalized))]
     if selected_developers:
         normalized_devs = [dev.strip().lower() for dev in selected_developers]
         filtered = filtered[filtered['Desarrollador'].fillna('').apply(lambda x: x.strip().lower() in normalized_devs)]
