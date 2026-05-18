@@ -559,18 +559,25 @@ def fix_nan(val, default="-"):
     return str(val)
 
 def convert_to_usd_numeric(price_str):
-    if pd.isna(price_str) or str(price_str).lower() == "nan": return 0.0
+    if pd.isna(price_str) or str(price_str).lower() == "nan":
+        return 0.0
     p = str(price_str).upper()
-    if any(word in p for word in ["GRATIS", "FREE", "0"]): return 0.0
+    if re.search(r"\b(GRATIS|FREE)\b", p):
+        return 0.0
     try:
         nums = re.findall(r"[-+]?\d*\.\d+|\d+", p.replace(',', '.'))
-        if not nums: return 0.0
+        if not nums:
+            return 0.0
         val = float(nums[0])
+        if val == 0.0:
+            return 0.0
         rates = {"€": 1.08, "฿": 0.028, "РУБ": 0.011, "AED": 0.27, "CLP": 0.0011, "CDN$": 0.74, "¥": 0.0067}
         for s, r in rates.items():
-            if s in p: return val * r
+            if s in p:
+                return val * r
         return val
-    except: return 0.0
+    except:
+        return 0.0
 
 def format_usd(price_str):
     val = convert_to_usd_numeric(price_str)
@@ -956,7 +963,7 @@ def get_peak_last_24h(ref_date):
     if window.empty:
         return 0
     values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0)
-    return int(values.max())
+    return int(values.sum())
 
 
 def get_previous_week_peak(appid, ref_date):
@@ -1148,8 +1155,6 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
             overlay_lines.append(f"{t['release_date']}: {rel_str}")
         except:
             pass
-    if price_raw is not None:
-        overlay_lines.append(f"{t['price']}: {format_local_price(price_raw, st.session_state.language)}")
     if genres_raw:
         overlay_lines.append(f"{t['genres_label']}: {fix_nan(genres_raw)}")
     if rating is not None:
@@ -1197,8 +1202,6 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     if lines:
         st.caption("  •  ".join(lines))
 
-    price_display = format_local_price(price_raw if price_raw is not None else 'N/A', st.session_state.language)
-    st.write(f"**{t['price']}:** {price_display}")
     if genres_raw:
         st.write(f"**{t['genres_label']}:** {fix_nan(genres_raw)}")
     if rating is not None:
@@ -1265,10 +1268,7 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
             platforms = display_platforms_section(aid, st.session_state.language)
             if platforms:
                 overlay_lines.append(platforms)
-        if not details_row.empty:
-            price_raw = details_row['Precio'].iloc[0]
-            if pd.notna(price_raw):
-                overlay_lines.append(f"{t['price']}: {format_local_price(price_raw, st.session_state.language)}")
+        # Price display removed from dashboard cards due to inconsistent data
     except:
         pass
     if players is not None:
@@ -1777,10 +1777,11 @@ st.title(t["dashboard_title"])
 
 # Dashboard metrics
 m1, m2, m3, m4 = st.columns(4)
+selected_peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
 m1.metric(t["players_online"], f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
 m2.metric(t["games_tracked"], f"{len(df_day)}")
 m3.metric(t["top_game"], fix_nan(df_day.iloc[0]["Nombre"]) if len(df_day) > 0 else "N/A")
-m4.metric(t["peak_24h"], f"{get_peak_last_24h(get_latest_data_date()):,}")
+m4.metric(t["peak_24h"], f"{get_peak_last_24h(selected_peak_date):,}")
 
 st.divider()
 
@@ -1944,11 +1945,11 @@ with t3:
 
 with t4:
     st.subheader(t["peak_24h_section"])
-    peak_value = get_peak_last_24h(get_latest_data_date())
+    peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
+    peak_value = get_peak_last_24h(peak_date)
     st.metric(t["peak_24h"], f"{peak_value:,}")
-    latest_date = get_latest_data_date()
-    if not pd.isna(latest_date):
-        st.write(f"{t['data_date']} {latest_date.strftime('%Y-%m-%d')}")
+    if peak_date is not None and not pd.isna(parse_date_safe(peak_date)):
+        st.write(f"{t['data_date']} {parse_date_safe(peak_date).strftime('%Y-%m-%d')}")
 
     if len(df_day) > 0:
         # Ensure numeric players and unique AppID to avoid duplicates
