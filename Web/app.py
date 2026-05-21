@@ -1704,7 +1704,7 @@ elif st.session_state.view == "Top Genres":
     genre_df['Genre_List'] = genre_df['Géneros'].apply(get_genre_tokens)
 
     flattened = [genre for row in genre_df['Genre_List'] for genre in row]
-    counts = pd.Series(flattened).value_counts()
+    counts = pd.Series(flattened).value_counts().sort_values(ascending=False)
     st.bar_chart(counts)
 
     # Use reviews and current player counts to order representative games
@@ -1738,7 +1738,7 @@ elif st.session_state.view == "Top Genres":
 
 elif st.session_state.view == "Top Developers":
     st.title(t["top_developers_title"])
-    devs = df_info['Desarrollador'].value_counts().head(15)
+    devs = df_info['Desarrollador'].value_counts().sort_values(ascending=False).head(15)
     st.bar_chart(devs)
     sample = df_info.sort_values('Desarrollador').head(24)
     cols_per_row = 4
@@ -1795,6 +1795,7 @@ elif st.session_state.view == "Future Trending":
     if trend_df.empty:
         st.info(t.get("no_trend_data", "No trend data available."))
     else:
+        trend_df = trend_df.sort_values('Trend Score', ascending=False)
         st.markdown(f"### {t.get('trend_forecast_chart', 'Top Trend Games')}")
         st.bar_chart(trend_df.set_index('Nombre')['Trend Score'], use_container_width=True)
         st.markdown("### " + t.get('trend_formula_title', '📊 Trend Formula'))
@@ -2065,6 +2066,7 @@ with t6:
     if trend_df.empty:
         st.info("No trend data available.")
     else:
+        trend_df = trend_df.sort_values('Trend Score', ascending=False)
         st.bar_chart(trend_df.set_index('Nombre')['Trend Score'], use_container_width=True)
         
         st.markdown("### Top Trend Games")
