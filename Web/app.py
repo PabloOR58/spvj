@@ -9,7 +9,7 @@ import sys
 # ---------- 1. PAGE CONFIGURATION ---------- 
 st.set_page_config(
     page_title="infosteam | Professional Dashboard",
-    page_icon="🎮",
+    page_icon="https://img.icons8.com/ios-filled/50/ffffff/steam.png",
     layout="wide"
 )
 
@@ -74,8 +74,8 @@ LANGUAGE_CODES = {
 LANGUAGE_CODE_TO_NAME = {v: k for k, v in LANGUAGE_CODES.items()}
 TRANSLATIONS = {
     "es": {
-        "language_label": "🌐 Idioma",
-        "account": "🔐 Cuenta",
+        "language_label": "Idioma",
+        "account": "Cuenta",
         "mode": "Modo",
         "user": "Usuario",
         "password": "Contraseña",
@@ -83,11 +83,11 @@ TRANSLATIONS = {
         "login": "Iniciar Sesión",
         "register": "Registrarse",
         "logout": "Cerrar sesión",
-        "my_favorites": "⭐ Mis Favoritos",
-        "navigation": "📑 Navegación",
+        "my_favorites": "Mis Favoritos",
+        "navigation": "Navegación",
         "select_date": "Seleccionar fecha:",
-        "home_dashboard": "🏠 Inicio",
-        "update_data": "🔄 Actualizar Datos",
+        "home_dashboard": "Inicio",
+        "update_data": "Actualizar Datos",
         "dashboard": "Dashboard",
         "market_trends": "Tendencias",
         "top_genres": "Géneros",
@@ -102,30 +102,30 @@ TRANSLATIONS = {
         "favorites_empty": "Tu lista de favoritos está vacía.",
         "saved": "Guardado:",
         "already_in_favorites": "Ya está en favoritos",
-        "remove": "🗑️ Eliminar",
+        "remove": "Eliminar",
         "view_info": "Ver Información",
         "details": "Detalles",
         "favorite": "Favorito",
         "toggle_top": "Alternar Top 10 / 100",
-        "players_online": "🟢 Jugadores en Línea",
-        "games_tracked": "🎮 Juegos Seguimiento",
-        "top_game": "🏆 Mejor Juego",
+        "players_online": "Jugadores en Línea",
+        "games_tracked": "Juegos Seguimiento",
+        "top_game": "Mejor Juego",
         "welcome": "Bienvenido",
         "price": "Precio",
         "free_to_play": "Gratis para jugar",
-        "market_trends_title": "📈 Tendencias y ventas",
-        "genre_popularity_title": "📂 Popularidad de géneros",
-        "top_developers_title": "👨‍💻 Mejores desarrolladores",
-        "popular_releases_title": "🎯 Populares",
-        "price_analysis_title": "💰 Análisis de precios",
-        "historical_trends_header": "📈 Tendencias históricas y cuota de mercado",
-        "market_share": "🎭 Cuota de mercado",
-        "volatility": "🔥 Volatilidad",
-        "peak_24h_section": "📈 Pico 24h",
-        "dashboard_title": "🎮 Dashboard",
-        "live_rankings": "📊 Clasificación en vivo",
-        "performance_trend": "📈 Tendencia de rendimiento",
-        "data_explorer": "📋 Explorador de datos",
+        "market_trends_title": "Tendencias y ventas",
+        "genre_popularity_title": "Popularidad de géneros",
+        "top_developers_title": "Mejores desarrolladores",
+        "popular_releases_title": "Populares",
+        "price_analysis_title": "Análisis de precios",
+        "historical_trends_header": "Tendencias históricas y cuota de mercado",
+        "market_share": "Cuota de mercado",
+        "volatility": "Volatilidad",
+        "peak_24h_section": "Pico 24h",
+        "dashboard_title": "Dashboard",
+        "live_rankings": "Clasificación en vivo",
+        "performance_trend": "Tendencia de rendimiento",
+        "data_explorer": "Explorador de datos",
         "compare_games": "Comparar juegos:",
         "filters_title": "Filtros de juegos",
         "name_filter": "Juego",
@@ -141,9 +141,9 @@ TRANSLATIONS = {
         "no_weekly_data": "No hay datos suficientes para la última semana con los juegos seleccionados.",
         "data_date": "Fecha de datos:",
         "no_24h_data": "No hay datos disponibles para las últimas 24 horas.",
-        "popular_releases_description": "Un juego se considera popular si su pico de jugadores en la última semana supera al pico semanal de otros juegos lanzados en fechas similares (±7 días).",
-        "future_trending": "Trendin a futuro",
-        "future_trending_title": "Trendin a futuro",
+        "popular_releases_description": "Un juego se considera popular si su pico de jugadores en la última semana supera al pico semanal de otros juegos lanzados en fechas similares (más o menos 7 días).",
+        "future_trending": "Tendencias a futuro",
+        "future_trending_title": "Tendencias a futuro",
         "future_trending_description": "Proyección de los juegos con mayor potencial ascendente usando el Trend Score.",
         "copyright": "© 2026 infosteam — Monitorización de datos de alto nivel",
         "release_date": "Fecha de lanzamiento",
@@ -151,29 +151,29 @@ TRANSLATIONS = {
         "game_details": "Detalles del juego",
         "watch_trailer_on_steam": "Ver tráiler en Steam",
         "watch_live_streams_of": "Ver streams en vivo de {game_name}",
-        "overview_tab": "📖 Resumen",
-        "details_tab": "ℹ️ Detalles",
-        "reviews_tab": "⭐ Reseñas",
-        "information": "📋 Información",
-        "release_information": "📅 Información de lanzamiento",
-        "about_game": "📝 Acerca del juego",
-        "trailer": "🎥 Trailer",
-        "twitch_streams": "🎮 Streams en Vivo",
+        "overview_tab": "Resumen",
+        "details_tab": "Detalles",
+        "reviews_tab": "Reseñas",
+        "information": "Información",
+        "release_information": "Información de lanzamiento",
+        "about_game": "Acerca del juego",
+        "trailer": "Trailer",
+        "twitch_streams": "Streams en Vivo",
         "developer_label": "Desarrollador",
         "platforms_label": "Plataformas",
         "genres_label": "Géneros",
         "rating_label": "Rating",
         "reviews_label": "Reseñas",
-        "trend_formula_title": "📊 Fórmula de tendencia",
+        "trend_formula_title": "Fórmula de tendencia",
         "trend_formula_description": "Puntuación estimada para proyectar la evolución de cada juego.",
-        "trend_formula_equation": "Trend Score = (Pico última semana × 0.6) + (Crecimiento 7d × 0.3) + (Recencia × 0.1)",
+        "trend_formula_equation": "Trend Score = (Pico última semana * 0.6) + (Crecimiento 7d * 0.3) + (Recencia * 0.1)",
         "trend_formula_note": "Valores más altos indican una mayor probabilidad de alza en la próxima semana.",
-        "trend_forecast_title": "📈 Tendencias",
+        "trend_forecast_title": "Tendencias",
         "trend_forecast_description": "Clasificación de juegos según el score de tendencia calculado.",
         "trend_forecast_chart": "Top juegos por Trend Score",
         "current_rank": "Posición actual",
         "current_players": "Jugadores actuales",
-        "peak_24h": "📈 Pico 24h",
+        "peak_24h": "Pico 24h",
         "open_steam": "Abrir en Steam",
         "open_twitch": "Ver en Twitch",
         "added_to_favorites": "Añadido a favoritos",
@@ -182,8 +182,8 @@ TRANSLATIONS = {
         "summary_hint": "Este resumen usa las valoraciones y el número de reseñas del conjunto de datos para describir el juego seleccionado.",
     },
     "en": {
-        "language_label": "🌐 Language",
-        "account": "🔐 Account",
+        "language_label": "Language",
+        "account": "Account",
         "mode": "Mode",
         "user": "User",
         "password": "Password",
@@ -191,11 +191,11 @@ TRANSLATIONS = {
         "login": "Login",
         "register": "Register",
         "logout": "Logout",
-        "my_favorites": "⭐ My Favorites",
-        "navigation": "📑 Navigation",
+        "my_favorites": "My Favorites",
+        "navigation": "Navigation",
         "select_date": "Select Date:",
-        "home_dashboard": "🏠 Home",
-        "update_data": "🔄 Update Data",
+        "home_dashboard": "Home",
+        "update_data": "Update Data",
         "dashboard": "Dashboard",
         "market_trends": "Market Trends",
         "top_genres": "Top Genres",
@@ -210,30 +210,30 @@ TRANSLATIONS = {
         "favorites_empty": "Your favorites list is empty.",
         "saved": "Saved:",
         "already_in_favorites": "Already in favorites",
-        "remove": "🗑️ Remove",
+        "remove": "Remove",
         "view_info": "View Info",
         "details": "Details",
         "favorite": "Favorite",
         "toggle_top": "Toggle Top 10 / 100",
-        "players_online": "🟢 Players Online",
-        "games_tracked": "🎮 Games Tracked",
-        "top_game": "🏆 Top Game",
+        "players_online": "Players Online",
+        "games_tracked": "Games Tracked",
+        "top_game": "Top Game",
         "welcome": "Welcome",
         "price": "Price",
         "free_to_play": "Free to Play",
-        "market_trends_title": "📈 Market Trends & Sales",
-        "genre_popularity_title": "📂 Genre Popularity",
-        "top_developers_title": "👨‍💻 Top Developers",
-        "popular_releases_title": "🎯 Popular Releases",
-        "price_analysis_title": "💰 Price Analysis",
-        "historical_trends_header": "📈 Historical Trends & Market Share",
-        "market_share": "🎭 Market Share",
-        "volatility": "🔥 Volatility",
-        "peak_24h_section": "📈 24h Peak Players",
-        "dashboard_title": "🎮 Dashboard",
-        "live_rankings": "📊 Live Rankings",
-        "performance_trend": "📈 Performance Trend",
-        "data_explorer": "📋 Data Explorer",
+        "market_trends_title": "Market Trends & Sales",
+        "genre_popularity_title": "Genre Popularity",
+        "top_developers_title": "Top Developers",
+        "popular_releases_title": "Popular Releases",
+        "price_analysis_title": "Price Analysis",
+        "historical_trends_header": "Historical Trends & Market Share",
+        "market_share": "Market Share",
+        "volatility": "Volatility",
+        "peak_24h_section": "24h Peak Players",
+        "dashboard_title": "Dashboard",
+        "live_rankings": "Live Rankings",
+        "performance_trend": "Performance Trend",
+        "data_explorer": "Data Explorer",
         "compare_games": "Compare Games:",
         "filters_title": "Game Filters",
         "name_filter": "Game",
@@ -249,7 +249,7 @@ TRANSLATIONS = {
         "no_weekly_data": "Not enough weekly data for the selected games.",
         "data_date": "Data date:",
         "no_24h_data": "No data available for the latest 24 hours.",
-        "popular_releases_description": "A game is considered popular if its weekly peak players exceed the weekly peak of other games released on similar dates (±7 days).",
+        "popular_releases_description": "A game is considered popular if its weekly peak players exceed the weekly peak of other games released on similar dates (plus or minus 7 days).",
         "future_trending": "Future Trending",
         "future_trending_title": "Future Trending",
         "future_trending_description": "Projected games with the highest upward potential using the Trend Score.",
@@ -259,29 +259,29 @@ TRANSLATIONS = {
         "game_details": "Game Details",
         "watch_trailer_on_steam": "Watch Trailer on Steam",
         "watch_live_streams_of": "Watch live streams of {game_name}",
-        "overview_tab": "📖 Overview",
-        "details_tab": "ℹ️ Details",
-        "reviews_tab": "⭐ Reviews",
-        "information": "📋 Information",
-        "release_information": "📅 Release Information",
-        "about_game": "📝 About This Game",
-        "trailer": "🎥 Trailer",
-        "twitch_streams": "🎮 Live Streams",
+        "overview_tab": "Overview",
+        "details_tab": "Details",
+        "reviews_tab": "Reviews",
+        "information": "Information",
+        "release_information": "Release Information",
+        "about_game": "About This Game",
+        "trailer": "Trailer",
+        "twitch_streams": "Live Streams",
         "developer_label": "Developer",
         "platforms_label": "Platforms",
         "genres_label": "Genres",
         "rating_label": "Rating",
         "reviews_label": "Reviews",
-        "trend_formula_title": "📊 Trend Formula",
+        "trend_formula_title": "Trend Formula",
         "trend_formula_description": "Estimated score to project how each game may evolve.",
-        "trend_formula_equation": "Trend Score = (Weekly Peak × 0.6) + (7d Growth × 0.3) + (Recency × 0.1)",
+        "trend_formula_equation": "Trend Score = (Weekly Peak * 0.6) + (7d Growth * 0.3) + (Recency * 0.1)",
         "trend_formula_note": "Higher values indicate a stronger upward trajectory next week.",
-        "trend_forecast_title": "📈 Trends",
+        "trend_forecast_title": "Trends",
         "trend_forecast_description": "Rank games by their computed trend score.",
         "trend_forecast_chart": "Top games by Trend Score",
         "current_rank": "Current Rank",
         "current_players": "Current Players",
-        "peak_24h": "📈 24h Peak",
+        "peak_24h": "24h Peak",
         "open_steam": "Open in Steam",
         "open_twitch": "Watch on Twitch",
         "added_to_favorites": "Added to favorites",
@@ -290,8 +290,8 @@ TRANSLATIONS = {
         "summary_hint": "This summary uses the rating and review counts from the dataset to describe the selected game.",
     },
     "fr": {
-        "language_label": "🌐 Langue",
-        "account": "🔐 Compte",
+        "language_label": "Langue",
+        "account": "Compte",
         "mode": "Mode",
         "user": "Utilisateur",
         "password": "Mot de passe",
@@ -299,11 +299,11 @@ TRANSLATIONS = {
         "login": "Connexion",
         "register": "S'inscrire",
         "logout": "Déconnexion",
-        "my_favorites": "⭐ Mes Favoris",
-        "navigation": "📑 Navigation",
+        "my_favorites": "Mes Favoris",
+        "navigation": "Navigation",
         "select_date": "Sélectionner la date:",
-        "home_dashboard": "🏠 Accueil",
-        "update_data": "🔄 Mettre à jour",
+        "home_dashboard": "Accueil",
+        "update_data": "Mettre à jour",
         "dashboard": "Tableau de bord",
         "market_trends": "Tendances",
         "top_genres": "Meilleurs Genres",
@@ -318,30 +318,30 @@ TRANSLATIONS = {
         "favorites_empty": "Votre liste de favoris est vide.",
         "saved": "Enregistré :",
         "already_in_favorites": "Déjà dans les favoris",
-        "remove": "🗑️ Supprimer",
+        "remove": "Supprimer",
         "view_info": "Voir Infos",
         "details": "Détails",
         "favorite": "Favori",
         "toggle_top": "Basculer Top 10 / 100",
-        "players_online": "🟢 Joueurs en ligne",
-        "games_tracked": "🎮 Jeux suivis",
-        "top_game": "🏆 Meilleur jeu",
+        "players_online": "Joueurs en ligne",
+        "games_tracked": "Jeux suivis",
+        "top_game": "Meilleur jeu",
         "welcome": "Bienvenue",
         "price": "Prix",
         "free_to_play": "Gratuit",
-        "market_trends_title": "📈 Tendances et ventes",
-        "genre_popularity_title": "📂 Popularité des genres",
-        "top_developers_title": "👨‍💻 Meilleurs développeurs",
-        "popular_releases_title": "🎯 Sorties Populaires",
-        "price_analysis_title": "💰 Analyse des prix",
-        "historical_trends_header": "📈 Tendances historiques et part de marché",
-        "market_share": "🎭 Part de marché",
-        "volatility": "🔥 Volatilité",
-        "peak_24h_section": "📈 Pic 24h",
-        "dashboard_title": "🎮 Tableau de bord",
-        "live_rankings": "📊 Classement en direct",
-        "performance_trend": "📈 Tendance de performance",
-        "data_explorer": "📋 Explorateur de données",
+        "market_trends_title": "Tendances et ventes",
+        "genre_popularity_title": "Popularité des genres",
+        "top_developers_title": "Meilleurs développeurs",
+        "popular_releases_title": "Sorties Populaires",
+        "price_analysis_title": "Analyse des prix",
+        "historical_trends_header": "Tendances historiques et part de marché",
+        "market_share": "Part de marché",
+        "volatility": "Volatilité",
+        "peak_24h_section": "Pic 24h",
+        "dashboard_title": "Tableau de bord",
+        "live_rankings": "Classement en direct",
+        "performance_trend": "Tendance de performance",
+        "data_explorer": "Explorateur de données",
         "compare_games": "Comparer les jeux:",
         "filters_title": "Filtres de jeu",
         "name_filter": "Jeu",
@@ -357,49 +357,49 @@ TRANSLATIONS = {
         "no_weekly_data": "Pas assez de données hebdomadaires pour les jeux sélectionnés.",
         "data_date": "Date des données :",
         "no_24h_data": "Aucune donnée disponible pour les dernières 24 heures.",
-        "popular_releases_description": "Un jeu est considéré comme populaire si son pic de joueurs hebdomadaire dépasse celui des autres jeux sortis à des dates similaires (±7 jours).",
+        "popular_releases_description": "Un jeu est considéré comme populaire si son pic de joueurs hebdomadaire dépasse celui des autres jeux sortis à des dates similaires (plus ou moins 7 jours).",
         "copyright": "© 2026 infosteam — Surveillance de données haut de gamme",
-        "release_date": "Date de sortie",
+        "release_date": "Date de suite",
         "weekly_peak": "Pic hebdomadaire",
         "game_details": "Détails du jeu",
         "watch_trailer_on_steam": "Regarder la bande-annonce sur Steam",
         "watch_live_streams_of": "Voir les streams en direct de {game_name}",
-        "overview_tab": "📖 Aperçu",
-        "details_tab": "ℹ️ Détails",
-        "reviews_tab": "⭐ Avis",
-        "information": "📋 Informations",
-        "release_information": "📅 Informations de sortie",
-        "about_game": "📝 À propos du jeu",
-        "trailer": "🎥 Bande-annonce",
-        "twitch_streams": "🎮 Streams en Direct",
+        "overview_tab": "Aperçu",
+        "details_tab": "Détails",
+        "reviews_tab": "Avis",
+        "information": "Informations",
+        "release_information": "Informations de sortie",
+        "about_game": "À propos du jeu",
+        "trailer": "Bande-annonce",
+        "twitch_streams": "Streams en Direct",
         "developer_label": "Développeur",
-        "platforms_label": "Plateformes",
+        "platforms_label": "Plataformes",
         "genres_label": "Genres",
         "rating_label": "Note",
         "reviews_label": "Avis",
-        "trend_formula_title": "📊 Formule de tendance",
-        "trend_formula_description": "Score estimé pour projeter l'évolution de chaque jeu.",
-        "trend_formula_equation": "Score de tendance = (Pic hebdo × 0.6) + (Croissance 7j × 0.3) + (Récence × 0.1)",
+        "trend_formula_title": "Formule de tendance",
+        "trend_formula_description": "Score estimé pour projeter l'évolution de cada jeu.",
+        "trend_formula_equation": "Score de tendance = (Pic hebdo * 0.6) + (Croissance 7j * 0.3) + (Récence * 0.1)",
         "trend_formula_note": "Les valeurs plus élevées indiquent une trajectoire ascendante plus probable.",
         "future_trending": "Tendance future",
         "future_trending_title": "Tendance future",
         "future_trending_description": "Jeux projetés avec le plus fort potentiel de hausse selon le Trend Score.",
-        "trend_forecast_title": "📈 Tendances",
+        "trend_forecast_title": "Tendances",
         "trend_forecast_description": "Classement des jeux par leur score de tendance calculé.",
         "trend_forecast_chart": "Top jeux par Trend Score",
         "current_rank": "Rang actuel",
         "current_players": "Joueurs actuels",
-        "peak_24h": "📈 Pic 24h",
+        "peak_24h": "Pic 24h",
         "open_steam": "Ouvrir sur Steam",
         "open_twitch": "Voir sur Twitch",
         "added_to_favorites": "Ajouté aux favoris",
         "add_to_favorites": "Ajouter aux favoris",
         "remove_from_favorites": "Retirer des favoris",
-        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données pour décrire le jeu sélectionné.",
+        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données para décrire le jeu sélectionné.",
     },
     "pt": {
-        "language_label": "🌐 Idioma",
-        "account": "🔐 Conta",
+        "language_label": "Idioma",
+        "account": "Conta",
         "mode": "Modo",
         "user": "Usuário",
         "password": "Senha",
@@ -407,11 +407,11 @@ TRANSLATIONS = {
         "login": "Entrar",
         "register": "Registrar",
         "logout": "Sair",
-        "my_favorites": "⭐ Meus Favoritos",
-        "navigation": "📑 Navegação",
+        "my_favorites": "Meus Favoritos",
+        "navigation": "Navegação",
         "select_date": "Selecionar data:",
-        "home_dashboard": "🏠 Início",
-        "update_data": "🔄 Atualizar Dados",
+        "home_dashboard": "Início",
+        "update_data": "Atualizar Dados",
         "dashboard": "Painel",
         "market_trends": "Tendências",
         "top_genres": "Principais Gêneros",
@@ -419,37 +419,37 @@ TRANSLATIONS = {
         "price_analysis": "Análise de Preços",
         "popular_releases": "Lançamentos Populares",
         "favorites": "Favoritos",
-        "user_exists": "O usuário já existe!",
+        "user_exists": "O usuário ya existe!",
         "user_registered": "Usuário registrado!",
-        "wrong_credentials": "Credenciais incorretas",
+        "wrong_credentials": "Credenciales incorretas",
         "please_login_favorites": "Por favor faça login para ver seus favoritos.",
         "favorites_empty": "Sua lista de favoritos está vazia.",
         "saved": "Salvo:",
         "already_in_favorites": "Já está nos favoritos",
-        "remove": "🗑️ Remover",
+        "remove": "Remover",
         "view_info": "Ver Informações",
         "details": "Detalhes",
         "favorite": "Favorito",
         "toggle_top": "Alternar Top 10 / 100",
-        "players_online": "🟢 Jogadores Online",
-        "games_tracked": "🎮 Jogos Monitorados",
-        "top_game": "🏆 Melhor Jogo",
+        "players_online": "Jogadores Online",
+        "games_tracked": "Jogos Monitorados",
+        "top_game": "Melhor Jogo",
         "welcome": "Bem-vindo",
         "price": "Preço",
         "free_to_play": "Grátis para jogar",
-        "market_trends_title": "📈 Tendências e vendas",
-        "genre_popularity_title": "📂 Popularidade de gêneros",
-        "top_developers_title": "👨‍💻 Principais desenvolvedores",
-        "popular_releases_title": "🎯 Lançamentos populares",
-        "price_analysis_title": "💰 Análise de preços",
-        "historical_trends_header": "📈 Tendências históricas e participação de mercado",
-        "market_share": "🎭 Participação de mercado",
-        "volatility": "🔥 Volatilidade",
-        "peak_24h_section": "📈 Pico 24h",
-        "dashboard_title": "🎮 Painel",
-        "live_rankings": "📊 Classificação ao vivo",
-        "performance_trend": "📈 Tendência de desempenho",
-        "data_explorer": "📋 Explorador de dados",
+        "market_trends_title": "Tendências e vendas",
+        "genre_popularity_title": "Popularidade de gêneros",
+        "top_developers_title": "Principais desenvolvedores",
+        "popular_releases_title": "Lançamentos populares",
+        "price_analysis_title": "Análise de preços",
+        "historical_trends_header": "Tendências históricas e participação de mercado",
+        "market_share": "Participação de mercado",
+        "volatility": "Volatilidade",
+        "peak_24h_section": "Pico 24h",
+        "dashboard_title": "Painel",
+        "live_rankings": "Classificação ao vivo",
+        "performance_trend": "Tendência de desempenho",
+        "data_explorer": "Explorador de dados",
         "compare_games": "Comparar jogos:",
         "filters_title": "Filtros de jogos",
         "name_filter": "Jogo",
@@ -465,45 +465,45 @@ TRANSLATIONS = {
         "no_weekly_data": "Não há dados semanais suficientes para os jogos selecionados.",
         "data_date": "Data dos dados:",
         "no_24h_data": "Nenhum dado disponível para as últimas 24 horas.",
-        "popular_releases_description": "Um jogo é considerado popular se seu pico semanal de jogadores for maior que o pico semanal de outros jogos lançados em datas similares (±7 dias).",
+        "popular_releases_description": "Um jogo é considerado popular se seu pico semanal de jogadores for maior que o pico semanal de outros jogos lançados em datas similares (mais o menos 7 dias).",
         "copyright": "© 2026 infosteam — Monitoramento de dados de alto nível",
         "release_date": "Data de lançamento",
         "weekly_peak": "Pico semanal",
         "game_details": "Detalhes do jogo",
         "watch_trailer_on_steam": "Ver trailer no Steam",
         "watch_live_streams_of": "Assistir streams ao vivo de {game_name}",
-        "overview_tab": "📖 Visão geral",
-        "details_tab": "ℹ️ Detalhes",
-        "reviews_tab": "⭐ Avaliações",
-        "information": "📋 Informações",
-        "release_information": "📅 Informações de lançamento",
-        "about_game": "📝 Sobre este jogo",
-        "trailer": "🎥 Trailer",
-        "twitch_streams": "🎮 Streams ao Vivo",
+        "overview_tab": "Visão geral",
+        "details_tab": "Detalhes",
+        "reviews_tab": "Avaliações",
+        "information": "Informações",
+        "release_information": "Informações de lançamento",
+        "about_game": "Sobre este jogo",
+        "trailer": "Trailer",
+        "twitch_streams": "Streams ao Vivo",
         "developer_label": "Desenvolvedor",
         "platforms_label": "Plataformas",
         "genres_label": "Gêneros",
         "rating_label": "Avaliação",
         "reviews_label": "Avaliações",
-        "trend_formula_title": "📊 Fórmula de tendência",
+        "trend_formula_title": "Fórmula de tendência",
         "trend_formula_description": "Pontuação estimada para projetar a evolução de cada jogo.",
-        "trend_formula_equation": "Trend Score = (Pico Semanal × 0.6) + (Crescimento 7d × 0.3) + (Recência × 0.1)",
+        "trend_formula_equation": "Trend Score = (Pico Semanal * 0.6) + (Crecimento 7d * 0.3) + (Recência * 0.1)",
         "trend_formula_note": "Valores maiores indicam uma tendência de alta mais forte.",
         "future_trending": "Tendência futura",
         "future_trending_title": "Tendência futura",
         "future_trending_description": "Jogos projetados com maior potencial de alta usando o Trend Score.",
-        "trend_forecast_title": "📈 Tendências",
+        "trend_forecast_title": "Tendências",
         "trend_forecast_description": "Rankeie os jogos pelo score de tendência calculado.",
         "trend_forecast_chart": "Top jogos por Trend Score",
         "current_rank": "Posição atual",
         "current_players": "Jogadores atuais",
-        "peak_24h": "📈 Pico 24h",
+        "peak_24h": "Pico 24h",
         "open_steam": "Abrir no Steam",
         "open_twitch": "Ver no Twitch",
         "added_to_favorites": "Adicionado aos favoritos",
         "add_to_favorites": "Adicionar aos favoritos",
         "remove_from_favorites": "Remover dos favoritos",
-        "summary_hint": "Este resumo usa as classificações e o número de avaliações do conjunto de dados para descrever o jogo selecionado.",
+        "summary_hint": "Este resumo usa as classificações e o número de avaliações do conjunto de datos para descrever o jogo selecionado.",
     },
 }
 CURRENCY_CONFIG = {
@@ -718,7 +718,7 @@ def get_fallback_game_image():
         "https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=460&h=215&fit=crop",  # Gaming room
         "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=460&h=215&fit=crop",  # RGB keyboard
         "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=460&h=215&fit=crop",  # Game controller
-        "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=460&h=215&fit=crop",  # Gaming PC
+        "https://images.unsplash.com/photo-1556438064-2d7646166914?w=460&h=215&fit=crop",  # Gaming PC
         "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=460&h=215&fit=crop",  # Controller closeup
         "https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?w=460&h=215&fit=crop",  # Gaming chair
         "https://images.unsplash.com/photo-1592478411213-6153e4ebc696?w=460&h=215&fit=crop",  # Multiplayer gaming
@@ -826,18 +826,18 @@ def format_game_name_for_twitch(game_name):
 
 
 def get_platform_icons(platforms_str):
-    """Convert platform string to visual icons"""
+    """Convert platform string to visual text without icons"""
     if not platforms_str or pd.isna(platforms_str):
-        return "❓ No disponible"
+        return "No disponible"
 
     platforms = [p.strip().lower() for p in str(platforms_str).split(',')]
 
     platform_icons = {
-        'windows': '🪟 Windows',
-        'mac': '🍎 macOS',
-        'linux': '🐧 Linux',
-        'android': '🤖 Android',
-        'ios': '📱 iOS'
+        'windows': 'Windows',
+        'mac': 'macOS',
+        'linux': 'Linux',
+        'android': 'Android',
+        'ios': 'iOS'
     }
 
     icons = []
@@ -845,7 +845,7 @@ def get_platform_icons(platforms_str):
         if platform in platform_icons:
             icons.append(platform_icons[platform])
         else:
-            icons.append(f"❓ {platform.title()}")
+            icons.append(f"{platform.title()}")
 
     return " | ".join(icons)
 
@@ -860,7 +860,7 @@ def display_platforms_section(appid, lang):
         platforms_str = platforms_data["Plataformas"].iloc[0]
         platforms_display = get_platform_icons(platforms_str)
     else:
-        platforms_display = "❓ No disponible"
+        platforms_display = "No disponible"
 
     return platforms_display
 
@@ -1178,11 +1178,11 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
             is_fav = ((f_df['username'] == st.session_state['user']) & (f_df['appid'] == safe_id)).any()
         except:
             is_fav = False
-        # show filled heart when favorite, else show an outlined star to indicate addable
+        # No emoji badges
         if is_fav:
-            badge_html = '<div class="badge pulse" style="position:absolute; right:8px; top:8px; background:transparent; color:#ff6b81; padding:4px 6px; border-radius:12px; font-weight:900; font-size:18px;" title="Favorito" aria-label="Favorito">❤️</div>'
+            badge_html = '<div class="badge pulse" style="position:absolute; right:8px; top:8px; background:#ff6b81; color:#ffffff; padding:4px 8px; border-radius:12px; font-weight:700; font-size:11px;" title="Favorito">FAVORITO</div>'
         else:
-            badge_html = '<div class="badge" style="position:absolute; right:8px; top:8px; background:transparent; color:#bdbdbd; padding:4px 6px; border-radius:12px; font-weight:700; font-size:16px;" title="'+t.get('add_to_favorites','Añadir a favoritos')+'" aria-label="'+t.get('add_to_favorites','Añadir a favoritos')+'">☆</div>'
+            badge_html = '<div class="badge" style="position:absolute; right:8px; top:8px; background:#4b5563; color:#ffffff; padding:4px 8px; border-radius:12px; font-weight:700; font-size:11px;" title="'+t.get('add_to_favorites','Añadir a favoritos')+'">DISPONIBLE</div>'
 
     overlay_lines = []
     if rel_dt is not None:
@@ -1272,7 +1272,7 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
         pass
     pulse_class = ' pulse' if badge == 'POP' else ''
     badge_html = f'<div class="badge{pulse_class}" style="background:{badge_color};">{badge}</div>' if badge else ''
-    # check favorites to show small fav badge (heart when favorited, star when not)
+    # check favorites to show small fav badge
     fav_badge_html = ''
     is_fav_dash = False
     safe_id = safe_appid(aid)
@@ -1281,9 +1281,9 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
             f_df = pd.read_csv(FAV_FILE)
             is_fav_dash = ((f_df['username'] == st.session_state['user']) & (f_df['appid'] == safe_id)).any()
             if is_fav_dash:
-                fav_badge_html = '<div class="badge" style="position:absolute; left:8px; top:8px; background:transparent; color:#ff6b81; padding:4px 6px; border-radius:12px; font-weight:900; font-size:16px;" title="Favorito" aria-label="Favorito">❤️</div>'
+                fav_badge_html = '<div class="badge" style="position:absolute; left:8px; top:8px; background:#ff6b81; color:#ffffff; padding:4px 6px; border-radius:12px; font-weight:700; font-size:9px;" title="Favorito">FAV</div>'
             else:
-                fav_badge_html = '<div class="badge" style="position:absolute; left:8px; top:8px; background:transparent; color:#bdbdbd; padding:4px 6px; border-radius:12px; font-weight:700; font-size:14px;" title="'+t.get('add_to_favorites','Añadir a favoritos')+'" aria-label="'+t.get('add_to_favorites','Añadir a favoritos')+'">☆</div>'
+                fav_badge_html = '<div class="badge" style="position:absolute; left:8px; top:8px; background:#4b5563; color:#ffffff; padding:4px 6px; border-radius:12px; font-weight:700; font-size:9px;" title="'+t.get('add_to_favorites','Añadir a favoritos')+'">ADD</div>'
         except:
             is_fav_dash = False
 
@@ -1304,13 +1304,12 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
             platforms = display_platforms_section(aid, st.session_state.language)
             if platforms:
                 overlay_lines.append(platforms)
-        # Price display removed from dashboard cards due to inconsistent data
     except:
         pass
     if players is not None:
-        overlay_lines.append(f"👥 {int(players):,}")
+        overlay_lines.append(f"Jugadores: {int(players):,}")
     if peak is not None:
-        overlay_lines.append(f"🔥 {int(peak):,}")
+        overlay_lines.append(f"Pico: {int(peak):,}")
     overlay_html = ''
     if overlay_lines:
         overlay_html = '<div class="dashboard-card__overlay">' + '<br>'.join(overlay_lines[:4]) + '</div>'
@@ -1319,9 +1318,9 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
     st.markdown(f"**{name}**")
     meta = []
     if players is not None:
-        meta.append(f"👥 {int(players):,}")
+        meta.append(f"Jugadores: {int(players):,}")
     if peak is not None:
-        meta.append(f"🔥 {int(peak):,}")
+        meta.append(f"Pico: {int(peak):,}")
     if meta:
         st.caption("  •  ".join(meta))
 
@@ -1411,7 +1410,7 @@ with st.sidebar:
             else:
                 st.error(t["wrong_credentials"])
     if "user" in st.session_state:
-        st.success(f"👤 {t['welcome'] if 'welcome' in t else 'Welcome'}, {st.session_state['user']}")
+        st.success(f"Usuario: {st.session_state['user']}")
         if st.button(t["logout"], width='stretch'):
             del st.session_state["user"]
             st.rerun()
@@ -1422,23 +1421,36 @@ with st.sidebar:
     st.divider()
     st.markdown(f"### {t['navigation']}")
 
+    if st.button(t["home_dashboard"], width='stretch'):
+        st.session_state.selected_game = None
+        st.session_state.view = "Dashboard"
+        st.rerun()
+
+    # BOTÓN CHAT INDEPENDIENTE JUSTO DEBAJO DE HOME (SIN EMOJIS)
+    if st.button("Chat", width='stretch'):
+        st.session_state.selected_game = None
+        st.session_state.view = "Chat"
+        st.rerun()
+
+    st.blank = st.markdown("<br>", unsafe_allow_html=True)
+
     view_menu_keys = ["Dashboard", "Market Trends", "Popular Releases", "Future Trending", "Top Genres", "Top Developers", "Price Analysis", "Favorites"]
     view_menu_labels = [
         t["dashboard"], t["market_trends"], t["popular_releases"], t["future_trending"],
         t["top_genres"], t["top_developers"], t["price_analysis"], t["favorites"]
     ]
+    
+    # Manejar el índice actual de forma segura si estamos en la vista de Chat
     current_index = view_menu_keys.index(st.session_state.view) if st.session_state.view in view_menu_keys else 0
     selected_label = st.selectbox("Seleccionar vista", view_menu_labels, index=current_index, label_visibility="collapsed")
-    st.session_state.view = view_menu_keys[view_menu_labels.index(selected_label)]
+    
+    # Solo cambiamos la vista si el usuario interactúa explícitamente con el selectbox
+    if st.session_state.view != "Chat" or selected_label != view_menu_labels[current_index]:
+        st.session_state.view = view_menu_keys[view_menu_labels.index(selected_label)]
 
     if not df_listado.empty:
         dates = sorted(df_listado["Fecha"].unique(), reverse=True)
         st.session_state.sel_date = st.selectbox(t["select_date"], dates, index=dates.index(st.session_state.sel_date) if st.session_state.sel_date in dates else 0)
-
-    if st.button(t["home_dashboard"], width='stretch'):
-        st.session_state.selected_game = None
-        st.session_state.view = "Dashboard"
-        st.rerun()
 
     if st.button(t["update_data"], width='stretch'):
         with st.spinner("Actualizando datos..."):
@@ -1468,7 +1480,7 @@ if selected_game_id:
     rank_num = pd.to_numeric(g_rank, errors='coerce')
     players_num = pd.to_numeric(g_players, errors='coerce')
 
-    st.title(f"🎮 {fix_nan(g_l['Nombre'] if g_l is not None else t['game_details'])}")
+    st.title(f"Juego: {fix_nan(g_l['Nombre'] if g_l is not None else t['game_details'])}")
 
     # Tabs for more detailed view
     tab1, tab2, tab3 = st.tabs([t["overview_tab"], t["details_tab"], t["reviews_tab"]])
@@ -1490,13 +1502,13 @@ if selected_game_id:
         # Key metrics in a nice grid
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            st.metric(t["rating_label"], f"⭐ {rating_num}/100" if not pd.isna(rating_num) else "⭐ N/A")
+            st.metric(t["rating_label"], f"{rating_num}/100" if not pd.isna(rating_num) else "N/A")
         with col2:
-            st.metric(t["reviews_label"], f"💬 {int(reviews_num):,}" if not pd.isna(reviews_num) else "💬 N/A")
+            st.metric(t["reviews_label"], f"{int(reviews_num):,}" if not pd.isna(reviews_num) else "N/A")
         with col3:
-            st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "🏆 N/A")
+            st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "N/A")
         with col4:
-            st.metric(t["current_players"], f"👥 {int(players_num):,}" if not pd.isna(players_num) else "👥 N/A")
+            st.metric(t["current_players"], f"{int(players_num):,}" if not pd.isna(players_num) else "N/A")
 
         # Action buttons
         st.markdown("---")
@@ -1515,7 +1527,7 @@ if selected_game_id:
         st.markdown("---")
 
         # Media section - Trailer and Twitch side by side
-        st.markdown(f"## 🎬 {t['trailer']} & {t['twitch_streams']}")
+        st.markdown(f"## {t['trailer']} & {t['twitch_streams']}")
 
         media_col1, media_col2 = st.columns(2)
 
@@ -1531,34 +1543,31 @@ if selected_game_id:
                 """
                 st.components.v1.html(video_html, height=250)
             else:
-                st.markdown(f"🎥 [{t['watch_trailer_on_steam']}](https://store.steampowered.com/app/{appid})")
+                st.markdown(f"[{t['watch_trailer_on_steam']}](https://store.steampowered.com/app/{appid})")
 
         with media_col2:
             st.markdown(f"### {t['twitch_streams']}")
             if game_name_for_twitch:
-                # Create an attractive Twitch link instead of blocked iframe
                 st.markdown(f"""
                 <div style="background: linear-gradient(135deg, #9146FF 0%, #1e1e2e 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 8px 32px rgba(145, 70, 255, 0.3);">
-                    <div style="font-size: 3em; margin-bottom: 10px;">🔴</div>
                     <h3 style="margin: 0 0 15px 0; color: #ffffff;">{t['twitch_streams']}</h3>
                     <p style="margin: 0 0 20px 0; opacity: 0.8;">{t['watch_live_streams_of'].format(game_name=game_name)}</p>
                     <a href="{twitch_url}" target="_blank" style="background: #ffffff; color: #9146FF; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-block; transition: all 0.3s ease;">
-                        🎮 {t['open_twitch']}
+                        {t['open_twitch']}
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div style="background: linear-gradient(135deg, #9146FF 0%, #1e1e2e 100%); padding: 30px; border-radius: 15px; text-align: center; color: white; height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <div style="font-size: 3em; margin-bottom: 10px;">🔴</div>
                     <h3 style="margin: 0 0 15px 0;">{t['twitch_streams']}</h3>
                     <a href="https://www.twitch.tv" target="_blank" style="background: #ffffff; color: #9146FF; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: bold;">
-                        🎮 {t['open_twitch']}
+                        {t['open_twitch']}
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
         # Game information in organized cards
-        st.markdown(f"## 📋 {t['information']}")
+        st.markdown(f"## {t['information']}")
 
         info_col1, info_col2 = st.columns(2)
 
@@ -1576,7 +1585,7 @@ if selected_game_id:
         with info_col2:
             st.markdown("""
             <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
-                <h4 style="margin: 0 0 10px 0;">📊 Statistics</h4>
+                <h4 style="margin: 0 0 10px 0;">Statistics</h4>
             </div>
             """, unsafe_allow_html=True)
             st.write(f"**{t['current_rank']}:** {fix_nan(g_rank)}")
@@ -1634,7 +1643,7 @@ if selected_game_id:
 
 # ---------- 8. VIEW: FAVORITES ---------- 
 if st.session_state.view == "Favorites":
-    st.title(f"⭐ {t['my_favorites']}")
+    st.title(f"{t['my_favorites']}")
     if "user" not in st.session_state:
         st.warning(t["please_login_favorites"])
     else:
@@ -1651,27 +1660,148 @@ if st.session_state.view == "Favorites":
                     idx = r + i
                     if idx < len(favs_list):
                         row = favs_list.iloc[idx]
-                        aid = int(row["appid"])
-                        # gather info
+                        get_aid = int(row["appid"])
                         g_name = None
-                        g_row = df_listado[df_listado['AppID'] == aid]
+                        g_row = df_listado[df_listado['AppID'] == get_aid]
                         if not g_row.empty:
                             g_name = g_row['Nombre'].iloc[0]
                         else:
-                            info_row = df_info[df_info['AppID'] == aid]
+                            info_row = df_info[df_info['AppID'] == get_aid]
                             if not info_row.empty:
                                 g_name = info_row['Nombre'].iloc[0]
                         if not g_name:
-                            g_name = f"AppID: {aid}"
+                            g_name = f"AppID: {get_aid}"
 
                         with col:
-                            # use render helper
-                            det_row = df_detalles[df_detalles['AppID'] == aid]
+                            det_row = df_detalles[df_detalles['AppID'] == get_aid]
                             price_raw = det_row['Precio'].iloc[0] if not det_row.empty else None
-                            info_row = df_info[df_info['AppID'] == aid]
+                            info_row = df_info[df_info['AppID'] == get_aid]
                             genres_raw = info_row['Géneros'].iloc[0] if not info_row.empty else None
                             rel_dt = info_row['Fecha_Lanzamiento'].iloc[0] if not info_row.empty else None
-                            render_game_card(aid, fix_nan(g_name), t, f"fav_{idx}", price_raw=price_raw, genres_raw=genres_raw, rel_dt=rel_dt)
+                            render_game_card(get_aid, fix_nan(g_name), t, f"fav_{idx}", price_raw=price_raw, genres_raw=genres_raw, rel_dt=rel_dt)
+    st.stop()
+
+# ---------- 8.5 VIEW: CHAT INDEPENDIENTE CON MÓDULO IA ---------- 
+if st.session_state.view == "Chat":
+    st.title("Infosteam AI Assistant")
+    st.markdown("Asistente Avanzado. Puedes hablarme en lenguaje natural o escribir fragmentos vagos de juegos.")
+
+    # Inicializar historial de chat si no existe (Sin emojis)
+    if "chat_messages" not in st.session_state:
+        st.session_state.chat_messages = [
+            {"role": "assistant", "content": "Hola. He analizado los CSVs del sistema. Pregúntame cosas como: '¿qué juegos son gratis?', 'busca juegos de Valve', 'juegos con rating mayor a 90' o un título parcial como 'strike'."}
+        ]
+
+    # Mostrar mensajes del historial
+    for msg in st.session_state.chat_messages:
+        with st.chat_message(msg["role"]):
+            st.write(msg["content"])
+
+    # Entrada de consulta
+    if user_query := st.chat_input("Escribe tu consulta analítica..."):
+        with st.chat_message("user"):
+            st.write(user_query)
+        st.session_state.chat_messages.append({"role": "user", "content": user_query})
+
+        ai_reply = ""
+        query_lower = user_query.lower()
+
+        # DICCIONARIO DE SINÓNIMOS Y ACRÓNIMOS COMUNES
+        alias_mapping = {
+            r"\bcs\b": "counter-strike",
+            r"\bcsgo\b": "counter-strike",
+            r"\bcs2\b": "counter-strike",
+            r"\bgta\b": "grand theft auto",
+            r"\bpubg\b": "playerunknown",
+            r"\bcod\b": "call of duty"
+        }
+        for alias, real_name in alias_mapping.items():
+            query_lower = re.sub(alias, real_name, query_lower)
+
+        # MÓDULO INTELIGENTE ANALÍTICO (IA LOCAL)
+        if "gratis" in query_lower or "free" in query_lower:
+            df_m = df_detalles.copy()
+            df_m['Price_Val'] = df_m['Precio'].apply(convert_to_usd_numeric)
+            gratis_df = df_m[df_m['Price_Val'] == 0.0].head(5)
+            if not gratis_df.empty:
+                ai_reply = "### Juegos Populares Gratuitos Detectados:\n\n"
+                for _, r in gratis_df.iterrows():
+                    ai_reply += f"- **{r['Nombre']}** (Rating: {fix_nan(r.get('Rating'), 'N/A')}/100)\n"
+            else:
+                ai_reply = "No localicé juegos marcados explícitamente como gratuitos en los datos actuales."
+
+        elif "desarrollador" in query_lower or "creador" in query_lower or "de valve" in query_lower:
+            dev_search = query_lower.replace("desarrollador", "").replace("creador", "").replace("de", "").replace("busca", "").strip()
+            if not dev_search: dev_search = "valve"
+            
+            dev_df = df_info[df_info['Desarrollador'].fillna('').astype(str).str.lower().str.contains(dev_search)].head(5)
+            if not dev_df.empty:
+                ai_reply = f"### Juegos del desarrollador que coincide con '{dev_search.title()}':\n\n"
+                for _, r in dev_df.iterrows():
+                    ai_reply += f"- **{r['Nombre']}** | Géneros: {r.get('Géneros','-')}\n"
+            else:
+                ai_reply = f"No encontré ningún desarrollador que contenga el término '{dev_search}' en nuestros registros actuales."
+
+        elif "mejor rating" in query_lower or "puntuacion alta" in query_lower or "rating mayor" in query_lower or "buen rating" in query_lower:
+            df_r = df_detalles.copy()
+            df_r['Rating_Num'] = pd.to_numeric(df_r['Rating'], errors='coerce').fillna(0)
+            mejo_df = df_r.sort_values('Rating_Num', ascending=False).head(5)
+            ai_reply = "### Los 5 Juegos con Mejor Puntuación Analizados:\n\n"
+            for _, r in mejo_df.iterrows():
+                ai_reply += f"- **{r['Nombre']}**: {int(r['Rating_Num'])}/100 de valoración positiva.\n"
+
+        else:
+            clean_search = query_lower.replace("busca", "").replace("informacion", "").replace("sobre", "").replace("info", "").replace("del", "").replace("juego", "").strip()
+            
+            found_games = []
+            if len(clean_search) > 1 and not df_info.empty:
+                for _, row in df_info.iterrows():
+                    g_name = str(row.get('Nombre', '')).lower()
+                    if clean_search in g_name or g_name in clean_search:
+                        found_games.append(row)
+                        if len(found_games) >= 3: break
+
+            if found_games:
+                ai_reply = f"Analizando la base de datos, localicé {len(found_games)} juego(s) vinculados a tu criterio:\n\n"
+                for game in found_games:
+                    appid_found = int(game['AppID'])
+                    det_row = df_detalles[df_detalles['AppID'] == appid_found]
+                    precio_game = det_row['Precio'].iloc[0] if not det_row.empty else "N/A"
+                    rating_game = det_row['Rating'].iloc[0] if not det_row.empty else "N/A"
+                    
+                    df_day_dt = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
+                    listado_row = df_day_dt[df_day_dt['AppID'] == appid_found]
+                    players_game = listado_row['JugadoresConcurrentes'].iloc[0] if not listado_row.empty else "N/A"
+
+                    precio_local = format_local_price(precio_game, st.session_state.language)
+                    
+                    ai_reply += f"### {game['Nombre']}\n"
+                    ai_reply += f"- **Desarrollador:** {game.get('Desarrollador', '-')}\n"
+                    ai_reply += f"- **Géneros:** {game.get('Géneros', '-')}\n"
+                    ai_reply += f"- **Precio Real:** {precio_local}\n"
+                    ai_reply += f"- **Rating:** {rating_game}/100\n"
+                    if isinstance(players_game, (int, float)):
+                        ai_reply += f"- **Jugadores concurrentes hoy:** {int(players_game):,}\n"
+                    else:
+                        ai_reply += f"- **Jugadores concurrentes hoy:** {players_game}\n"
+                    ai_reply += "\n"
+            
+            elif "hola" in query_lower or "saludos" in query_lower or "buenas" in query_lower:
+                ai_reply = "Hola. Estoy listo. Puedes pedirme listas de juegos por desarrolladores, gratuitos, top ratings o ingresar un trozo de un título."
+            elif "mas jugado" in query_lower or "top 1" in query_lower:
+                df_day_dt = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
+                if not df_day_dt.empty:
+                    top_1 = df_day_dt.iloc[0]
+                    ai_reply = f"El líder absoluto de hoy es **{top_1['Nombre']}** registrando **{int(top_1['JugadoresConcurrentes']):,}** usuarios activos."
+                else:
+                    ai_reply = "Sin datos de ranking para la fecha seleccionada."
+            else:
+                ai_reply = "No encontré coincidencias semánticas directas. Intenta simplificar la búsqueda ingresando palabras clave separadas (ej: 'Counter', 'Dota', 'Valve' o 'gratis')."
+
+        with st.chat_message("assistant"):
+            st.write(ai_reply)
+        st.session_state.chat_messages.append({"role": "assistant", "content": ai_reply})
+        st.rerun()
     st.stop()
 
 # ---------- 9. ANALYTICS VIEWS ---------- 
@@ -1679,7 +1809,6 @@ df_day = df_listado[df_listado["Fecha"] == st.session_state.sel_date].copy()
 
 if st.session_state.view == "Market Trends":
     st.title(t["market_trends_title"])
-    st.markdown(t.get('market_trends_title', ''))
     market_df = df_detalles.copy()
     market_df['Reviews_Num'] = pd.to_numeric(market_df['Reviews'], errors='coerce').fillna(0)
     top = market_df.sort_values('Reviews_Num', ascending=False).head(24)
@@ -1707,7 +1836,6 @@ elif st.session_state.view == "Top Genres":
     counts = pd.Series(flattened).value_counts().sort_values(ascending=False)
     st.bar_chart(counts)
 
-    # Use reviews and current player counts to order representative games
     popularity_df = genre_df.merge(df_detalles[['AppID', 'Reviews']], on='AppID', how='left')
     popularity_df['Reviews_Num'] = pd.to_numeric(popularity_df['Reviews'], errors='coerce').fillna(0)
     if not df_day.empty:
@@ -1762,7 +1890,6 @@ elif st.session_state.view == "Popular Releases":
     popular_releases = compute_popular_releases(popular_ref_date)
     popular_releases = popular_releases.loc[popular_releases['is_popular']] if 'is_popular' in popular_releases.columns else popular_releases
     display_df = prepare_popular_releases_display(popular_releases, t)
-    # Show the top 3 popular games with explicit TOP 1 / TOP 2 / TOP 3 badges
     popular_list = popular_releases.sort_values('peak_last_week', ascending=False).reset_index(drop=True)
     if popular_list.empty:
         st.info("No popular releases found.")
@@ -1798,7 +1925,7 @@ elif st.session_state.view == "Future Trending":
         trend_df = trend_df.sort_values('Trend Score', ascending=False)
         st.markdown(f"### {t.get('trend_forecast_chart', 'Top Trend Games')}")
         st.bar_chart(trend_df.set_index('Nombre')['Trend Score'], use_container_width=True)
-        st.markdown("### " + t.get('trend_formula_title', '📊 Trend Formula'))
+        st.markdown("### " + t.get('trend_formula_title', 'Formula de tendencia'))
         st.dataframe(trend_df[['Nombre', 'Weekly peak', 'Growth 7d', 'Recency', 'Trend Score']].rename(columns={
             'Nombre': t.get('name_filter', 'Name'),
             'Weekly peak': t.get('weekly_peak', 'Weekly peak'),
@@ -1807,7 +1934,7 @@ elif st.session_state.view == "Future Trending":
             'Trend Score': 'Trend Score'
         }))
 
-        with st.expander(t.get('trend_formula_title', '📊 Trend Formula')):
+        with st.expander(t.get('trend_formula_title', 'Formula de tendencia')):
             st.markdown(t['trend_formula_equation'])
             st.markdown(t['trend_formula_note'])
 
@@ -1845,7 +1972,6 @@ st.divider()
 t1, t2, t3, t4, t5, t6 = st.tabs([t["live_rankings"], t["performance_trend"], t["data_explorer"], t["peak_24h_section"], t["popular_releases_title"], t["trend_forecast_title"]])
 
 with t1:
-    # AHORA MUESTRA 100 JUEGOS EN VEZ DE 50
     limit = 100 if st.session_state.show_more else 10
     top_df = df_day.head(limit).reset_index(drop=True)
     for r in range(0, len(top_df), 5):
@@ -1857,11 +1983,9 @@ with t1:
                 aid = int(game.get("AppID", 0))
                 with col:
                     game_name = fix_nan(game.get("Nombre"))
-                    game_title = f'{game_name} - Rank #{int(game.get("Posicion", 0))} - {int(game.get("JugadoresConcurrentes", 0))} players'
-                    # Use unified game card (image, title, meta, details + favorites)
                     pos = int(game.get('Posicion', 0)) if not pd.isna(game.get('Posicion', 0)) else 0
                     players = int(game.get('JugadoresConcurrentes', 0)) if not pd.isna(game.get('JugadoresConcurrentes', 0)) else 0
-                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  👥 {players:,}")
+                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  {players:,}")
     if st.button(t["toggle_top"]):
         st.session_state.show_more = not st.session_state.show_more
         st.rerun()
@@ -1877,7 +2001,7 @@ with t2:
         if sel_g:
             selected_date = pd.to_datetime(st.session_state.sel_date, format="%Y-%m-%d", errors="coerce")
             if pd.isna(selected_date):
-                st.info("Fecha seleccionada no válida para el filtro de una semana.")
+                st.info("Fecha seleccionada no válida para el filtro de una week.")
             else:
                 one_week_ago = selected_date - pd.Timedelta(days=6)
                 filtered = df_listado[df_listado["Nombre"].isin(sel_g)].copy()
@@ -2010,7 +2134,6 @@ with t4:
         st.write(f"{t['data_date']} {parse_date_safe(peak_date).strftime('%Y-%m-%d')}")
 
     if len(df_day) > 0:
-        # Ensure numeric players and unique AppID to avoid duplicates
         tmp = df_day.copy()
         tmp['JugadoresConcurrentes'] = pd.to_numeric(tmp['JugadoresConcurrentes'], errors='coerce').fillna(0)
         top24_df = tmp.sort_values('JugadoresConcurrentes', ascending=False).drop_duplicates(subset='AppID').head(12).reset_index(drop=True)
