@@ -1,7 +1,7 @@
 
 # Proyecto Videojuegos
 
-Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
+Analísis de videojuegos para encontrar el juego adecuado para cada usuario.
 
 # Estructura
     - src: código
@@ -13,7 +13,7 @@ Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
 
 Tienes **dos opciones** para ejecutar esta aplicación. 
 
-## Opción 1: Sin Docker (Recomendado para desarrollo)
+## Opción 1: Sin Docker 
 
 La forma más simple de ejecutar el código en tu computadora.
 
@@ -65,7 +65,7 @@ La forma más simple de ejecutar el código en tu computadora.
 
 ---
 
-## Opción 2: Con Docker (Recomendado para producción)
+## Opción 2: Con Docker 
 
 Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
 
