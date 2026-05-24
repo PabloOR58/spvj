@@ -1,53 +1,113 @@
 
-
 # Proyecto Videojuegos
 
 Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
 
-
-
 # Estructura
-    
     - src: código
     - data: ficheros crudos y trabajados
     - notebooks: ficheros de prueba 
 
 
-# Instrucciones
-    - Virtual env: python -m venv .venv
-    - Activarlo: .venv\Scripts\activate
-    - Librerías: pip install -r requirements.txt
+# Cómo ejecutar el proyecto
 
+Tienes **dos opciones** para ejecutar esta aplicación. 
 
+## Opción 1: Sin Docker (Recomendado para desarrollo)
 
-# Integrantes
-    - Sergi Armengol
-    - Pablo Orellana Revenko
-    - Victor Manuel Camacho Jerez
-    - Jorge Sanchez Estudillo
+La forma más simple de ejecutar el código en tu computadora.
 
+### Requisitos previos:
+- **Python 3.9+** instalado en tu sistema
 
-# URL Juego
+### Pasos:
 
-    -https://infosteam.streamlit.app/
+1. **Clona o descarga el proyecto**
+   ```bash
+   cd /ruta/del/proyecto
+   ```
 
+2. **Crea un entorno virtual** (aislado, sin afectar tu sistema)
+   ```bash
+   python -m venv .venv
+   ```
 
-# 
-    -streamlit run web\app.py
-    docker run --rm -p 8501:8501 mi-web-app
-    docker ps -a --filter "publish=8501"
+3. **Activa el entorno virtual:**
+   - **En macOS/Linux:**
+     ```bash
+     source .venv/bin/activate
+     ```
+   - **En Windows (PowerShell):**
+     ```bash
+     .venv\Scripts\Activate.ps1
+     ```
+   - **En Windows (CMD):**
+     ```bash
+     .venv\Scripts\activate
+     ```
 
+4. **Instala las librerías necesarias**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+5. **Ejecuta la aplicación Streamlit**
+   ```bash
+   streamlit run web/app.py
+   ```
 
-# Arquitectura en Docker
+   La app se abrirá en tu navegador en `http://localhost:8501`
 
-## Descripción
-La aplicación utiliza una arquitectura de un solo contenedor Docker para simplicidad y facilidad de despliegue.
+6. **Para desactivar el entorno virtual cuando termines:**
+   ```bash
+   deactivate
+   ```
 
-- **Contenedor principal**: Ejecuta la app Streamlit en Python 3.9-slim.
-- **Imagen base**: `python:3.9-slim` de Docker Hub.
-- **Puerto expuesto**: 8501.
-- **Volúmenes**: Ninguno por ahora; los datos se manejan dentro del contenedor.
-- **Ejecución**: Construye con `docker build -t spvj .` y ejecuta con `docker run -p 8501:8501 spvj`.
+---
 
+## Opción 2: Con Docker (Recomendado para producción)
+
+Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
+
+### Requisitos previos:
+- **Docker Desktop** instalado en tu sistema (descarga desde https://www.docker.com/products/docker-desktop)
+
+### Pasos:
+
+1. **Clona o descarga el proyecto**
+   ```bash
+   cd /ruta/del/proyecto
+   ```
+
+2. **Construye la imagen Docker**
+   ```bash
+   docker build -t spvj .
+   ```
+
+3. **Ejecuta el contenedor**
+   ```bash
+   docker run --rm -p 8501:8501 spvj
+   ```
+
+   La app se abrirá en tu navegador en `http://localhost:8501`
+
+4. **Para detener el contenedor**, presiona `Ctrl+C` en la terminal.
+
+---
+
+## Solución de problemas
+
+- **Puerto 8501 ya en uso**: Ejecuta en otro puerto:
+  ```bash
+  streamlit run web/app.py --server.port 8502
+  ```
+  O en Docker: `docker run --rm -p 8502:8501 spvj`
+
+- **Python no reconocido**: Instala Python desde https://www.python.org/
+
+- **Docker no reconocido**: Asegúrate de que Docker Desktop está ejecutándose.
+
+# URL Juego Online
+
+- https://infosteam.streamlit.app/
 
