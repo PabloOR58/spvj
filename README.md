@@ -85,10 +85,7 @@ Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
    ```
 
 3. **Ejecuta el contenedor**
-   ```bash
-   docker run --rm -p 8501:8501 spvj
-   ```
-
+   docker compose up --build.
    La app se abrirá en tu navegador en `http://localhost:8501`
 
 4. **Para detener el contenedor**, presiona `Ctrl+C` en la terminal.
