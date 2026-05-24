@@ -5,6 +5,7 @@ import re
 import base64
 import subprocess
 import sys
+import plotly.graph_objects as go
 
 # ---------- 1. PAGE CONFIGURATION ---------- 
 st.set_page_config(
@@ -1834,7 +1835,9 @@ elif st.session_state.view == "Top Genres":
 
     flattened = [genre for row in genre_df['Genre_List'] for genre in row]
     counts = pd.Series(flattened).value_counts().sort_values(ascending=False)
-    st.bar_chart(counts)
+    fig = go.Figure(data=[go.Bar(x=counts.index, y=counts.values)])
+    fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+    st.plotly_chart(fig, use_container_width=True)
 
     popularity_df = genre_df.merge(df_detalles[['AppID', 'Reviews']], on='AppID', how='left')
     popularity_df['Reviews_Num'] = pd.to_numeric(popularity_df['Reviews'], errors='coerce').fillna(0)
@@ -1867,7 +1870,9 @@ elif st.session_state.view == "Top Genres":
 elif st.session_state.view == "Top Developers":
     st.title(t["top_developers_title"])
     devs = df_info['Desarrollador'].value_counts().sort_values(ascending=False).head(15)
-    st.bar_chart(devs)
+    fig = go.Figure(data=[go.Bar(x=devs.index, y=devs.values)])
+    fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+    st.plotly_chart(fig, use_container_width=True)
     sample = df_info.sort_values('Desarrollador').head(24)
     cols_per_row = 4
     for r in range(0, len(sample), cols_per_row):
@@ -1924,7 +1929,9 @@ elif st.session_state.view == "Future Trending":
     else:
         trend_df = trend_df.sort_values('Trend Score', ascending=False)
         st.markdown(f"### {t.get('trend_forecast_chart', 'Top Trend Games')}")
-        st.bar_chart(trend_df.set_index('Nombre')['Trend Score'], use_container_width=True)
+        fig = go.Figure(data=[go.Bar(x=trend_df['Nombre'], y=trend_df['Trend Score'])])
+        fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+        st.plotly_chart(fig, use_container_width=True)
         st.markdown("### " + t.get('trend_formula_title', 'Formula de tendencia'))
         st.dataframe(trend_df[['Nombre', 'Weekly peak', 'Growth 7d', 'Recency', 'Trend Score']].rename(columns={
             'Nombre': t.get('name_filter', 'Name'),
@@ -1942,7 +1949,10 @@ elif st.session_state.view == "Price Analysis":
     st.title(t["price_analysis_title"])
     df_p = df_detalles.copy()
     df_p['Price_Val'] = df_p['Precio'].apply(convert_to_usd_numeric)
-    st.bar_chart(df_p.sort_values('Price_Val', ascending=False).head(20).set_index('Nombre')['Price_Val'])
+    price_sorted = df_p.sort_values('Price_Val', ascending=False).head(20)
+    fig = go.Figure(data=[go.Bar(x=price_sorted['Nombre'], y=price_sorted['Price_Val'])])
+    fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+    st.plotly_chart(fig, use_container_width=True)
     sorted_df = df_p.sort_values('Price_Val', ascending=False).head(24)
     cols_per_row = 4
     for r in range(0, len(sorted_df), cols_per_row):
@@ -2021,7 +2031,9 @@ with t2:
         top_today = df_day.sort_values("JugadoresConcurrentes", ascending=False).head(10)
         if not top_today.empty:
             st.subheader("Top 10 juegos hoy por jugadores concurrentes")
-            st.bar_chart(top_today.set_index("Nombre")["JugadoresConcurrentes"])
+            fig = go.Figure(data=[go.Bar(x=top_today['Nombre'], y=top_today['JugadoresConcurrentes'])])
+            fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+            st.plotly_chart(fig, use_container_width=True)
 
         prev_date = dates_list[1]
         cur = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
@@ -2041,7 +2053,9 @@ with t2:
         if not movers.empty:
             movers = movers.merge(df_listado[['AppID', 'Nombre']].drop_duplicates(subset=['AppID']), on='AppID', how='left')
             st.subheader("Top 10 crecimiento diario")
-            st.bar_chart(movers.set_index('Nombre')['growth'])
+            fig = go.Figure(data=[go.Bar(x=movers['Nombre'], y=movers['growth'])])
+            fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+            st.plotly_chart(fig, use_container_width=True)
 
 with t3:
     st.header(t.get('data_explorer', t['data_explorer']))
@@ -2190,7 +2204,9 @@ with t6:
         st.info("No trend data available.")
     else:
         trend_df = trend_df.sort_values('Trend Score', ascending=False)
-        st.bar_chart(trend_df.set_index('Nombre')['Trend Score'], use_container_width=True)
+        fig = go.Figure(data=[go.Bar(x=trend_df['Nombre'], y=trend_df['Trend Score'])])
+        fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
+        st.plotly_chart(fig, use_container_width=True)
         
         st.markdown("### Top Trend Games")
         cols_per_row = 4
