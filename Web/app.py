@@ -1325,7 +1325,6 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
     if meta:
         st.caption("  •  ".join(meta))
 
-    # Use shared controls to keep details + favorites consistent across views
     render_card_controls(aid, name, key_prefix, is_fav_dash, t, compact=True)
 
 

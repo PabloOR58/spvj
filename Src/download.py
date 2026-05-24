@@ -6,18 +6,14 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLEAN_DIR = os.path.join(BASE_DIR, "Clean")
 
-# ========================================
-# CREAR CSV SI NO EXISTE
-# ========================================
+
 def crear_csv(path, headers):
     if not os.path.exists(path):
         with open(path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(headers)
 
-# ========================================
-# ELIMINAR DATOS DE HOY
-# ========================================
+
 def eliminar_fecha(path, fecha):
     if not os.path.exists(path):
         return
@@ -36,9 +32,7 @@ def eliminar_fecha(path, fecha):
         writer.writeheader()
         writer.writerows(filas)
 
-# ========================================
-# PLATAFORMAS
-# ========================================
+
 def get_platforms(appid):
     try:
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}"
@@ -60,17 +54,13 @@ def get_platforms(appid):
     except:
         return "windows"
 
-# ========================================
-# FUNCIÓN PRINCIPAL
-# ========================================
+
 def generar_datos():
 
     os.makedirs(CLEAN_DIR, exist_ok=True)
     fecha = datetime.now().strftime("%Y-%m-%d")
 
-    # =========================
-    # TOP JUGADOS
-    # =========================
+
     path_jugados = os.path.join(CLEAN_DIR, "listado_juegos.csv")
     path_plataformas = os.path.join(CLEAN_DIR, "plataformas_juegos.csv")
 
@@ -135,9 +125,7 @@ def generar_datos():
 
             print("OK:", nombre)
 
-    # =========================
-    # TOP VENDIDOS
-    # =========================
+
     path_vendidos = os.path.join(CLEAN_DIR, "top_vendidos.csv")
 
     crear_csv(path_vendidos, ["Fecha", "Posicion", "ID", "Nombre"])
@@ -163,8 +151,6 @@ def generar_datos():
 
     print("Proceso terminado")
 
-# ========================================
-# EJECUCIÓN
-# ========================================
+
 if __name__ == "__main__":
     generar_datos()
