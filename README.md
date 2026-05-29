@@ -1,7 +1,7 @@
 
 # Proyecto Videojuegos
 
-Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
+Analísis de videojuegos para encontrar el juego adecuado para cada usuario.
 
 # Estructura
     - src: código
@@ -13,7 +13,7 @@ Analísis de videojuegos para crear un videojuego óptimo para la sociedad.
 
 Tienes **dos opciones** para ejecutar esta aplicación. 
 
-## Opción 1: Sin Docker (Recomendado para desarrollo)
+## Opción 1: Sin Docker 
 
 La forma más simple de ejecutar el código en tu computadora.
 
@@ -65,7 +65,7 @@ La forma más simple de ejecutar el código en tu computadora.
 
 ---
 
-## Opción 2: Con Docker (Recomendado para producción)
+## Opción 2: Con Docker 
 
 Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
 
@@ -85,10 +85,7 @@ Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
    ```
 
 3. **Ejecuta el contenedor**
-   ```bash
-   docker run --rm -p 8501:8501 spvj
-   ```
-
+   docker compose up --build.
    La app se abrirá en tu navegador en `http://localhost:8501`
 
 4. **Para detener el contenedor**, presiona `Ctrl+C` en la terminal.
@@ -107,7 +104,7 @@ Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
 
 - **Docker no reconocido**: Asegúrate de que Docker Desktop está ejecutándose.
 
-- **No module Named Streamlit** : En caso de que aparezca este error, asegurar de que se esta trabajando en el entorno virtual correcto. Cmd+shift+p 
+- **No module Named Streamlit** : En caso de que aparezca este error, asegurar de que se esta trabajando en el entorno virtual correcto. Cmd+shift+p, seleccionar interpretador
 
 # URL Juego Online
 
