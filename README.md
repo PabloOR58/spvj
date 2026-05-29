@@ -104,7 +104,7 @@ Ejecuta la aplicación en un contenedor aislado. No necesitas instalar Python.
 
 - **Docker no reconocido**: Asegúrate de que Docker Desktop está ejecutándose.
 
-- **No module Named Streamlit** : En caso de que aparezca este error, asegurar de que se esta trabajando en el entorno virtual correcto. Cmd+shift+p 
+- **No module Named Streamlit** : En caso de que aparezca este error, asegurar de que se esta trabajando en el entorno virtual correcto. Cmd+shift+p, seleccionar interpretador
 
 # URL Juego Online
 
