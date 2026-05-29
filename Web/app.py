@@ -7,14 +7,14 @@ import subprocess
 import sys
 import plotly.graph_objects as go
 
-# ---------- 1. PAGE CONFIGURATION ---------- 
+ 
 st.set_page_config(
     page_title="infosteam | Professional Dashboard",
     page_icon="https://img.icons8.com/ios-filled/50/ffffff/steam.png",
     layout="wide"
 )
 
-# Global styles for animated cards
+
 st.markdown("""
 <style>
 .game-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .25s ease, box-shadow .25s ease; }
@@ -50,7 +50,7 @@ NON_STEAM_IMAGE_TOKENS = [
 USERS_FILE = "users.csv"
 FAV_FILE = "favoritos.csv"
 
-# ---------- 2. DATABASE INITIALIZATION ---------- 
+ 
 def init_user_files():
     if not os.path.exists(USERS_FILE):
         pd.DataFrame(columns=["username", "password"]).to_csv(USERS_FILE, index=False)
@@ -528,32 +528,32 @@ def format_local_price(price_str, lang):
 def get_translations(lang):
     return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
 
-# ---------- PASSWORD ENCRYPTION FUNCTIONS ----------
+
 def encrypt_password(password):
     """Encrypt password using base64 encoding"""
     if not password:
         return ""
     try:
-        # Convert to bytes, encode with base64, then back to string
+        
         password_bytes = password.encode('utf-8')
         encoded_bytes = base64.b64encode(password_bytes)
         return encoded_bytes.decode('utf-8')
     except:
-        return password  # Fallback to plain text if encoding fails
+        return password  
 
 def decrypt_password(encrypted_password):
     """Decrypt password from base64 encoding"""
     if not encrypted_password:
         return ""
     try:
-        # Convert from string to bytes, decode from base64, then to string
+        
         encrypted_bytes = encrypted_password.encode('utf-8')
         decoded_bytes = base64.b64decode(encrypted_bytes)
         return decoded_bytes.decode('utf-8')
     except:
-        return encrypted_password  # Fallback to encrypted text if decoding fails
+        return encrypted_password 
 
-# ---------- 3. HELPER FUNCTIONS ---------- 
+ 
 def fix_nan(val, default="-"):
     if pd.isna(val) or str(val).lower() == "nan" or str(val).strip() == "":
         return default
@@ -677,14 +677,14 @@ def steam_video_exists(appid):
         if aid <= 0:
             return False
         import requests
-        # Use Steam API to get movie data
+        
         url = f"https://store.steampowered.com/api/appdetails?appids={aid}"
         response = requests.get(url, timeout=10)
         data = response.json()
         if str(aid) in data and data[str(aid)]['success']:
             app_data = data[str(aid)]['data']
             if 'movies' in app_data and len(app_data['movies']) > 0:
-                # Return the HLS URL of the first movie
+                
                 first_movie = app_data['movies'][0]
                 if 'hls_h264' in first_movie:
                     return first_movie['hls_h264']
@@ -709,7 +709,7 @@ def get_game_video(appid):
 
 def get_fallback_game_image():
     """Get a fallback game image when Steam image is not available"""
-    # Collection of gaming-themed placeholder images
+    
     game_placeholders = [
         "https://images.unsplash.com/photo-1556438064-2d7646166914?w=460&h=215&fit=crop",  # Gaming setup
         "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=460&h=215&fit=crop",  # Controller
@@ -728,7 +728,7 @@ def get_fallback_game_image():
         "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=460&h=215&fit=crop",  # Mechanical keyboard
     ]
 
-    # Return a random placeholder image
+    
     import random
     return random.choice(game_placeholders)
 
@@ -817,12 +817,12 @@ def format_game_name_for_twitch(game_name):
     """Format game name for Twitch URL"""
     if not game_name:
         return ""
-    # Remove special characters and replace spaces with %20 or use urllib
+   
     import re
     import urllib.parse
-    # Clean the name
+    
     clean_name = re.sub(r'[^\w\s-]', '', game_name).strip()
-    # URL encode
+    
     return urllib.parse.quote(clean_name)
 
 
@@ -855,7 +855,7 @@ def display_platforms_section(appid, lang):
     """Display platforms in an attractive card format"""
     t = get_translations(lang)
 
-    # Get platforms for this game
+    
     platforms_data = df_plataformas[df_plataformas["AppID"] == appid]
     if not platforms_data.empty:
         platforms_str = platforms_data["Plataformas"].iloc[0]
@@ -869,10 +869,10 @@ def display_platforms_section(appid, lang):
 def get_enhanced_game_background(appid, game_name=None):
     """Enhanced background getter that tries multiple sources"""
     try:
-        # Convert appid to int and validate
+       
         aid = int(float(appid)) if appid and str(appid).strip() else 0
 
-        # Skip Steam check for known non-Steam games or invalid IDs
+        
         skip_steam_games = [
             'fivem', 'fife', 'gta v fivem', 'grand theft auto v fivem',
             'multiplayer', 'server', 'custom', 'mod'
@@ -881,29 +881,29 @@ def get_enhanced_game_background(appid, game_name=None):
         should_check_steam = True
         if game_name and any(skip.lower() in game_name.lower() for skip in skip_steam_games):
             should_check_steam = False
-        elif aid <= 0 or aid > 99999999:  # Invalid Steam AppID range
+        elif aid <= 0 or aid > 99999999:  
             should_check_steam = False
 
-        # First try Steam background if valid
+        
         if should_check_steam and steam_image_exists(appid):
             steam_bg = f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/page_bg_generated_v6b.jpg"
             return steam_bg
 
     except Exception as e:
-        # If any error occurs, continue to fallback
+       
         pass
 
-    # Final fallback
+    
     return get_fallback_game_background()
 
-# ---------- 4. DATA LOADING ---------- 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLEAN_DIR = os.path.join(BASE_DIR, "Clean")
 SRC_DIR = os.path.join(BASE_DIR, "Src")
 DOWNLOAD_SCRIPT = os.path.join(SRC_DIR, "download.py")
 
 
-# ---------- LOAD DATA ----------
+
 @st.cache_data(ttl=300)
 def load_data():
     try:
@@ -1142,7 +1142,7 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
             st.session_state.selected_game = safe_id
             st.rerun()
     with c2:
-        # Only allow favorites actions when a user is logged in
+
         if "user" not in st.session_state:
             return
         try:
@@ -1156,7 +1156,7 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
                 st.success(t.get('remove_from_favorites', 'Quitar de favoritos'))
                 st.rerun()
         else:
-            # Use imperative label for add button
+            
             if safe_id is not None and st.button(t.get('add_to_favorites', 'Añadir a favoritos'), key=add_key):
                 new_fav = pd.DataFrame([[st.session_state['user'], safe_id]], columns=["username", "appid"])
                 pd.concat([f_df, new_fav], ignore_index=True).to_csv(FAV_FILE, index=False)
@@ -1169,7 +1169,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     """Render a standardized game card inside the current Streamlit column."""
     title_attr = f"{name}"
     img_url = get_enhanced_game_image(aid, name)
-    # determine favorite state to show badge
+    
     badge_html = ''
     is_fav = False
     safe_id = safe_appid(aid)
@@ -1246,34 +1246,34 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     if reviews is not None and not pd.isna(reviews):
         st.write(f"**{t['reviews_label']}:** {int(pd.to_numeric(reviews, errors='coerce')):,}")
 
-    # consistent controls (details + add/remove favorite)
+  
     render_card_controls(aid, name, key_prefix, is_fav, t, compact=False)
 
 
 def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badge=None, players=None, peak=None):
     """Render a compact card used in dashboard tabs to differentiate from full navigation views."""
     img_url = get_enhanced_game_image(aid, name)
-    # Determine badge color and background based on context
+    
     badge_color = '#ffbf47'
     card_gradient = 'linear-gradient(135deg, #0f1720 0%, #111827 100%)'
     try:
         if badge == 'POP':
-            badge_color = '#9b5cff'  # purple for popular
+            badge_color = '#9b5cff'  
             card_gradient = 'linear-gradient(135deg, #6b21a8 0%, #111827 100%)'
         elif badge == '▲':
-            badge_color = '#16a34a'  # green for growth
+            badge_color = '#16a34a'  
             card_gradient = 'linear-gradient(135deg, #052e18 0%, #08301a 100%)'
         elif peak is not None and float(peak) < 0:
-            badge_color = '#ef4444'  # red for decline
+            badge_color = '#ef4444'  
             card_gradient = 'linear-gradient(135deg, #2b0f0f 0%, #111827 100%)'
         elif players is not None and int(players) > 100000:
-            badge_color = '#f97316'  # orange for very large
+            badge_color = '#f97316'  
             card_gradient = 'linear-gradient(135deg, #3a0f00 0%, #111827 100%)'
     except:
         pass
     pulse_class = ' pulse' if badge == 'POP' else ''
     badge_html = f'<div class="badge{pulse_class}" style="background:{badge_color};">{badge}</div>' if badge else ''
-    # check favorites to show small fav badge
+    
     fav_badge_html = ''
     is_fav_dash = False
     safe_id = safe_appid(aid)
@@ -1340,7 +1340,7 @@ def render_trend_formula_card(t):
     st.markdown(formula_html, unsafe_allow_html=True)
 
 
-# ---------- 6. SESSION STATE ---------- 
+
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
 if "show_more" not in st.session_state: st.session_state.show_more = False
 if "view" not in st.session_state: st.session_state.view = "Dashboard"
@@ -1378,7 +1378,7 @@ with st.sidebar:
             if u_name in users["username"].values:
                 st.error(t["user_exists"])
             else:
-                # Encrypt password before saving
+                
                 encrypted_pass = encrypt_password(u_pass)
                 new_u = pd.DataFrame([[u_name, encrypted_pass]], columns=["username", "password"])
                 pd.concat([users, new_u]).to_csv(USERS_FILE, index=False)
@@ -1386,20 +1386,20 @@ with st.sidebar:
     else:
         if st.button(t["login"], width='stretch'):
             users = pd.read_csv(USERS_FILE)
-            # Check for valid login (support both encrypted and plain text passwords for migration)
+            
             valid_user = None
             for _, user_row in users.iterrows():
                 if user_row["username"] == u_name:
                     stored_pass = user_row["password"]
-                    # Try encrypted comparison first
+                    
                     encrypted_input = encrypt_password(u_pass)
                     if stored_pass == encrypted_input:
                         valid_user = user_row
                         break
-                    # Try plain text comparison for backward compatibility
+                    
                     elif stored_pass == u_pass:
                         valid_user = user_row
-                        # Migrate to encrypted password
+                        
                         users.loc[users["username"] == u_name, "password"] = encrypted_input
                         users.to_csv(USERS_FILE, index=False)
                         break
@@ -1426,7 +1426,7 @@ with st.sidebar:
         st.session_state.view = "Dashboard"
         st.rerun()
 
-    # BOTÓN CHAT INDEPENDIENTE JUSTO DEBAJO DE HOME (SIN EMOJIS)
+    
     if st.button("Chat", width='stretch'):
         st.session_state.selected_game = None
         st.session_state.view = "Chat"
@@ -1440,11 +1440,11 @@ with st.sidebar:
         t["top_genres"], t["top_developers"], t["price_analysis"], t["favorites"]
     ]
     
-    # Manejar el índice actual de forma segura si estamos en la vista de Chat
+    
     current_index = view_menu_keys.index(st.session_state.view) if st.session_state.view in view_menu_keys else 0
     selected_label = st.selectbox("Seleccionar vista", view_menu_labels, index=current_index, label_visibility="collapsed")
     
-    # Solo cambiamos la vista si el usuario interactúa explícitamente con el selectbox
+    
     if st.session_state.view != "Chat" or selected_label != view_menu_labels[current_index]:
         st.session_state.view = view_menu_keys[view_menu_labels.index(selected_label)]
 
@@ -1461,7 +1461,7 @@ with st.sidebar:
         else:
             st.error(f"Error al actualizar datos: {message}")
 
-# ---------- 7. VIEW: GAME DETAIL ---------- 
+
 selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None
 if selected_game_id:
     appid = selected_game_id
@@ -1470,7 +1470,7 @@ if selected_game_id:
     g_i = df_info[df_info["AppID"] == appid].iloc[0] if not df_info[df_info["AppID"] == appid].empty else pd.Series()
     g_d = df_detalles[df_detalles["AppID"] == appid].iloc[0] if not df_detalles[df_detalles["AppID"] == appid].empty else pd.Series()
 
-    # Define metric values before use
+    
     g_rank = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["Posicion"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
     g_players = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["JugadoresConcurrentes"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
     rating = fix_nan(g_d.get('Rating'), 'N/A')
@@ -1482,13 +1482,13 @@ if selected_game_id:
 
     st.title(f"Juego: {fix_nan(g_l['Nombre'] if g_l is not None else t['game_details'])}")
 
-    # Tabs for more detailed view
+    
     tab1, tab2, tab3 = st.tabs([t["overview_tab"], t["details_tab"], t["reviews_tab"]])
 
     with tab1:
         game_name = fix_nan(g_l.get('Nombre') if g_l is not None else 'Game')
 
-        # Hero section with background image and title
+        
         st.markdown(f"""
         <div style="position: relative; height: 300px; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
             <img src="{get_enhanced_game_background(appid, game_name)}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4);" />
@@ -1499,7 +1499,7 @@ if selected_game_id:
         </div>
         """, unsafe_allow_html=True)
 
-        # Key metrics in a nice grid
+       
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric(t["rating_label"], f"{rating_num}/100" if not pd.isna(rating_num) else "N/A")
@@ -1510,7 +1510,7 @@ if selected_game_id:
         with col4:
             st.metric(t["current_players"], f"{int(players_num):,}" if not pd.isna(players_num) else "N/A")
 
-        # Action buttons
+        
         st.markdown("---")
         col_a, col_b, col_c = st.columns([1, 1, 2])
         with col_a:
@@ -1526,7 +1526,7 @@ if selected_game_id:
 
         st.markdown("---")
 
-        # Media section - Trailer and Twitch side by side
+        
         st.markdown(f"## {t['trailer']} & {t['twitch_streams']}")
 
         media_col1, media_col2 = st.columns(2)
@@ -1566,7 +1566,7 @@ if selected_game_id:
                     </a>
                 </div>
                 """, unsafe_allow_html=True)
-        # Game information in organized cards
+        
         st.markdown(f"## {t['information']}")
 
         info_col1, info_col2 = st.columns(2)
@@ -1630,7 +1630,7 @@ if selected_game_id:
         else:
             st.write("No hay texto de reseñas disponible en el dataset; sólo podemos mostrar el rating y el número de reseñas.")
 
-        # Use unified controls for details/favorites in game detail view
+        
         if "user" in st.session_state:
             game_title = fix_nan(g_l.get('Nombre') if g_l is not None else t['game_details'])
             try:
@@ -1641,7 +1641,7 @@ if selected_game_id:
             render_card_controls(appid, game_title, "detail", is_fav, t, compact=False)
     st.stop()
 
-# ---------- 8. VIEW: FAVORITES ---------- 
+
 if st.session_state.view == "Favorites":
     st.title(f"{t['my_favorites']}")
     if "user" not in st.session_state:
@@ -1681,23 +1681,23 @@ if st.session_state.view == "Favorites":
                             render_game_card(get_aid, fix_nan(g_name), t, f"fav_{idx}", price_raw=price_raw, genres_raw=genres_raw, rel_dt=rel_dt)
     st.stop()
 
-# ---------- 8.5 VIEW: CHAT INDEPENDIENTE CON MÓDULO IA ---------- 
+ 
 if st.session_state.view == "Chat":
     st.title("Infosteam AI Assistant")
     st.markdown("Asistente Avanzado. Puedes hablarme en lenguaje natural o escribir fragmentos vagos de juegos.")
 
-    # Inicializar historial de chat si no existe (Sin emojis)
+    
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = [
             {"role": "assistant", "content": "Hola. He analizado los CSVs del sistema. Pregúntame cosas como: '¿qué juegos son gratis?', 'busca juegos de Valve', 'juegos con rating mayor a 90' o un título parcial como 'strike'."}
         ]
 
-    # Mostrar mensajes del historial
+    
     for msg in st.session_state.chat_messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # Entrada de consulta
+   
     if user_query := st.chat_input("Escribe tu consulta analítica..."):
         with st.chat_message("user"):
             st.write(user_query)
@@ -1706,7 +1706,7 @@ if st.session_state.view == "Chat":
         ai_reply = ""
         query_lower = user_query.lower()
 
-        # DICCIONARIO DE SINÓNIMOS Y ACRÓNIMOS COMUNES
+        
         alias_mapping = {
             r"\bcs\b": "counter-strike",
             r"\bcsgo\b": "counter-strike",
@@ -1718,7 +1718,7 @@ if st.session_state.view == "Chat":
         for alias, real_name in alias_mapping.items():
             query_lower = re.sub(alias, real_name, query_lower)
 
-        # MÓDULO INTELIGENTE ANALÍTICO (IA LOCAL)
+        
         if "gratis" in query_lower or "free" in query_lower:
             df_m = df_detalles.copy()
             df_m['Price_Val'] = df_m['Precio'].apply(convert_to_usd_numeric)
@@ -1965,10 +1965,10 @@ elif st.session_state.view == "Price Analysis":
                     render_game_card(aid, fix_nan(row.get('Nombre')), t, f"pa_{idx}", price_raw=row.get('Precio'), rating=row.get('Rating'))
     st.stop()
 
-# ---------- 10. MAIN DASHBOARD ---------- 
+ 
 st.title(t["dashboard_title"])
 
-# Dashboard metrics
+
 m1, m2, m3, m4 = st.columns(4)
 selected_peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
 m1.metric(t["players_online"], f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
