@@ -1,10 +1,10 @@
 import streamlit as st #biblioteca para la interfaz web
 import pandas as pd #librería para la manipulación y el análisis de datos
 import os #librería para interactuar con el sistema operativo y manejar archivos y directorios 
-import re #librería para trabajar con expresiones regulares, útil para procesar texto y extraer información específica
-import base64 #librería para codificar y decodificar datos en formato base64, utilizada aquí para manejar contraseñas de forma sencilla
-import subprocess #librería para ejecutar comandos del sistema operativo, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como actualizar datos o ejecutar scripts externos
-import sys #librería para interactuar con el intérprete de Python, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como manejar argumentos de línea de comandos o controlar la salida del programa
+import re #Sirve para gestionar rutas de archivos de forma segura e independiente de si ejecutas la app en Windows, Linux o Docker. También la usas para comprobar si un archivo físico existe en el disco duro, como los CSV de usuarios o favoritos
+import base64 #Se usa para buscar y extraer patrones de texto complejos. En tu código es fundamental para la conversión de divisas, ya que analiza los textos de los precios de Steam (que vienen con símbolos raros como €, $, ฿, o letras) y extrae únicamente la parte numérica para poder hacer cálculos matemáticos con ella.
+import subprocess #librería para ejecutar comandos del sistema operativo, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como actualizar datos o ejecutar scripts externos. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
+import sys #librería para interactuar con el intérprete de Python, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como manejar argumentos de línea de comandos o controlar la salida del programa. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
 import plotly.graph_objects as go #librería para crear gráficos interactivo visualizar datos de tendencias, análisis de precios, etc.
 
  
@@ -514,7 +514,7 @@ CURRENCY_CONFIG = {
     "en": {"symbol": "$", "rate": 1.00},
 }
 def get_currency_config(lang): #Devuelve la configuración de moneda (símbolo y tasa de conversión) para el idioma especificado, con un valor predeterminado para inglés si el idioma no está definido en la configuración.
-    return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"])
+    return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"]) #Devuelve la configuración de moneda (símbolo y tasa de conversión) para el idioma especificado, con un valor predeterminado para inglés si el idioma no está definido en la configuración.
 
 def format_local_price(price_str, lang):
     val_usd = convert_to_usd_numeric(price_str)
@@ -586,7 +586,7 @@ def normalize_genre_token(token): #Normaliza un token de género eliminando espa
     token_text = str(token).strip()
     if not token_text:
         return None
-    token_text = re.sub(r"[\|/;]+", ",", token_text)
+    token_text = re.sub(r"[\|/;]+", ",", token_text) #Reemplaza cualquier secuencia de caracteres delimitadores (barra vertical, barra o punto y coma) por una coma para estandarizar la separación de géneros, lo que facilita la posterior división en tokens individuales.
     token_text = re.sub(r"\s+", " ", token_text)
     token_text = token_text.title()
     replacements = {
@@ -604,13 +604,13 @@ def normalize_genre_token(token): #Normaliza un token de género eliminando espa
         return replacements[token_text]
     if token_text.isdigit() or len(token_text) <= 1:
         return None
-    return token_text
+    return token_text #Devuelve el token de género normalizado, o None si el token es considerado vacío, no significativo o está en la lista de reemplazos que indican que no es un género válido.
 
 def get_genre_tokens(genre_text):
     if pd.isna(genre_text):
         return []
     tokens = []
-    for raw in re.split(r"[;,|/]+", str(genre_text)):
+    for raw in re.split(r"[;,|/]+", str(genre_text)): #Divide la cadena de texto de géneros en tokens individuales utilizando una expresión regular que permite múltiples delimitadores (punto y coma, barra vertical, barra o coma), luego normaliza cada token y lo agrega a la lista de tokens si no es None.
         normalized = normalize_genre_token(raw)
         if normalized:
             tokens.append(normalized)
@@ -623,10 +623,10 @@ def format_usd(price_str):
 def get_game_image(appid):
     """Get game image with multiple fallback options"""
     try:
-        aid = int(float(appid))
+        aid = int(float(appid)) #Intenta convertir el appid a un número entero para asegurarse de que es un valor válido antes de intentar acceder a la imagen de Steam. Si el appid no es un número válido o es menor o igual a cero, devuelve una imagen de respaldo genérica para juegos.
         if aid <= 0:
             return get_fallback_game_image()
-        return f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
+        return f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg" #Intenta obtener la imagen del juego desde Steam usando el appid, pero si el appid no es válido o si la imagen no existe, devuelve una imagen de respaldo genérica para juegos.
     except:
         return get_fallback_game_image()
 
@@ -634,32 +634,32 @@ def normalize_game_name(game_name):
     if not game_name:
         return ""
     name = str(game_name).strip().lower()
-    return re.sub(r"[^a-z0-9\s]", "", name)
+    return re.sub(r"[^a-z0-9\s]", "", name) #Normaliza el nombre del juego convirtiéndolo a minúsculas, eliminando espacios al principio y al final, y eliminando caracteres especiales, dejando solo letras, números y espacios. Esto ayuda a estandarizar los nombres de juegos para comparaciones y búsquedas más consistentes.
 
 
 def normalize_game_name_compact(game_name):
-    return normalize_game_name(game_name).replace(" ", "")
+    return normalize_game_name(game_name).replace(" ", "") #Crea una versión compacta del nombre del juego eliminando todos los espacios después de normalizarlo, lo que permite comparaciones aún más flexibles al ignorar completamente los espacios entre palabras.
 
 
 def get_special_game_image(game_name):
     normalized = normalize_game_name(game_name)
     compact = normalize_game_name_compact(game_name)
-    for key, image_url in GAME_IMAGE_OVERRIDES.items():
+    for key, image_url in GAME_IMAGE_OVERRIDES.items(): #Busca en las claves de GAME_IMAGE_OVERRIDES si alguna de ellas está presente en el nombre normalizado o compactado del juego. Si encuentra una coincidencia, devuelve la URL de la imagen correspondiente. Esto permite asignar imágenes específicas a ciertos juegos basándose en palabras clave en sus nombres.
         if key in normalized or key in compact:
             return image_url
     return None
 
 
 def should_skip_steam_image(game_name):
-    normalized = normalize_game_name(game_name)
-    compact = normalize_game_name_compact(game_name)
-    return any(token in normalized or token in compact for token in NON_STEAM_IMAGE_TOKENS)
+    normalized = normalize_game_name(game_name) #Normaliza el nombre del juego eliminando caracteres especiales y convirtiéndolo a minúsculas para facilitar la detección de palabras clave que indican que no se debe usar la imagen de Steam, lo que es útil para juegos que pueden no tener imágenes disponibles o para evitar imágenes genéricas.
+    compact = normalize_game_name_compact(game_name) #Normaliza el nombre del juego tanto en una versión con espacios como en una versión compacta sin espacios para facilitar la detección de palabras clave que indican que no se debe usar la imagen de Steam, lo que es útil para juegos que pueden no tener imágenes disponibles o para evitar imágenes genéricas.
+    return any(token in normalized or token in compact for token in NON_STEAM_IMAGE_TOKENS) #Determina si se debe omitir la imagen de Steam para un juego verificando si el nombre del juego contiene alguna de las palabras clave definidas en NON_STEAM_IMAGE_TOKENS. Si alguna de estas palabras clave está presente en el nombre normalizado o compactado del juego, devuelve True, indicando que se debe usar una imagen de respaldo en lugar de la imagen de Steam, lo que es útil para juegos que no tienen imágenes disponibles en Steam o para evitar imágenes genéricas que no representan bien el juego.
 
 
-@st.cache_data(ttl=86400)
+@st.cache_data(ttl=86400) #Caché de la función para verificar si la imagen de Steam existe, con un tiempo de vida de 24 horas para evitar hacer demasiadas solicitudes a Steam y mejorar el rendimiento al reutilizar resultados anteriores.
 def steam_image_exists(appid):
     try:
-        aid = int(float(appid))
+        aid = int(float(appid)) #Intenta convertir el appid a un número entero para asegurarse de que es un valor válido antes de intentar acceder a la imagen de Steam. Si el appid no es un número válido o es menor o igual a cero, devuelve False, indicando que la imagen de Steam no existe para ese appid.
         if aid <= 0:
             return False
         import requests
@@ -670,7 +670,7 @@ def steam_image_exists(appid):
         return False
 
 
-@st.cache_data(ttl=86400)
+@st.cache_data(ttl=86400) #Caché de la función para verificar si el video de Steam existe, con un tiempo de vida de 24 horas para evitar hacer demasiadas solicitudes a Steam y mejorar el rendimiento al reutilizar resultados anteriores.
 def steam_video_exists(appid):
     try:
         aid = int(float(appid))
@@ -678,7 +678,7 @@ def steam_video_exists(appid):
             return False
         import requests
         
-        url = f"https://store.steampowered.com/api/appdetails?appids={aid}"
+        url = f"https://store.steampowered.com/api/appdetails?appids={aid}" #Hace una solicitud a la API de Steam para obtener los detalles del juego utilizando el appid, y luego verifica si la respuesta contiene información sobre videos (trailers) para ese juego. Si se encuentra un video válido, devuelve la URL del video; de lo contrario, devuelve False, indicando que no hay un video disponible para ese appid.
         response = requests.get(url, timeout=10)
         data = response.json()
         if str(aid) in data and data[str(aid)]['success']:
@@ -686,7 +686,7 @@ def steam_video_exists(appid):
             if 'movies' in app_data and len(app_data['movies']) > 0:
                 
                 first_movie = app_data['movies'][0]
-                if 'hls_h264' in first_movie:
+                if 'hls_h264' in first_movie: #Verifica si el primer video tiene una URL de video en formato HLS (hls_h264) y, si es así, devuelve esa URL para que pueda ser utilizada como el trailer del juego. Si no se encuentra un video válido, devuelve False.
                     return first_movie['hls_h264']
         return False
     except:
@@ -730,7 +730,7 @@ def get_fallback_game_image():
 
     
     import random
-    return random.choice(game_placeholders)
+    return random.choice(game_placeholders) #Devuelve una imagen de respaldo aleatoria de la lista de game_placeholders para usar cuando la imagen de Steam no esté disponible, proporcionando una variedad de imágenes relacionadas con juegos para mejorar la apariencia visual de la aplicación incluso cuando no se pueden obtener imágenes específicas de los juegos desde Steam.
 
 
 def get_fallback_game_background():
@@ -745,7 +745,7 @@ def get_fallback_game_background():
     import random
     return random.choice(background_placeholders)
 
-def get_game_background(appid):
+def get_game_background(appid): #Intenta obtener la imagen de fondo del juego desde Steam utilizando el appid, pero si el appid no es válido o si la imagen no existe, devuelve una imagen de respaldo genérica para juegos.
     try:
         aid = int(float(appid))
         if aid <= 0: return get_fallback_game_background()
@@ -766,7 +766,7 @@ def get_enhanced_game_image(appid, game_name=None):
 
     return get_fallback_game_image()
 
-def get_ai_response(user_input, game_data):
+def get_ai_response(user_input, game_data): #Devuelve una respuesta de estilo IA segura utilizando los datos conocidos del juego.
     """Return a safe fallback AI-style response using known game data."""
     response_lines = [
         f"Here is what I found for {game_data.get('name', 'the game')}:",
@@ -779,7 +779,7 @@ def get_ai_response(user_input, game_data):
         f"- Reviews: {game_data.get('reviews', 'Unknown')}"
     ]
     if "price" in user_input.lower():
-        response_lines.append("This game appears to have the listed price and may be free to play depending on the store listing.")
+        response_lines.append("This game appears to have the listed price and may be free to play depending on the store listing.") #Agrega una línea adicional a la respuesta si el usuario pregunta sobre el precio, indicando que el juego tiene el precio listado y que puede ser gratuito dependiendo de la tienda, lo que proporciona información útil sin hacer afirmaciones específicas sobre promociones o descuentos actuales.
     elif "rating" in user_input.lower() or "review" in user_input.lower():
         response_lines.append("The rating and reviews are based on the current dataset and may vary over time.")
     return "\n".join(response_lines)
@@ -819,7 +819,7 @@ def format_game_name_for_twitch(game_name):
         return ""
    
     import re
-    import urllib.parse
+    import urllib.parse #Importa el módulo re para usar expresiones regulares y urllib.parse para codificar el nombre del juego de manera segura en una URL, asegurándose de que los caracteres especiales se manejen correctamente al generar enlaces a Twitch.
     
     clean_name = re.sub(r'[^\w\s-]', '', game_name).strip()
     
@@ -851,14 +851,14 @@ def get_platform_icons(platforms_str):
     return " | ".join(icons)
 
 
-def display_platforms_section(appid, lang):
+def display_platforms_section(appid, lang): 
     """Display platforms in an attractive card format"""
-    t = get_translations(lang)
+    t = get_translations(lang) 
 
     
     platforms_data = df_plataformas[df_plataformas["AppID"] == appid]
     if not platforms_data.empty:
-        platforms_str = platforms_data["Plataformas"].iloc[0]
+        platforms_str = platforms_data["Plataformas"].iloc[0] #Obtiene la cadena de plataformas para el juego con el appid dado desde el DataFrame df_plataformas. Si se encuentra una fila correspondiente, extrae la información de plataformas; de lo contrario, se considera que no hay datos disponibles para las plataformas del juego.
         platforms_display = get_platform_icons(platforms_str)
     else:
         platforms_display = "No disponible"
@@ -870,7 +870,7 @@ def get_enhanced_game_background(appid, game_name=None):
     """Enhanced background getter that tries multiple sources"""
     try:
        
-        aid = int(float(appid)) if appid and str(appid).strip() else 0
+        aid = int(float(appid)) if appid and str(appid).strip() else 0 #Intenta convertir el appid a un número entero para asegurarse de que es un valor válido antes de intentar acceder a la imagen de fondo de Steam. Si el appid no es un número válido o es menor o igual a cero, devuelve una imagen de fondo de respaldo genérica para juegos.
 
         
         skip_steam_games = [
@@ -879,7 +879,7 @@ def get_enhanced_game_background(appid, game_name=None):
         ]
 
         should_check_steam = True
-        if game_name and any(skip.lower() in game_name.lower() for skip in skip_steam_games):
+        if game_name and any(skip.lower() in game_name.lower() for skip in skip_steam_games): #Si el nombre del juego contiene alguna de las palabras clave definidas en skip_steam_games (como "fivem", "multiplayer", "server", etc.), se establece should_check_steam en False para indicar que no se debe intentar obtener la imagen de fondo de Steam, lo que es útil para juegos que son modificaciones, servidores personalizados o juegos multijugador que pueden no tener imágenes de fondo representativas en Steam.
             should_check_steam = False
         elif aid <= 0 or aid > 99999999:  
             should_check_steam = False
@@ -897,14 +897,14 @@ def get_enhanced_game_background(appid, game_name=None):
     return get_fallback_game_background()
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CLEAN_DIR = os.path.join(BASE_DIR, "Clean")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #Determina el directorio base del proyecto al obtener la ruta absoluta del archivo actual, luego subir un nivel para llegar al directorio raíz del proyecto. Esto es útil para construir rutas relativas a los archivos de datos y scripts dentro del proyecto de manera consistente, independientemente de dónde se ejecute el código.
+CLEAN_DIR = os.path.join(BASE_DIR, "Clean") #Construye la ruta al directorio "Clean" dentro del directorio base del proyecto, donde se espera que se encuentren los archivos CSV limpios con los datos de juegos. Esta ruta se utiliza para cargar los datos en los DataFrames de pandas y para acceder a los archivos necesarios para la aplicación.
 SRC_DIR = os.path.join(BASE_DIR, "Src")
 DOWNLOAD_SCRIPT = os.path.join(SRC_DIR, "download.py")
 
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300) 
 def load_data():
     try:
         df_l = pd.read_csv(os.path.join(CLEAN_DIR, "listado_juegos.csv"))
@@ -923,7 +923,7 @@ df_listado, df_info, df_detalles, df_plataformas = load_data()
 
 def update_data_source():
     """Run the external download script and clear cached data on success."""
-    try:
+    try: #Ejecuta el script de descarga externo para actualizar los datos, capturando la salida y los errores. Si el script se ejecuta correctamente (código de retorno 0), borra la caché de datos para forzar la recarga de los nuevos datos actualizados. Si el script falla o si ocurre un error, devuelve un mensaje de error apropiado.
         result = subprocess.run(
             [sys.executable, DOWNLOAD_SCRIPT],
             cwd=BASE_DIR,
@@ -938,14 +938,14 @@ def update_data_source():
     except subprocess.TimeoutExpired as e:
         return False, f"Tiempo de actualización agotado después de {e.timeout} segundos."
     except Exception as e:
-        return False, str(e)
+        return False, str(e) #Devuelve el mensaje de error como una cadena, lo que permite mostrar información útil sobre lo que salió mal durante la actualización de los datos, ya sea un error específico del proceso o cualquier otra excepción que pueda ocurrir.
 
 
-def parse_date_safe(value):
+def parse_date_safe(value): #Intenta analizar una fecha a partir de una cadena de texto utilizando pandas, primero asumiendo el formato día/mes/año (dayfirst=True) y luego intentando el formato mes/día/año (dayfirst=False) si el primer intento falla. Si ambos intentos fallan o si el valor es NaN, devuelve pd.NaT para indicar que no se pudo analizar la fecha de manera segura.
     try:
         if pd.isna(value):
             return pd.NaT
-        parsed = pd.to_datetime(value, dayfirst=True, errors='coerce')
+        parsed = pd.to_datetime(value, dayfirst=True, errors='coerce') #Intenta analizar la fecha asumiendo el formato día/mes/año (dayfirst=True) y, si el análisis falla (errors='coerce' convierte valores no válidos en NaT), intenta nuevamente asumiendo el formato mes/día/año (dayfirst=False). Esto es útil para manejar fechas que pueden estar en diferentes formatos dependiendo de la fuente de datos, aumentando la probabilidad de analizar correctamente las fechas sin errores.
         if pd.isna(parsed):
             parsed = pd.to_datetime(value, dayfirst=False, errors='coerce')
         return parsed
@@ -953,7 +953,7 @@ def parse_date_safe(value):
         return pd.NaT
 
 
-def get_recent_releases(ref_date, days=30):
+def get_recent_releases(ref_date, days=30): #Devuelve un DataFrame de juegos que se lanzaron dentro de una ventana de tiempo específica (por defecto, los últimos 30 días) antes de una fecha de referencia dada. Analiza las fechas de lanzamiento de los juegos y filtra aquellos que caen dentro del rango definido por la fecha de referencia y el número de días especificado.
     ref_dt = parse_date_safe(ref_date)
     if pd.isna(ref_dt) or df_info.empty:
         return pd.DataFrame()
@@ -970,16 +970,16 @@ def get_recent_releases(ref_date, days=30):
 
 def peak_players_last_week(appid, ref_date):
     end_dt = parse_date_safe(ref_date)
-    if pd.isna(end_dt) or df_listado.empty:
+    if pd.isna(end_dt) or df_listado.empty: #Si la fecha de referencia no se puede analizar correctamente o si el DataFrame df_listado está vacío, devuelve 0 como el número máximo de jugadores concurrentes en la última semana, lo que indica que no hay datos disponibles para calcular esta métrica.
         return 0
-    game_rows = df_listado[df_listado['AppID'] == int(appid)].copy()
-    if game_rows.empty:
+    game_rows = df_listado[df_listado['AppID'] == int(appid)].copy() #Filtra el DataFrame df_listado para obtener solo las filas correspondientes al juego con el appid dado. Si no se encuentran filas para ese appid, devuelve 0, indicando que no hay datos de jugadores concurrentes disponibles para ese juego.
+    if game_rows.empty: 
         return 0
-    game_rows['__date'] = pd.to_datetime(game_rows['Fecha'], errors='coerce')
+    game_rows['__date'] = pd.to_datetime(game_rows['Fecha'], errors='coerce') #Convierte la columna 'Fecha' a un formato de fecha utilizando pandas, lo que permite realizar operaciones de filtrado basadas en fechas. Si alguna fecha no se puede analizar correctamente, se convierte en NaT (Not a Time), lo que facilita la exclusión de filas con fechas no válidas al calcular el número máximo de jugadores concurrentes en la última semana.
     window = game_rows[(game_rows['__date'] > (end_dt - pd.Timedelta(days=7))) & (game_rows['__date'] <= end_dt)]
     if window.empty:
         return 0
-    values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0)
+    values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0) #Convierte la columna 'JugadoresConcurrentes' a valores numéricos, manejando cualquier valor no numérico como NaN y luego llenando esos NaN con 0 para asegurarse de que se puedan calcular correctamente los valores máximos sin errores. Esto es útil para obtener el número máximo de jugadores concurrentes en la última semana, incluso si algunos datos de jugadores concurrentes no son válidos o están ausentes.
     return int(values.max())
 
 
@@ -1018,17 +1018,17 @@ def get_previous_week_peak(appid, ref_date):
     return int(values.max())
 
 
-def compute_trend_scores(ref_date, limit=12):
+def compute_trend_scores(ref_date, limit=12): #Calcula una puntuación de tendencia para los juegos basándose en su pico de jugadores concurrentes en la última semana, el crecimiento en jugadores concurrentes en los últimos 7 días y la recencia del lanzamiento. Devuelve un DataFrame con los juegos ordenados por su puntuación de tendencia, mostrando solo los mejores resultados según el límite especificado.
     ref_dt = parse_date_safe(ref_date)
     if pd.isna(ref_dt) or df_info.empty:
         return pd.DataFrame()
 
     rows = []
     for _, row in df_info.iterrows():
-        appid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+        appid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0 #Intenta obtener el appid de la fila actual del DataFrame df_info, asegurándose de que sea un número entero válido. Si el appid no es un número válido o es menor o igual a cero, se establece en 0, lo que indica que no hay un appid válido para ese juego. Esto es útil para evitar errores al calcular las métricas de tendencia para juegos sin un appid válido.
         if appid <= 0:
             continue
-        weekly_peak = peak_players_last_week(appid, ref_dt)
+        weekly_peak = peak_players_last_week(appid, ref_dt)  
         prev_peak = get_previous_week_peak(appid, ref_dt)
         growth_7d = weekly_peak - prev_peak
         release_dt = parse_date_safe(row.get('Fecha_Lanzamiento'))
@@ -1044,7 +1044,7 @@ def compute_trend_scores(ref_date, limit=12):
             'Trend Score': round(score, 2),
         })
 
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows) #Crea un DataFrame a partir de la lista de diccionarios que contienen las métricas calculadas para cada juego, lo que permite ordenar y filtrar los juegos según su puntuación de tendencia.
     if df.empty:
         return df
     return df.sort_values('Trend Score', ascending=False).head(limit).reset_index(drop=True)
@@ -1057,7 +1057,7 @@ def get_latest_release_date():
     return dates.max()
 
 
-def get_popular_reference_date():
+def get_popular_reference_date(): #Determina la fecha de referencia para calcular los lanzamientos populares, utilizando la fecha de los datos más recientes si hay lanzamientos recientes, o la fecha del último lanzamiento si no hay lanzamientos recientes. Esto asegura que la sección de lanzamientos populares se base en una fecha relevante para los datos disponibles.
     data_ref = get_latest_data_date()
     if not get_recent_releases(data_ref, days=30).empty:
         return data_ref
@@ -1072,7 +1072,7 @@ def compute_popular_releases(ref_date):
         )
 
     rows = []
-    for _, row in recent.iterrows():
+    for _, row in recent.iterrows(): #Itera sobre las filas del DataFrame de lanzamientos recientes y calcula el pico de jugadores concurrentes en la última semana para cada juego utilizando su appid. Luego, almacena esta información junto con el nombre y la fecha de lanzamiento en una lista de diccionarios, que se convertirá en un nuevo DataFrame para analizar qué lanzamientos son populares en comparación con sus pares lanzados en un período similar.
         appid = int(row.get('AppID', 0))
         release_dt = parse_date_safe(row.get('Fecha_Lanzamiento'))
         peak_week = peak_players_last_week(appid, ref_date)
@@ -1099,10 +1099,10 @@ def compute_popular_releases(ref_date):
         else:
             df_recent.at[idx, 'is_popular'] = int(row['peak_last_week']) > int(peers['peak_last_week'].max())
 
-    return df_recent.sort_values(['is_popular', 'peak_last_week'], ascending=[False, False]).reset_index(drop=True)
+    return df_recent.sort_values(['is_popular', 'peak_last_week'], ascending=[False, False]).reset_index(drop=True) #Ordena el DataFrame de lanzamientos recientes primero por la columna 'is_popular' en orden descendente (colocando los lanzamientos populares al principio) y luego por 'peak_last_week' también en orden descendente (colocando los lanzamientos con mayor pico de jugadores concurrentes en la última semana al principio dentro de cada grupo de popularidad), lo que permite mostrar los lanzamientos más destacados y populares en la parte superior de la lista.
 
 
-def prepare_popular_releases_display(popular_releases, t):
+def prepare_popular_releases_display(popular_releases, t): #Prepara el DataFrame de lanzamientos populares para su visualización, filtrando solo los lanzamientos populares y formateando la fecha de lanzamiento para mostrarla de manera legible. Si no hay lanzamientos populares, devuelve un DataFrame vacío con las columnas esperadas para mantener la consistencia en la visualización.
     if 'is_popular' in popular_releases.columns:
         popular_releases = popular_releases.loc[popular_releases['is_popular']]
     if 'Fecha_Lanzamiento' in popular_releases.columns:
@@ -1127,7 +1127,7 @@ def safe_appid(value):
         return None
 
 
-def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
+def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False): 
     """Render details + favorite add/remove controls with consistent keys and behavior."""
     safe_id = safe_appid(aid)
     det_key = f"{key_prefix}_det_dash" if compact else f"{key_prefix}_det"
@@ -1165,9 +1165,9 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
 
 
 
-def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, rating=None, reviews=None, rel_dt=None, extra_caption=None):
+def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, rating=None, reviews=None, rel_dt=None, extra_caption=None): 
     """Render a standardized game card inside the current Streamlit column."""
-    title_attr = f"{name}"
+    title_attr = f"{name}" 
     img_url = get_enhanced_game_image(aid, name)
     
     badge_html = ''
@@ -1188,7 +1188,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     overlay_lines = []
     if rel_dt is not None:
         try:
-            rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt)
+            rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt) #Intenta analizar la fecha de lanzamiento y formatearla como una cadena legible. Si el análisis falla o si la fecha es NaN, utiliza la función fix_nan para mostrar un valor adecuado en su lugar. Luego, agrega esta información a las líneas de superposición que se mostrarán sobre la imagen del juego en la tarjeta.
             overlay_lines.append(f"{t['release_date']}: {rel_str}")
         except:
             pass
@@ -1206,7 +1206,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
                 dev = fix_nan(info_row['Desarrollador'].iloc[0])
                 if dev and dev.lower() != 'nan':
                     overlay_lines.insert(0, f"{t['developer_label']}: {dev}")
-                platforms = display_platforms_section(aid, st.session_state.language)
+                platforms = display_platforms_section(aid, st.session_state.language) #Obtiene la información de plataformas para el juego utilizando la función display_platforms_section, que a su vez consulta el DataFrame df_plataformas para obtener las plataformas disponibles para el juego con el appid dado. Si se encuentran plataformas disponibles, se agrega esta información a las líneas de superposición que se mostrarán sobre la imagen del juego en la tarjeta, proporcionando a los usuarios información adicional sobre en qué plataformas pueden jugar el juego.
                 if platforms:
                     overlay_lines.append(platforms)
             if not det_row.empty and rating is None:
@@ -1402,7 +1402,7 @@ with st.sidebar:
                         
                         users.loc[users["username"] == u_name, "password"] = encrypted_input
                         users.to_csv(USERS_FILE, index=False)
-                        break
+                        break #Si el usuario ingresó la contraseña sin cifrar pero coincide con la contraseña almacenada, se considera una coincidencia válida. En este caso, se actualiza la contraseña almacenada para ese usuario con la versión cifrada de la contraseña ingresada, y luego se guarda el DataFrame actualizado en el archivo CSV. Esto permite que los usuarios que tenían contraseñas almacenadas sin cifrar puedan iniciar sesión y al mismo tiempo mejora la seguridad al cifrar sus contraseñas para futuros inicios de sesión.
 
             if valid_user is not None:
                 st.session_state["user"] = u_name
@@ -1462,7 +1462,7 @@ with st.sidebar:
             st.error(f"Error al actualizar datos: {message}")
 
 
-selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None
+selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None #Intenta obtener el appid del juego seleccionado en el estado de la sesión, asegurándose de que sea un número entero válido. Si el valor no es un número válido o es None, se establecerá en None, lo que indica que no hay un juego seleccionado con un appid válido. Esto es útil para evitar errores al intentar mostrar los detalles de un juego sin un appid válido.
 if selected_game_id:
     appid = selected_game_id
     st.session_state.selected_game = selected_game_id
@@ -1815,7 +1815,7 @@ if st.session_state.view == "Market Trends":
     if top.empty:
         st.info("No data available")
     else:
-        cols_per_row = 4
+        cols_per_row = 4 #Número de columnas por fila para mostrar las tarjetas de los juegos. En este caso, se mostrarán 4 tarjetas por fila, lo que permite una presentación más compacta y organizada de los juegos populares en la sección de tendencias del mercado.
         for r in range(0, len(top), cols_per_row):
             cols = st.columns(cols_per_row)
             for i, col in enumerate(cols):
@@ -1827,7 +1827,7 @@ if st.session_state.view == "Market Trends":
                         render_game_card(aid, fix_nan(row.get('Nombre')), t, f"mt_{idx}", price_raw=row.get('Precio'), rating=row.get('Rating'), reviews=row.get('Reviews'))
     st.stop()
 
-elif st.session_state.view == "Top Genres":
+elif st.session_state.view == "Top Genres": #Esta sección se enfoca en analizar la popularidad de los géneros de juegos presentes en el dataset. Primero, se extraen y cuentan los géneros de los juegos para visualizar cuáles son los más comunes. Luego, se muestra una selección de juegos populares dentro de esos géneros, ordenados por número de jugadores concurrentes y número de reseñas, proporcionando a los usuarios una visión clara de qué tipos de juegos están dominando el mercado actualmente.
     st.title(t["genre_popularity_title"])
     genre_df = df_info[['AppID', 'Nombre', 'Géneros', 'Fecha_Lanzamiento']].copy()
     genre_df['Genre_List'] = genre_df['Géneros'].apply(get_genre_tokens)
