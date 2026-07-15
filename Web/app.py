@@ -5,6 +5,8 @@ import re
 import base64
 import subprocess
 import sys
+import json
+import requests
 import plotly.graph_objects as go
 
  
@@ -17,22 +19,45 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-.game-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .25s ease, box-shadow .25s ease; }
-.game-card img { width:100%; height:140px; object-fit:cover; transition: transform .35s ease; display:block; }
-.game-card:hover { transform: translateY(-6px) scale(1.02); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
-.game-card:hover img { transform: scale(1.04); }
-.game-card .meta { padding-top:6px; color: #cbd5e1; font-size:13px; }
-.game-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.92); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(12px); transition: opacity .25s ease, transform .25s ease; font-size:12px; line-height:1.4; z-index:2; }
-.game-card:hover .game-card__overlay { opacity:1; transform: translateY(0); }
-.badge { position:absolute; right:8px; top:8px; padding:4px 8px; border-radius:12px; font-weight:700; font-size:12px; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 70% { box-shadow: 0 0 0 10px rgba(155,92,255,0);} 100% { box-shadow: 0 0 0 0 rgba(155,92,255,0);} }
+:root {
+    color-scheme: dark;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+body { background: #070b14; }
+.game-card { position: relative; border-radius: 18px; overflow: hidden; transition: transform .25s ease, box-shadow .25s ease; box-shadow: 0 14px 45px rgba(0,0,0,0.18); }
+.game-card img { width: 100%; height: 180px; object-fit: cover; transition: transform .35s ease; display: block; }
+.game-card:hover { transform: translateY(-8px); box-shadow: 0 22px 56px rgba(0,0,0,0.28); }
+.game-card:hover img { transform: scale(1.05); }
+.game-card .meta { padding-top: 10px; color: #cbd5e1; font-size: 13px; }
+.game-card__overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(12, 18, 36, 0.95); color: #f8fafc; padding: 14px 16px; opacity: 0; transform: translateY(16px); transition: opacity .25s ease, transform .25s ease; font-size: 12px; line-height: 1.5; z-index: 2; }
+.game-card:hover .game-card__overlay { opacity: 1; transform: translateY(0); }
+.badge { position: absolute; right: 12px; top: 12px; padding: 5px 10px; border-radius: 999px; font-weight: 700; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 70% { box-shadow: 0 0 0 10px rgba(155,92,255,0); } 100% { box-shadow: 0 0 0 0 rgba(155,92,255,0); } }
 .badge.pulse { animation: pulse 2s infinite; }
-.dashboard-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease; }
-.dashboard-card img { width:100%; height:110px; object-fit:cover; transition: transform .3s ease; display:block; }
-.dashboard-card:hover { transform: translateY(-4px); box-shadow:0 10px 26px rgba(0,0,0,0.35); }
-.dashboard-card:hover img { transform: scale(1.03); filter:brightness(1); }
-.dashboard-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.95); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(14px); transition: opacity .2s ease, transform .2s ease; font-size:12px; line-height:1.4; z-index:2; }
-.dashboard-card:hover .dashboard-card__overlay { opacity:1; transform: translateY(0); }
+.dashboard-card { position: relative; border-radius: 18px; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 16px 42px rgba(0,0,0,0.16); }
+.dashboard-card img { width: 100%; height: 130px; object-fit: cover; transition: transform .3s ease; display: block; }
+.dashboard-card:hover { transform: translateY(-5px); }
+.dashboard-card__overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.95); color: #f8fafc; padding: 12px 14px; opacity: 0; transform: translateY(14px); transition: opacity .2s ease, transform .2s ease; font-size: 12px; line-height: 1.4; z-index: 2; }
+.dashboard-card:hover .dashboard-card__overlay { opacity: 1; transform: translateY(0); }
+.hero-banner { background: linear-gradient(135deg, #0b1220 0%, #131b2f 100%); border-radius: 28px; padding: 34px; margin-bottom: 26px; box-shadow: 0 28px 80px rgba(0,0,0,0.26); border: 1px solid rgba(148,163,184,0.14); }
+.hero-banner .hero-left { max-width: 680px; }
+.hero-banner .eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; color: #a78bfa; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; }
+.hero-banner h1 { margin: 0 0 14px 0; font-size: clamp(2.4rem, 2.8vw, 3.4rem); line-height: 1.04; color: #f8fafc; }
+.hero-banner p { margin: 0; color: #cbd5e1; font-size: 1.02rem; max-width: 620px; }
+.hero-right { display: grid; gap: 16px; grid-template-columns: repeat(1, minmax(180px, 1fr)); margin-top: 24px; }
+.metric-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(148,163,184,0.15); border-radius: 20px; padding: 22px 24px; min-height: 112px; color: #f8fafc; }
+.metric-label { color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px; }
+.metric-value { font-size: 1.75rem; font-weight: 700; line-height: 1.1; }
+.detail-hero { background: linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.98) 100%); border-radius: 24px; padding: 28px; display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 26px; margin-bottom: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.24); }
+.detail-hero img { border-radius: 20px; width: 100%; height: auto; object-fit: cover; }
+.detail-hero h1 { margin: 0 0 12px 0; font-size: 2.6rem; color: #f8fafc; }
+.detail-hero p { margin: 6px 0 0 0; color: #cbd5e1; line-height: 1.7; }
+.tag-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.tag-chip { background: rgba(99,102,241,0.16); color: #e0e7ff; padding: 10px 14px; border-radius: 999px; font-size: 0.82rem; display: inline-flex; align-items: center; }
+.section-panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.14); border-radius: 20px; padding: 22px; margin-bottom: 18px; }
+.section-panel h3 { margin: 0 0 12px 0; color: #f8fafc; }
+.streamlit-expanderHeader, .st-bf { color: #f8fafc !important; }
+@media (min-width: 900px) { .hero-banner { display: grid; grid-template-columns: 1.7fr 1fr; gap: 32px; align-items: center; } .hero-right { margin-top: 0; } }
 </style>
 """, unsafe_allow_html=True)
 
@@ -705,6 +730,240 @@ def get_game_video(appid):
         return None
     except:
         return None
+
+
+@st.cache_data(ttl=86400)
+def get_steam_app_details(appid):
+    try:
+        aid = safe_appid(appid)
+        if not aid:
+            return {}
+        url = f"https://store.steampowered.com/api/appdetails?appids={aid}&cc=us&l=en"
+        response = requests.get(url, timeout=10, headers={"User-Agent": "infosteam-pro-dashboard/1.0"})
+        data = response.json()
+        if str(aid) in data and data[str(aid)].get("success"):
+            return data[str(aid)]["data"] or {}
+    except Exception:
+        pass
+    return {}
+
+
+def get_steam_store_tags(appid):
+    details = get_steam_app_details(appid)
+    tags = []
+    for section in ("genres", "categories"):
+        for item in details.get(section, []):
+            label = item.get("description") or item.get("title") or item.get("name")
+            if label and label not in tags:
+                tags.append(label)
+    return tags[:10]
+
+
+def render_hero_banner(t, df_day):
+    total_players = int(df_day["JugadoresConcurrentes"].sum()) if not df_day.empty else 0
+    total_games = len(df_day)
+    top_game = fix_nan(df_day.iloc[0]["Nombre"]) if not df_day.empty else "N/A"
+    today = pd.Timestamp.now().strftime('%Y-%m-%d')
+    hero_html = f"""
+    <div class="hero-banner">
+      <div class="hero-left">
+        <span class="eyebrow">infosteam</span>
+        <h1>Dashboard profesional de juegos y tendencias</h1>
+        <p>Visualiza métricas clave, rendimiento en vivo y detalles enriquecidos de Steam en una interfaz moderna y elegante.</p>
+      </div>
+      <div class="hero-right">
+        <div class="metric-card">
+          <div class="metric-label">{t['players_online']}</div>
+          <div class="metric-value">{total_players:,}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{t['games_tracked']}</div>
+          <div class="metric-value">{total_games}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{t['top_game']}</div>
+          <div class="metric-value">{top_game}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">{t['data_date']}</div>
+          <div class="metric-value">{today}</div>
+        </div>
+      </div>
+    </div>
+    """
+    st.markdown(hero_html, unsafe_allow_html=True)
+
+
+def render_advanced_html_dashboard(t, df_day, show_more=False):
+    top_games = []
+    if not df_day.empty:
+        limit = 24 if show_more else 8
+        for _, row in df_day.head(limit).iterrows():
+            top_games.append({
+                "name": fix_nan(row.get("Nombre")),
+                "rank": int(row.get("Posicion")) if not pd.isna(row.get("Posicion")) else None,
+                "players": int(row.get("JugadoresConcurrentes")) if not pd.isna(row.get("JugadoresConcurrentes")) else 0,
+                "appid": int(row.get("AppID")) if not pd.isna(row.get("AppID")) else None,
+            })
+
+    summary_cards = {
+        "players": int(df_day["JugadoresConcurrentes"].sum()) if not df_day.empty else 0,
+        "games": len(df_day),
+        "top_game": fix_nan(df_day.iloc[0]["Nombre"]) if not df_day.empty else "N/A",
+        "active_games": int((df_day["JugadoresConcurrentes"] > 0).sum()) if not df_day.empty else 0,
+        "limit": 24 if show_more else 8,
+    }
+
+    games_json = json.dumps(top_games)
+    html = """
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-3y16fY/1OfRkELRYh6Q+g+fp6cKPa7I9z+gM8Qkzn8oj7W0lTxfDKEk23y5q68sH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <div class="container-fluid" style="margin-top: 24px; margin-bottom: 24px; color: #e2e8f0;">
+      <div class="row g-3">
+        <div class="col-12">
+          <div class="p-4 rounded-4" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(148, 163, 184, 0.14); box-shadow: 0 26px 70px rgba(0, 0, 0, 0.25);">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+              <div>
+                <span class="d-inline-block mb-3" style="text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; font-weight: 700;">Interfaz Pro</span>
+                <h2 class="mb-3" style="font-size: clamp(2rem, 2.6vw, 2.8rem);">Vista avanzada de métricas y tendencias</h2>
+                <p class="mb-0" style="color: #cbd5e1; max-width: 720px;">Nuevo panel interactivo construido con HTML y JS para dar una experiencia más sofisticada, con tarjetas de datos, gráfico de top juegos y una tabla filtrable.</p>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <span class="badge rounded-pill bg-gradient" style="background: linear-gradient(135deg, #7c3aed, #22c55e); font-size: 0.9rem;">Streamlit + HTML</span>
+                <span class="badge rounded-pill bg-gradient" style="background: linear-gradient(135deg, #0ea5e9, #6366f1); font-size: 0.9rem;">Chart.js</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-xl-3">
+          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
+            <h5 class="mb-3" style="color: #cbd5e1;">Jugadores totales</h5>
+            <div class="display-6 fw-bold">__PLAYERS__</div>
+            <p class="mb-0 text-muted">Total en la fecha seleccionada.</p>
+          </div>
+        </div>
+        <div class="col-12 col-xl-3">
+          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
+            <h5 class="mb-3" style="color: #cbd5e1;">Juegos monitorizados</h5>
+            <div class="display-6 fw-bold">__GAMES__</div>
+            <p class="mb-0 text-muted">Cantidad de títulos cargados en el dataset.</p>
+          </div>
+        </div>
+        <div class="col-12 col-xl-3">
+          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
+            <h5 class="mb-3" style="color: #cbd5e1;">Juego Líder</h5>
+            <div class="display-6 fw-bold">__TOP_GAME__</div>
+            <p class="mb-0 text-muted">El título con mayor prioridad en el ranking actual.</p>
+          </div>
+        </div>
+        <div class="col-12 col-xl-3">
+          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
+            <h5 class="mb-3" style="color: #cbd5e1;">Activos</h5>
+            <div class="display-6 fw-bold">__ACTIVE_GAMES__</div>
+            <p class="mb-0 text-muted">Títulos con jugadores en línea.</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-7">
+          <div class="p-4 rounded-4" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(148, 163, 184, 0.12);">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h5 class="mb-0" style="color: #cbd5e1;">Top juegos por jugadores</h5>
+                <small class="text-muted">Mostrando los __DISPLAY_LIMIT__ juegos principales</small>
+              </div>
+              <small class="text-muted">Actualizado al momento</small>
+            </div>
+            <canvas id="topPlayersChart" height="260"></canvas>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <div class="p-4 rounded-4" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(148, 163, 184, 0.12);">
+            <div class="mb-3">
+              <h5 class="mb-2" style="color: #cbd5e1;">Buscar juegos</h5>
+              <input id="gameSearch" type="search" class="form-control form-control-dark" placeholder="Filtrar por nombre..." style="background: rgba(255,255,255,0.04); border-color: rgba(148,163,184,0.2); color: #f8fafc;" />
+            </div>
+            <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
+              <table class="table table-borderless text-white mb-0">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(148,163,184,0.16);">
+                    <th class="text-muted">Rank</th>
+                    <th class="text-muted">Juego</th>
+                    <th class="text-muted">Jugadores</th>
+                  </tr>
+                </thead>
+                <tbody id="gameTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const topGames = __GAMES_JSON__;
+
+      function buildTable(filtered) {
+        const tbody = document.getElementById('gameTableBody');
+        tbody.innerHTML = '';
+        filtered.forEach(game => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="color:#a5b4fc;">${game.rank || '-'}</td>
+            <td style="color:#e2e8f0;"><a href="https://store.steampowered.com/app/${game.appid}" target="_blank" style="color:#e2e8f0; text-decoration:none;">${game.name}</a></td>
+            <td style="color:#cbd5e1;">${game.players.toLocaleString()}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      function renderChart() {
+        const labels = topGames.map(game => game.name);
+        const values = topGames.map(game => game.players);
+        const ctx = document.getElementById('topPlayersChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Jugadores concurrentes',
+              data: values,
+              backgroundColor: 'rgba(99, 102, 241, 0.85)',
+              borderRadius: 12,
+              maxBarThickness: 32,
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+              x: { ticks: { color: '#cbd5e1' }, grid: { display: false } },
+              y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(148, 163, 184, 0.12)' } }
+            }
+          }
+        });
+      }
+
+      buildTable(topGames);
+      renderChart();
+
+      document.getElementById('gameSearch').addEventListener('input', (event) => {
+        const query = event.target.value.toLowerCase();
+        const filtered = topGames.filter(game => game.name.toLowerCase().includes(query));
+        buildTable(filtered);
+      });
+    </script>
+    """
+    html = html.replace("__PLAYERS__", f"{summary_cards['players']:,}")
+    html = html.replace("__GAMES__", str(summary_cards['games']))
+    html = html.replace("__TOP_GAME__", summary_cards["top_game"])
+    html = html.replace("__ACTIVE_GAMES__", str(summary_cards["active_games"]))
+    html = html.replace("__DISPLAY_LIMIT__", str(summary_cards["limit"]))
+    html = html.replace("__GAMES_JSON__", games_json)
+    st.components.v1.html(html, height=840)
 
 
 def get_fallback_game_image():
@@ -1470,7 +1729,10 @@ if selected_game_id:
     g_i = df_info[df_info["AppID"] == appid].iloc[0] if not df_info[df_info["AppID"] == appid].empty else pd.Series()
     g_d = df_detalles[df_detalles["AppID"] == appid].iloc[0] if not df_detalles[df_detalles["AppID"] == appid].empty else pd.Series()
 
-    
+    steam_details = get_steam_app_details(appid)
+    steam_description = fix_nan(steam_details.get("short_description"), "")
+    steam_tags = get_steam_store_tags(appid)
+
     g_rank = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["Posicion"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
     g_players = df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)]["JugadoresConcurrentes"].iloc[0] if not df_listado[(df_listado["AppID"] == appid) & (df_listado["Fecha"] == st.session_state.sel_date)].empty else "N/A"
     rating = fix_nan(g_d.get('Rating'), 'N/A')
@@ -1490,11 +1752,18 @@ if selected_game_id:
 
         
         st.markdown(f"""
-        <div style="position: relative; height: 300px; border-radius: 15px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
-            <img src="{get_enhanced_game_background(appid, game_name)}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4);" />
-            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
-                <h1 style="font-size: 3em; margin: 0; font-weight: bold;">{game_name}</h1>
-                <p style="font-size: 1.2em; margin: 10px 0 0 0; opacity: 0.9;">{fix_nan(g_i.get('Desarrollador'))}</p>
+        <div class="detail-hero">
+            <div>
+                <img src="{get_enhanced_game_background(appid, game_name)}" alt="{game_name}" />
+            </div>
+            <div>
+                <span class="eyebrow">Versión profesional</span>
+                <h1>{game_name}</h1>
+                <p>{fix_nan(g_i.get('Desarrollador'))}</p>
+                <div class="tag-bar">
+                    {''.join(f'<span class="tag-chip">{tag}</span>' for tag in steam_tags[:6])}
+                </div>
+                <p class="detail-description" style="margin-top: 18px; color: #d1d5db; line-height: 1.7;">{steam_description or 'Descripción no disponible en Steam. Usa los datos locales del CSV para más contexto.'}</p>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1968,6 +2237,12 @@ elif st.session_state.view == "Price Analysis":
  
 st.title(t["dashboard_title"])
 
+render_hero_banner(t, df_day)
+more_label = "Ver menos juegos" if st.session_state.show_more else "Ver más juegos"
+if st.button(more_label, key="toggle_pro_more"):
+    st.session_state.show_more = not st.session_state.show_more
+    st.experimental_rerun()
+render_advanced_html_dashboard(t, df_day, show_more=st.session_state.show_more)
 
 m1, m2, m3, m4 = st.columns(4)
 selected_peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
