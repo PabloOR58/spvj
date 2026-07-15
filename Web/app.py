@@ -76,7 +76,7 @@ USERS_FILE = "users.csv"
 FAV_FILE = "favoritos.csv"
 
  
-def init_user_files():
+def init_user_files(): #Inicializa los archivos CSV para usuarios y favoritos si no existen, creando estructuras vacías con las columnas necesarias para almacenar la información de cuentas y preferencias de los usuarios.
     if not os.path.exists(USERS_FILE):
         pd.DataFrame(columns=["username", "password"]).to_csv(USERS_FILE, index=False)
     if not os.path.exists(FAV_FILE):
@@ -97,7 +97,7 @@ LANGUAGE_CODES = {
     "Français": "fr",
     "Português": "pt",
 }
-LANGUAGE_CODE_TO_NAME = {v: k for k, v in LANGUAGE_CODES.items()}
+LANGUAGE_CODE_TO_NAME = {v: k for k, v in LANGUAGE_CODES.items()} #Diccionario inverso para mapear códigos de idioma a nombres legibles, útil para mostrar el idioma seleccionado en la interfaz de usuario de manera amigable.
 TRANSLATIONS = {
     "es": {
         "language_label": "Idioma",
@@ -538,7 +538,7 @@ CURRENCY_CONFIG = {
     "pt": {"symbol": "€", "rate": 0.92},
     "en": {"symbol": "$", "rate": 1.00},
 }
-def get_currency_config(lang):
+def get_currency_config(lang): #Devuelve la configuración de moneda (símbolo y tasa de conversión) para el idioma especificado, con un valor predeterminado para inglés si el idioma no está definido en la configuración.
     return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"])
 
 def format_local_price(price_str, lang):
@@ -548,7 +548,7 @@ def format_local_price(price_str, lang):
         return t["free_to_play"]
     cfg = get_currency_config(lang)
     amount = val_usd * cfg["rate"]
-    return f"{cfg['symbol']}{amount:,.2f}"
+    return f"{cfg['symbol']}{amount:,.2f}" #Formatea el precio local con el símbolo de moneda y dos decimales, usando comas como separadores de miles.
 
 def get_translations(lang):
     return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
@@ -566,20 +566,20 @@ def encrypt_password(password):
     except:
         return password  
 
-def decrypt_password(encrypted_password):
+def decrypt_password(encrypted_password): 
     """Decrypt password from base64 encoding"""
-    if not encrypted_password:
+    if not encrypted_password: #Si la contraseña cifrada está vacía o es None, devuelve una cadena vacía para evitar errores al intentar decodificar un valor no válido.
         return ""
     try:
         
-        encrypted_bytes = encrypted_password.encode('utf-8')
+        encrypted_bytes = encrypted_password.encode('utf-8') #Convierte la contraseña cifrada de una cadena a bytes utilizando UTF-8, preparando el valor para la decodificación base64.
         decoded_bytes = base64.b64decode(encrypted_bytes)
         return decoded_bytes.decode('utf-8')
     except:
         return encrypted_password 
 
  
-def fix_nan(val, default="-"):
+def fix_nan(val, default="-"): #Si el valor es NaN, una cadena vacía o la cadena "nan" (ignorando mayúsculas), devuelve un valor predeterminado (por defecto "-"). De lo contrario, devuelve el valor convertido a cadena. Esto es útil para limpiar datos antes de mostrarlos en la interfaz de usuario.
     if pd.isna(val) or str(val).lower() == "nan" or str(val).strip() == "":
         return default
     return str(val)
@@ -591,13 +591,13 @@ def convert_to_usd_numeric(price_str):
     if re.search(r"\b(GRATIS|FREE)\b", p):
         return 0.0
     try:
-        nums = re.findall(r"[-+]?\d*\.\d+|\d+", p.replace(',', '.'))
+        nums = re.findall(r"[-+]?\d*\.\d+|\d+", p.replace(',', '.')) #Busca números en la cadena de precio, permitiendo tanto puntos como comas como separadores decimales, y devuelve el primer número encontrado como valor numérico. Si no se encuentran números, devuelve 0.0.
         if not nums:
             return 0.0
         val = float(nums[0])
         if val == 0.0:
             return 0.0
-        rates = {"€": 1.08, "฿": 0.028, "РУБ": 0.011, "AED": 0.27, "CLP": 0.0011, "CDN$": 0.74, "¥": 0.0067}
+        rates = {"€": 1.08, "฿": 0.028, "РУБ": 0.011, "AED": 0.27, "CLP": 0.0011, "CDN$": 0.74, "¥": 0.0067} #Diccionario de símbolos de moneda y sus tasas de conversión aproximadas a USD para convertir precios que pueden estar en diferentes monedas a un valor numérico en dólares.
         for s, r in rates.items():
             if s in p:
                 return val * r
@@ -605,7 +605,7 @@ def convert_to_usd_numeric(price_str):
     except:
         return 0.0
 
-def normalize_genre_token(token):
+def normalize_genre_token(token): #Normaliza un token de género eliminando espacios, caracteres especiales y aplicando reemplazos específicos para estandarizar los nombres de géneros, devolviendo None para tokens vacíos o no significativos.
     if pd.isna(token):
         return None
     token_text = str(token).strip()
