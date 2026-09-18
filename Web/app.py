@@ -517,13 +517,23 @@ def get_currency_config(lang): #Devuelve la configuración de moneda (símbolo y
     return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"]) #Devuelve la configuración de moneda (símbolo y tasa de conversión) para el idioma especificado, con un valor predeterminado para inglés si el idioma no está definido en la configuración.
 
 def format_local_price(price_str, lang):
-    val_usd = convert_to_usd_numeric(price_str)
     t = get_translations(lang)
-    if val_usd == 0.0:
+    if pd.isna(price_str) or str(price_str).strip().lower() in {"", "nan", "n/a"}:
+        return "N/A"
+    if re.search(r"\b(GRATIS|FREE)\b", str(price_str), re.IGNORECASE):
         return t["free_to_play"]
-    cfg = get_currency_config(lang)
-    amount = val_usd * cfg["rate"]
-    return f"{cfg['symbol']}{amount:,.2f}" #Formatea el precio local con el símbolo de moneda y dos decimales, usando comas como separadores de miles.
+    return str(price_str)
+
+
+def format_number(value, decimals=0):
+    """Format numbers with Spanish thousands separators for every UI language."""
+    try:
+        numeric = float(value)
+        if decimals:
+            return f"{numeric:,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"{int(numeric):,}".replace(",", ".")
+    except (TypeError, ValueError):
+        return fix_nan(value, "N/A")
 
 def get_translations(lang):
     return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
@@ -558,6 +568,15 @@ def fix_nan(val, default="-"): #Si el valor es NaN, una cadena vacía o la caden
     if pd.isna(val) or str(val).lower() == "nan" or str(val).strip() == "":
         return default
     return str(val)
+
+
+def get_game_description(game_row, lang):
+    """Return the localized expanded description, falling back to English."""
+    language_column = f"Descripcion_{lang}"
+    description = fix_nan(game_row.get(language_column), "")
+    if description:
+        return description
+    return fix_nan(game_row.get("Descripcion_en", game_row.get("Descripcion")), "")
 
 def convert_to_usd_numeric(price_str):
     if pd.isna(price_str) or str(price_str).lower() == "nan":
@@ -761,6 +780,13 @@ def get_enhanced_game_image(appid, game_name=None):
         if special_image:
             return special_image
 
+    try:
+        stored_image = df_detalles.loc[df_detalles["AppID"] == safe_appid(appid), "Imagen"]
+        if not stored_image.empty and pd.notna(stored_image.iloc[0]) and str(stored_image.iloc[0]).strip():
+            return str(stored_image.iloc[0])
+    except (KeyError, TypeError):
+        pass
+
     if steam_image_exists(appid):
         return get_game_image(appid)
 
@@ -799,18 +825,18 @@ def generate_review_snippets(game_name, rating, reviews):
         return [
             f"Los jugadores valoran {game_name} muy positivamente: {int(rating_val)}/100.",
             "Destacan especialmente su jugabilidad fluida y equilibrio.",
-            f"Con más de {reviews_val:,} opiniones, se nota una comunidad activa y satisfecha."
+            f"Con más de {format_number(reviews_val)} opiniones, se nota una comunidad activa y satisfecha."
         ]
     if rating_val >= 70:
         return [
             f"{game_name} mantiene una buena valoración: {int(rating_val)}/100.",
             "Muchos usuarios destacan su contenido y experiencia general.",
-            f"Las {reviews_val:,} reseñas muestran interés y opiniones mayoritariamente positivas." 
+            f"Las {format_number(reviews_val)} reseñas muestran interés y opiniones mayoritariamente positivas." 
         ]
     return [
         f"{game_name} tiene una puntuación de {int(rating_val)}/100.",
         "Algunos usuarios aprecian su propuesta, aunque piden mejoras en ciertos aspectos.",
-        f"Con {reviews_val:,} reseñas, hay una base suficiente para obtener una idea general del juego."
+        f"Con {format_number(reviews_val)} reseñas, hay una base suficiente para obtener una idea general del juego."
     ]
 
 def format_game_name_for_twitch(game_name):
@@ -908,7 +934,7 @@ DOWNLOAD_SCRIPT = os.path.join(SRC_DIR, "download.py")
 def load_data():
     try:
         df_l = pd.read_csv(os.path.join(CLEAN_DIR, "listado_juegos.csv"))
-        df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"))
+        df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"), on_bad_lines="skip")
         df_d = pd.read_csv(os.path.join(CLEAN_DIR, "detalles_juegos.csv"), on_bad_lines="skip")
         df_p = pd.read_csv(os.path.join(CLEAN_DIR, "plataformas_juegos.csv"))
         for df in [df_l, df_i, df_d, df_p]:
@@ -1197,7 +1223,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     if rating is not None:
         overlay_lines.append(f"{t['rating_label']}: {fix_nan(rating)}")
     if reviews is not None and not pd.isna(reviews):
-        overlay_lines.append(f"{t['reviews_label']}: {int(pd.to_numeric(reviews, errors='coerce')):,}")
+        overlay_lines.append(f"{t['reviews_label']}: {format_number(reviews)}")
     if safe_id is not None:
         try:
             info_row = df_info[df_info['AppID'] == safe_id]
@@ -1216,7 +1242,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
             if not det_row.empty and (reviews is None or pd.isna(reviews)):
                 det_reviews = pd.to_numeric(det_row['Reviews'].iloc[0], errors='coerce')
                 if not pd.isna(det_reviews):
-                    overlay_lines.append(f"{t['reviews_label']}: {int(det_reviews):,}")
+                    overlay_lines.append(f"{t['reviews_label']}: {format_number(det_reviews)}")
         except:
             pass
     if extra_caption:
@@ -1244,7 +1270,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     if rating is not None:
         st.write(f"**{t['rating_label']}:** {fix_nan(rating)}")
     if reviews is not None and not pd.isna(reviews):
-        st.write(f"**{t['reviews_label']}:** {int(pd.to_numeric(reviews, errors='coerce')):,}")
+        st.write(f"**{t['reviews_label']}:** {format_number(reviews)}")
 
   
     render_card_controls(aid, name, key_prefix, is_fav, t, compact=False)
@@ -1308,9 +1334,9 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
     except:
         pass
     if players is not None:
-        overlay_lines.append(f"Jugadores: {int(players):,}")
+        overlay_lines.append(f"Jugadores: {format_number(players)}")
     if peak is not None:
-        overlay_lines.append(f"Pico: {int(peak):,}")
+        overlay_lines.append(f"Pico: {format_number(peak)}")
     overlay_html = ''
     if overlay_lines:
         overlay_html = '<div class="dashboard-card__overlay">' + '<br>'.join(overlay_lines[:4]) + '</div>'
@@ -1319,9 +1345,9 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
     st.markdown(f"**{name}**")
     meta = []
     if players is not None:
-        meta.append(f"Jugadores: {int(players):,}")
+        meta.append(f"Jugadores: {format_number(players)}")
     if peak is not None:
-        meta.append(f"Pico: {int(peak):,}")
+        meta.append(f"Pico: {format_number(peak)}")
     if meta:
         st.caption("  •  ".join(meta))
 
@@ -1504,11 +1530,11 @@ if selected_game_id:
         with col1:
             st.metric(t["rating_label"], f"{rating_num}/100" if not pd.isna(rating_num) else "N/A")
         with col2:
-            st.metric(t["reviews_label"], f"{int(reviews_num):,}" if not pd.isna(reviews_num) else "N/A")
+            st.metric(t["reviews_label"], format_number(reviews_num) if not pd.isna(reviews_num) else "N/A")
         with col3:
             st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "N/A")
         with col4:
-            st.metric(t["current_players"], f"{int(players_num):,}" if not pd.isna(players_num) else "N/A")
+            st.metric(t["current_players"], format_number(players_num) if not pd.isna(players_num) else "N/A")
 
         
         st.markdown("---")
@@ -1581,6 +1607,9 @@ if selected_game_id:
             st.write(f"**{t['genres_label']}:** {fix_nan(g_i.get('Géneros'))}")
             st.write(f"**{t['platforms_label']}:** {display_platforms_section(appid, st.session_state.language)}")
             st.write(f"**{t['release_information']}:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}")
+            description = get_game_description(g_d, st.session_state.language)
+            if description:
+                st.write(f"**{t['about_game']}:** {description}")
 
         with info_col2:
             st.markdown("""
@@ -1606,6 +1635,10 @@ if selected_game_id:
             t['current_players']: fix_nan(g_players),
         }
         st.table(pd.DataFrame.from_dict(detail_rows, orient="index", columns=["Value"]))
+        description = get_game_description(g_d, st.session_state.language)
+        if description:
+            st.markdown(f"**{t['about_game']}**")
+            st.write(description)
 
     with tab3:
         st.markdown(f"### {t['reviews_tab']}")
@@ -1614,7 +1647,7 @@ if selected_game_id:
         else:
             st.write(f"**{t['rating_label']}:** N/A")
         if not pd.isna(reviews_num):
-            st.metric(t["reviews_label"], f"{int(reviews_num):,}")
+            st.metric(t["reviews_label"], format_number(reviews_num))
         else:
             st.write(f"**{t['reviews_label']}:** N/A")
 
@@ -1781,7 +1814,7 @@ if st.session_state.view == "Chat":
                     ai_reply += f"- **Precio Real:** {precio_local}\n"
                     ai_reply += f"- **Rating:** {rating_game}/100\n"
                     if isinstance(players_game, (int, float)):
-                        ai_reply += f"- **Jugadores concurrentes hoy:** {int(players_game):,}\n"
+                        ai_reply += f"- **Jugadores concurrentes hoy:** {format_number(players_game)}\n"
                     else:
                         ai_reply += f"- **Jugadores concurrentes hoy:** {players_game}\n"
                     ai_reply += "\n"
@@ -1792,7 +1825,7 @@ if st.session_state.view == "Chat":
                 df_day_dt = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
                 if not df_day_dt.empty:
                     top_1 = df_day_dt.iloc[0]
-                    ai_reply = f"El líder absoluto de hoy es **{top_1['Nombre']}** registrando **{int(top_1['JugadoresConcurrentes']):,}** usuarios activos."
+                    ai_reply = f"El líder absoluto de hoy es **{top_1['Nombre']}** registrando **{format_number(top_1['JugadoresConcurrentes'])}** usuarios activos."
                 else:
                     ai_reply = "Sin datos de ranking para la fecha seleccionada."
             else:
@@ -1971,10 +2004,10 @@ st.title(t["dashboard_title"])
 
 m1, m2, m3, m4 = st.columns(4)
 selected_peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
-m1.metric(t["players_online"], f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
+m1.metric(t["players_online"], format_number(df_day['JugadoresConcurrentes'].sum()))
 m2.metric(t["games_tracked"], f"{len(df_day)}")
 m3.metric(t["top_game"], fix_nan(df_day.iloc[0]["Nombre"]) if len(df_day) > 0 else "N/A")
-m4.metric(t["peak_24h"], f"{get_peak_last_24h(selected_peak_date):,}")
+m4.metric(t["peak_24h"], format_number(get_peak_last_24h(selected_peak_date)))
 
 st.divider()
 
@@ -1994,7 +2027,7 @@ with t1:
                     game_name = fix_nan(game.get("Nombre"))
                     pos = int(game.get('Posicion', 0)) if not pd.isna(game.get('Posicion', 0)) else 0
                     players = int(game.get('JugadoresConcurrentes', 0)) if not pd.isna(game.get('JugadoresConcurrentes', 0)) else 0
-                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  {players:,}")
+                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  {format_number(players)}")
     if st.button(t["toggle_top"]):
         st.session_state.show_more = not st.session_state.show_more
         st.rerun()
@@ -2142,7 +2175,7 @@ with t4:
     st.subheader(t["peak_24h_section"])
     peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
     peak_value = get_peak_last_24h(peak_date)
-    st.metric(t["peak_24h"], f"{peak_value:,}")
+    st.metric(t["peak_24h"], format_number(peak_value))
     if peak_date is not None and not pd.isna(parse_date_safe(peak_date)):
         st.write(f"{t['data_date']} {parse_date_safe(peak_date).strftime('%Y-%m-%d')}")
 

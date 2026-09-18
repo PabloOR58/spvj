@@ -1,6 +1,7 @@
 import requests #Importa la biblioteca requests para realizar solicitudes HTTP a la API de Steam y obtener datos sobre los juegos, como su nombre, plataformas y número de jugadores concurrentes. Esto es esencial para recopilar la información necesaria para generar los archivos CSV con los datos de los juegos más jugados y vendidos en Steam.
 from datetime import datetime #Importa la clase datetime del módulo datetime para trabajar con fechas y horas. En este código, se utiliza para obtener la fecha actual en formato "YYYY-MM-DD" para registrar cuándo se recopilaron los datos de los juegos y para eliminar entradas anteriores de los archivos CSV que correspondan a la misma fecha, asegurando que los datos estén actualizados y organizados por fecha.
 import csv #Importa el módulo csv para trabajar con archivos CSV (Comma-Separated Values). Este módulo proporciona funciones para leer y escribir archivos CSV de manera sencilla. En este código, se utiliza para crear archivos CSV con encabezados específicos, eliminar filas basadas en la fecha y escribir los datos recopilados sobre los juegos en los archivos CSV correspondientes.                                                                                                   
+import re
 import os #Importa el módulo os para interactuar con el sistema operativo, como crear directorios y manejar rutas de archivos. En este código, se utiliza para determinar la ruta base del proyecto, crear un directorio "Clean" si no existe y construir las rutas completas para los archivos CSV donde se almacenarán los datos de los juegos. Esto ayuda a organizar los archivos de salida y asegurarse de que se guarden en la ubicación correcta dentro del proyecto.
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #Determina la ruta base del proyecto al obtener el directorio del archivo actual (download.py) y luego subir un nivel para llegar al directorio raíz del proyecto. Esto es útil para construir rutas relativas a partir de la ubicación del proyecto, lo que facilita la gestión de archivos y directorios dentro del proyecto sin depender de rutas absolutas que pueden variar entre diferentes entornos o sistemas.
@@ -53,6 +54,131 @@ def get_platforms(appid): #Obtiene las plataformas disponibles para un juego esp
 
     except:
         return "windows"
+
+
+def obtener_detalles_juego(appid):
+    """Obtiene y normaliza los metadatos públicos de un juego de Steam."""
+    try:
+        response = requests.get(
+            f"https://store.steampowered.com/api/appdetails?appids={appid}&l=english&cc=es",
+            timeout=10,
+        ).json()
+        entry = response.get(str(appid), {})
+        if not entry.get("success"):
+            return None
+
+        data = entry.get("data", {})
+        price = data.get("price_overview", {}).get("final_formatted")
+        if data.get("is_free"):
+            price = "Gratis"
+        recommendations = data.get("recommendations", {}).get("total", 0)
+        rating = data.get("metacritic", {}).get("score")
+        try:
+            review_data = requests.get(
+                f"https://store.steampowered.com/appreviews/{appid}?json=1&language=all&num_per_page=0",
+                timeout=10,
+            ).json().get("query_summary", {})
+            total_reviews = review_data.get("total_reviews", 0)
+            if total_reviews:
+                rating = round(review_data.get("total_positive", 0) * 100 / total_reviews)
+                recommendations = total_reviews
+        except (TypeError, ValueError, requests.RequestException):
+            pass
+
+        descripcion = re.sub(r"<[^>]+>", " ", data.get("about_the_game", ""))
+        descripcion = re.sub(r"\s+", " ", descripcion).strip()
+        if data.get("short_description") and descripcion:
+            descripcion = f"{data['short_description']} {descripcion}"
+        localized_descriptions = {"Descripcion_en": descripcion}
+        for language, steam_language in (("es", "spanish"), ("fr", "french"), ("pt", "portuguese")):
+            try:
+                localized_response = requests.get(
+                    f"https://store.steampowered.com/api/appdetails?appids={appid}&l={steam_language}&cc=es",
+                    timeout=10,
+                ).json()
+                localized_data = localized_response.get(str(appid), {}).get("data", {})
+                localized_text = re.sub(r"<[^>]+>", " ", localized_data.get("about_the_game", ""))
+                localized_text = re.sub(r"\s+", " ", localized_text).strip()
+                short_text = localized_data.get("short_description", "")
+                localized_descriptions[f"Descripcion_{language}"] = (
+                    f"{short_text} {localized_text}".strip()
+                )
+            except requests.RequestException:
+                localized_descriptions[f"Descripcion_{language}"] = ""
+
+        return {
+            "AppID": appid,
+            "Nombre": data.get("name", f"ID {appid}"),
+            "Fecha_Lanzamiento": data.get("release_date", {}).get("date", ""),
+            "Géneros": ", ".join(g["description"] for g in data.get("genres", []) if g.get("description")),
+            "Desarrollador": ", ".join(data.get("developers", [])),
+            "Plataformas": ",".join(name for name, enabled in data.get("platforms", {}).items() if enabled),
+            "Precio": price or "N/A",
+            "Rating": rating if rating is not None else "N/A",
+            "Reviews": recommendations,
+            "Descripcion": descripcion,
+            "Imagen": data.get("header_image", ""),
+            **localized_descriptions,
+        }
+    except (KeyError, TypeError, ValueError, requests.RequestException) as error:
+        print(f"No se pudieron obtener los detalles de {appid}: {error}")
+        return None
+
+
+def guardar_catalogo(path_info, path_detalles, path_plataformas, juegos):
+    """Actualiza los catálogos con filas CSV correctamente escapadas."""
+    info_headers = ["AppID", "Nombre", "Fecha_Lanzamiento", "Géneros", "Desarrollador"]
+    detalles_headers = [
+        "AppID", "Nombre", "Precio", "Rating", "Reviews", "Descripcion", "Imagen",
+        "Descripcion_es", "Descripcion_en", "Descripcion_fr", "Descripcion_pt",
+    ]
+    plataformas_headers = ["Fecha", "AppID", "Plataformas"]
+    fecha = datetime.now().strftime("%Y-%m-%d")
+    catalogo = {}
+    if os.path.exists(path_detalles):
+        with open(path_detalles, "r", encoding="utf-8") as detalles_file:
+            for row in csv.DictReader(detalles_file):
+                try:
+                    catalogo[int(row["AppID"])] = row
+                except (KeyError, TypeError, ValueError):
+                    continue
+    historico_plataformas = []
+    if os.path.exists(path_plataformas):
+        with open(path_plataformas, "r", encoding="utf-8") as plataformas_file:
+            historico_plataformas = [
+                row for row in csv.DictReader(plataformas_file)
+                if row.get("Fecha") != fecha and row.get("AppID")
+            ]
+
+    for juego in juegos:
+        appid = juego.get("appid") or juego.get("id")
+        if appid is None:
+            continue
+        detalles = obtener_detalles_juego(int(appid))
+        if detalles:
+            catalogo[int(appid)] = detalles
+
+    with open(path_info, "w", newline="", encoding="utf-8") as info_file, \
+         open(path_detalles, "w", newline="", encoding="utf-8") as detalles_file, \
+         open(path_plataformas, "w", newline="", encoding="utf-8") as plataformas_file:
+        info_writer = csv.DictWriter(info_file, fieldnames=info_headers)
+        detalles_writer = csv.DictWriter(detalles_file, fieldnames=detalles_headers)
+        plataformas_writer = csv.DictWriter(plataformas_file, fieldnames=plataformas_headers)
+        info_writer.writeheader()
+        detalles_writer.writeheader()
+        plataformas_writer.writeheader()
+
+        for row in historico_plataformas:
+            plataformas_writer.writerow({key: row.get(key, "") for key in plataformas_headers})
+
+        for appid, datos in catalogo.items():
+            info_writer.writerow({key: datos.get(key, "") for key in info_headers})
+            detalles_writer.writerow({key: datos.get(key, "") for key in detalles_headers})
+            plataformas_writer.writerow({
+                "Fecha": fecha,
+                "AppID": appid,
+                "Plataformas": datos.get("Plataformas") or "windows",
+            })
 
 
 def generar_datos(): #Genera los datos de los juegos más jugados y vendidos en Steam, y los guarda en archivos CSV organizados por fecha. Primero, crea los archivos CSV necesarios con los encabezados adecuados si no existen. Luego, elimina las entradas anteriores correspondientes a la fecha actual para evitar duplicados. A continuación, realiza solicitudes a la API de Steam para obtener información sobre los juegos más jugados y vendidos, y escribe estos datos en los archivos CSV correspondientes. Finalmente, imprime un mensaje indicando que el proceso ha terminado.
@@ -137,6 +263,10 @@ def generar_datos(): #Genera los datos de los juegos más jugados y vendidos en 
         top = data.get("top_sellers", {}).get("items", [])
     except Exception:
         top = []
+
+    path_info = os.path.join(CLEAN_DIR, "info_juegos.csv")
+    path_detalles = os.path.join(CLEAN_DIR, "detalles_juegos.csv")
+    guardar_catalogo(path_info, path_detalles, path_plataformas, juegos + top)
 
     with open(path_vendidos, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
