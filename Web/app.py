@@ -970,9 +970,11 @@ def steam_app_details(appid):
         return {}
 
 
-def get_steam_ai_response(user_query):
+def get_steam_ai_response(user_query, context_term=None):
     """Turn a natural-language game question into a current Steam answer."""
     term = extract_game_term(user_query)
+    if len(term) < 2 and context_term:
+        term = context_term
     if len(term) < 2:
         return None
 
@@ -994,6 +996,13 @@ def get_steam_ai_response(user_query):
     price = "Gratis" if details.get("is_free") else details.get("price_overview", {}).get("final_formatted", "No disponible")
     description = re.sub(r"<[^>]+>", "", details.get("short_description", "")).strip()
     description = truncate_text(description, 320) if description else "Sin descripción disponible."
+    requirements = details.get("pc_requirements", {})
+    minimum_requirements = truncate_text(
+        re.sub(r"<[^>]+>", " ", requirements.get("minimum", "")), 450
+    ) or "No disponibles"
+    recommended_requirements = truncate_text(
+        re.sub(r"<[^>]+>", " ", requirements.get("recommended", "")), 450
+    ) or "No disponibles"
     store_url = f"https://store.steampowered.com/app/{result.get('id')}"
 
     return (
@@ -1004,6 +1013,8 @@ def get_steam_ai_response(user_query):
         f"- **Plataformas:** {platforms}\n"
         f"- **Lanzamiento:** {release_date}\n"
         f"- **Precio actual en Steam:** {price}\n\n"
+        f"**Requisitos mínimos:** {minimum_requirements}\n\n"
+        f"**Requisitos recomendados:** {recommended_requirements}\n\n"
         f"[Abrir ficha en Steam]({store_url})\n\n"
         f"_Datos consultados en la API pública de Steam._"
     )
@@ -1445,7 +1456,7 @@ def extract_game_term(user_query):
     """Extract a likely game title from a natural-language question."""
     term = user_query.lower()
     term = re.sub(
-        r"\b(steam|dime|dime algo|puedes|puede|decirme|decir|sabes|saber|quiero|quieres|cuanto|cuánto|cuesta|vale|precio|actual|actualizada|informacion|información|sobre|acerca de|ficha|sinopsis|requisitos|juego|game|qué|que|del|de|la|el|los|las|me|por favor)\b",
+        r"\b(steam|dime|dime algo|puedes|puede|decirme|decir|sabes|saber|quiero|quieres|cuanto|cuánto|cuenta|cuesta|vale|precio|actual|actualizada|informacion|información|sobre|acerca de|ficha|sinopsis|requisitos|juego|game|qué|que|q|del|de|la|el|los|las|me|por|favor|y|sus|su|ese|esa|tambien|también)\b",
         " ",
         term,
     )
@@ -1459,6 +1470,7 @@ def extract_game_term(user_query):
         "gta": "grand theft auto",
         "pubg": "playerunknown battlegrounds",
         "cod": "call of duty",
+        "forza": "forza horizon 5",
     }
     return aliases.get(term, term)
 
@@ -2061,12 +2073,12 @@ if st.session_state.view == "Chat":
     
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = [
-            {"role": "assistant", "content": "Hola. Puedo buscar juegos por título, desarrollador, género, precio, valoración y jugadores. Prueba con: `top 10`, `juegos gratis`, `aventuras`, `juegos de Valve` o `rating mayor a 90`."}
+            {"role": "assistant", "content": "Hola, soy el asistente de Infosteam. Puedo investigar juegos en tu catálogo y consultar Steam para darte precios, requisitos, géneros, valoraciones y recomendaciones. Puedes preguntarme de forma natural, por ejemplo: `¿qué me recomiendas para jugar gratis?`, `¿cuánto cuesta el Counter?` o `¿y sus requisitos?`."}
         ]
 
     if st.button("Nueva conversación", key="clear_chat"):
         st.session_state.chat_messages = [
-            {"role": "assistant", "content": "Conversación reiniciada. Puedo buscar por título, desarrollador, género, precio, valoración y jugadores. ¿Qué quieres descubrir?"}
+            {"role": "assistant", "content": "Conversación reiniciada. Cuéntame qué quieres encontrar y lo investigaré en Infosteam y Steam."}
         ]
         st.rerun()
 
@@ -2101,14 +2113,30 @@ if st.session_state.view == "Chat":
             query_lower = re.sub(alias, real_name, query_lower)
             query_normalized = re.sub(alias, real_name, query_normalized)
 
+        previous_user_messages = [
+            message["content"] for message in st.session_state.chat_messages[:-1]
+            if message["role"] == "user"
+        ]
+        context_term = extract_game_term(previous_user_messages[-1]) if previous_user_messages else None
+        if context_term in {"", "que", "cual", "ese", "este", "el", "la"}:
+            context_term = None
+
+        recent_user_messages = " ".join(
+            message["content"].lower()
+            for message in st.session_state.chat_messages[-8:]
+            if message["role"] == "user"
+        )
+
         
         steam_query = re.search(
             r"\b(steam|actual|actualizada|sinopsis|requisitos|ficha)\b",
             query_normalized,
         )
-        steam_reply = get_steam_ai_response(user_query) if steam_query else None
-        price_question = bool(re.search(r"\b(cuanto|cuánto|cuesta|vale|precio)\b", query_normalized))
-        recommendation_question = bool(re.search(r"\b(recomiendas|recomendar|recomendacion|recomendación|mejor para empezar)\b", query_normalized))
+        follow_up_query = bool(re.search(r"\b(y|e|sus|su|ese|esa|tambien|también|requisitos|sinopsis|precio)\b", query_normalized))
+        steam_reply = get_steam_ai_response(user_query, context_term) if (steam_query or follow_up_query) and not platform_question else None
+        price_question = bool(re.search(r"\b(cuanto|cuánto|cuenta|cuesta|vale|precio)\b", query_normalized))
+        recommendation_question = bool(re.search(r"\b(q|recomiendas|recomendar|recomendacion|recomendación|mejor para empezar|que me compro|qué me compro|que juego|qué juego)\b", query_normalized))
+        platform_question = bool(re.search(r"\b(windows|pc|linux|mac|steam deck)\b", query_normalized))
 
         if price_question:
             game_term = extract_game_term(user_query)
@@ -2127,7 +2155,7 @@ if st.session_state.view == "Chat":
                     "Si quieres, también puedo consultar la ficha actual directamente en Steam."
                 )
             else:
-                ai_reply = steam_reply or get_steam_ai_response(user_query) or (
+                ai_reply = steam_reply or get_steam_ai_response(user_query, context_term) or (
                     f"No he encontrado una ficha para **{game_term or 'ese juego'}**. "
                     "Prueba con el nombre completo, por ejemplo `Counter-Strike 2`."
                 )
@@ -2135,14 +2163,30 @@ if st.session_state.view == "Chat":
             recommendation_df = df_detalles.copy()
             recommendation_df["Rating_Num"] = pd.to_numeric(recommendation_df["Rating"], errors="coerce").fillna(0)
             recommendation_df["Reviews_Num"] = pd.to_numeric(recommendation_df["Reviews"], errors="coerce").fillna(0)
-            recent_user_messages = " ".join(
-                message["content"].lower()
-                for message in st.session_state.chat_messages[-6:]
-                if message["role"] == "user"
-            )
             if "gratis" in recent_user_messages or "free" in recent_user_messages:
                 recommendation_df = recommendation_df[
                     recommendation_df["Precio"].apply(convert_to_usd_numeric) == 0.0
+                ]
+            preference_tokens = {
+                "competitivo": ["Action", "Multiplayer", "Sports"],
+                "competitiva": ["Action", "Multiplayer", "Sports"],
+                "historia": ["Adventure", "RPG", "Story Rich"],
+                "relajado": ["Casual", "Simulation", "Indie"],
+                "amigos": ["Multiplayer", "Co-op", "Casual"],
+                "estrategia": ["Strategy"],
+                "accion": ["Action"],
+                "aventura": ["Adventure"],
+                "rpg": ["RPG"],
+            }
+            requested_preferences = next(
+                (tokens for preference, tokens in preference_tokens.items() if preference in recent_user_messages),
+                None,
+            )
+            if requested_preferences:
+                recommendation_df = recommendation_df[
+                    recommendation_df["Géneros"].fillna("").apply(
+                        lambda value: any(token.lower() in str(value).lower() for token in requested_preferences)
+                    )
                 ]
             recommendation_df = recommendation_df[recommendation_df["Rating_Num"] > 0].copy()
             if not recommendation_df.empty:
@@ -2157,6 +2201,29 @@ if st.session_state.view == "Chat":
                 )
             else:
                 ai_reply = "Necesito más datos de valoración para recomendarte uno con criterio."
+        elif platform_question and ("gratis" in recent_user_messages or "free" in recent_user_messages or "gratis" in query_normalized or "free" in query_normalized):
+            platform_name = "windows" if "windows" in query_normalized or "pc" in query_normalized else "linux" if "linux" in query_normalized else "mac"
+            platform_rows = df_info[
+                df_info["Géneros"].notna() & df_info["Nombre"].notna()
+            ].copy()
+            platform_map = df_plataformas.groupby("AppID")["Plataformas"].first().fillna("")
+            platform_rows = platform_rows[
+                platform_rows["AppID"].map(platform_map).fillna("").astype(str).str.lower().str.contains(platform_name)
+            ]
+            free_ids = set(
+                df_detalles.loc[
+                    df_detalles["Precio"].apply(convert_to_usd_numeric) == 0.0, "AppID"
+                ].dropna().astype(int)
+            )
+            platform_rows = platform_rows[platform_rows["AppID"].isin(free_ids)]
+            platform_rows = platform_rows.head(8)
+            if not platform_rows.empty:
+                ai_reply = f"### Juegos gratis para {platform_name.title()}\n\n"
+                for _, platform_row in platform_rows.iterrows():
+                    ai_reply += f"- **{platform_row.get('Nombre', 'N/A')}** | {platform_row.get('Desarrollador', 'N/A')}\n"
+                ai_reply += "\nPuedo recomendarte uno según si buscas competitivo, historia, relajado o jugar con amigos."
+            else:
+                ai_reply = f"No encontré juegos gratuitos con datos compatibles con {platform_name.title()} en el catálogo actual."
         elif steam_reply:
             ai_reply = steam_reply
         elif re.search(r"\b(top|ranking|mas jugad|más jugad)\b", query_normalized):
@@ -2171,7 +2238,9 @@ if st.session_state.view == "Chat":
         elif "gratis" in query_normalized or "free" in query_normalized:
             df_m = df_detalles.copy()
             df_m['Price_Val'] = df_m['Precio'].apply(convert_to_usd_numeric)
-            gratis_df = df_m[df_m['Price_Val'] == 0.0].head(5)
+            gratis_df = df_m[df_m['Price_Val'] == 0.0].copy()
+            gratis_df['Rating_Num'] = pd.to_numeric(gratis_df['Rating'], errors='coerce').fillna(0)
+            gratis_df = gratis_df.sort_values('Rating_Num', ascending=False).head(5)
             if not gratis_df.empty:
                 ai_reply = "### Juegos Populares Gratuitos Detectados:\n\n"
                 for _, r in gratis_df.iterrows():
