@@ -44,13 +44,13 @@ AppID,Nombre,Fecha_Lanzamiento,Géneros,Desarrollador
 289070,Sid Meier’s Civilization® VI,"20 Oct, 2016",Strategy,"Firaxis Games, Aspyr (Mac), Aspyr (Linux)"
 4001890,How to Fish,"20 Aug, 2026","Action, Casual, Indie, Simulation",Dazed Games
 275850,No Man's Sky,"12 Aug, 2016","Action, Adventure",Hello Games
-1245620,ELDEN RING,"24 Feb, 2022","Action, RPG","FromSoftware, Inc."
-2807960,Battlefield™ 6,"10 Oct, 2025",Action,Battlefield Studios
+1245620,ELDEN RING,,,
+2807960,Battlefield™ 6,,,
 1174180,Red Dead Redemption 2,"5 Dec, 2019","Action, Adventure",Rockstar Games
 2073620,Arena Breakout: Infinite,"15 Sep, 2025","Action, Adventure, Massively Multiplayer, RPG, Strategy, Free To Play",Morefun Studios
 3551340,Football Manager 26,"4 Nov, 2025","Simulation, Sports, Strategy",Sports Interactive
 1091500,Cyberpunk 2077,"9 Dec, 2020",RPG,CD PROJEKT RED
-221100,DayZ,"13 Dec, 2018","Action, Adventure, Massively Multiplayer",Bohemia Interactive
+221100,DayZ,,,
 227300,Euro Truck Simulator 2,"12 Oct, 2012","Indie, Simulation",SCS Software
 261550,Mount & Blade II: Bannerlord,"25 Oct, 2022","Action, Indie, RPG, Simulation, Strategy",TaleWorlds Entertainment
 1366800,Crosshair X,"17 Aug, 2020","Action, Adventure, Indie, Software Training, Utilities",CenterPoint Gaming
@@ -93,11 +93,18 @@ AppID,Nombre,Fecha_Lanzamiento,Géneros,Desarrollador
 39210,FINAL FANTASY XIV Online,"18 Feb, 2014","Massively Multiplayer, RPG",Square Enix
 2252570,Football Manager 2024,"6 Nov, 2023","Simulation, Sports, Strategy",Sports Interactive
 427520,Factorio,"14 Aug, 2020","Casual, Indie, Simulation, Strategy",Wube Software LTD.
-2183900,"Warhammer 40,000: Space Marine 2","9 Sep, 2024","Action, Adventure, RPG",Saber Interactive
+2183900,"Warhammer 40,000: Space Marine 2",,,
 252950,Rocket League®,"6 Jul, 2015","Action, Indie, Racing, Sports",Psyonix LLC
 629520,Soundpad,"30 Sep, 2017","Audio Production, Utilities",Leppsoft
 4080220,EA SPORTS FC™ 27,"24 Sep, 2026","Simulation, Sports","EA CANADA, EA Romania"
 4225980,Trails in the Sky 2nd Chapter,"16 Sep, 2026","Action, Adventure, RPG",Nihon Falcom
-2402680,Dimraeth,"15 Sep, 2026","Action, Adventure, RPG, Early Access",Mudtek
-3008130,Dying Light: The Beast,"18 Sep, 2025","Action, Adventure, RPG",Techland
-3407390,ENDLESS Legend™ 2,"17 Sep, 2026","RPG, Simulation, Strategy",AMPLITUDE Studios
+2402680,Dimraeth,,,
+3008130,Dying Light: The Beast,,,
+3407390,ENDLESS Legend™ 2,,,
+1808500,ARC Raiders,"30 Oct, 2025",Action,Embark Studios
+3751260,The Blood of Dawnwalker,"2 Sep, 2026","Action, Adventure, RPG",Rebel Wolves
+346110,ARK: Survival Evolved,"27 Aug, 2017","Action, Adventure, Indie, Massively Multiplayer, RPG","Studio Wildcard, Instinct Games, Efecto Studios, Virtual Basement LLC"
+1818450,STALZONE,"9 Dec, 2022","Action, Massively Multiplayer, RPG, Free To Play",EXBO
+4200780,Call of Duty®: Black Ops 7 - BlackCell (Season 06),"17 Sep, 2026",Action,"Treyarch, Raven Software, Beenox, High Moon Studios, Sledgehammer Games, Infinity Ward, Activision Shanghai, Demonware"
+1478500,Big Walk,"4 Aug, 2026",Adventure,House House
+2001120,Split Fiction,"6 Mar, 2025","Action, Adventure",Hazelight Studios

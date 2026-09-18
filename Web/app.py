@@ -6,6 +6,7 @@ import base64 #Se usa para buscar y extraer patrones de texto complejos. En tu c
 import subprocess #librería para ejecutar comandos del sistema operativo, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como actualizar datos o ejecutar scripts externos. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
 import sys #librería para interactuar con el intérprete de Python, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como manejar argumentos de línea de comandos o controlar la salida del programa. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
 import plotly.graph_objects as go #librería para crear gráficos interactivo visualizar datos de tendencias, análisis de precios, etc.
+import streamlit.components.v1 as components
 
  
 st.set_page_config(
@@ -17,22 +18,217 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-.game-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .25s ease, box-shadow .25s ease; }
-.game-card img { width:100%; height:140px; object-fit:cover; transition: transform .35s ease; display:block; }
-.game-card:hover { transform: translateY(-6px) scale(1.02); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
-.game-card:hover img { transform: scale(1.04); }
-.game-card .meta { padding-top:6px; color: #cbd5e1; font-size:13px; }
-.game-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.92); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(12px); transition: opacity .25s ease, transform .25s ease; font-size:12px; line-height:1.4; z-index:2; }
-.game-card:hover .game-card__overlay { opacity:1; transform: translateY(0); }
-.badge { position:absolute; right:8px; top:8px; padding:4px 8px; border-radius:12px; font-weight:700; font-size:12px; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 70% { box-shadow: 0 0 0 10px rgba(155,92,255,0);} 100% { box-shadow: 0 0 0 0 rgba(155,92,255,0);} }
-.badge.pulse { animation: pulse 2s infinite; }
-.dashboard-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease; }
-.dashboard-card img { width:100%; height:110px; object-fit:cover; transition: transform .3s ease; display:block; }
-.dashboard-card:hover { transform: translateY(-4px); box-shadow:0 10px 26px rgba(0,0,0,0.35); }
-.dashboard-card:hover img { transform: scale(1.03); filter:brightness(1); }
-.dashboard-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.95); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(14px); transition: opacity .2s ease, transform .2s ease; font-size:12px; line-height:1.4; z-index:2; }
-.dashboard-card:hover .dashboard-card__overlay { opacity:1; transform: translateY(0); }
+    .stApp {
+        background:
+            radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 25%),
+            radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.18), transparent 22%),
+            linear-gradient(180deg, #070b14 0%, #0f172a 100%);
+    }
+
+    .main .block-container {
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+    }
+
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.88));
+        border-right: 1px solid rgba(148, 163, 184, 0.15);
+        box-shadow: 8px 0 30px rgba(2, 6, 23, 0.35);
+    }
+
+    section[data-testid="stSidebar"] .stMarkdownContainer,
+    section[data-testid="stSidebar"] .stSelectbox,
+    section[data-testid="stSidebar"] .stButton > button,
+    section[data-testid="stSidebar"] .stRadio > div,
+    section[data-testid="stSidebar"] .stTextInput {
+        transition: all 0.2s ease;
+    }
+
+    .stTabs [role="tablist"] {
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stTabs [role="tablist"] button {
+        background: rgba(15, 23, 42, 0.7);
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 12px 12px 0 0;
+        padding: 0.65rem 1rem;
+        font-weight: 600;
+    }
+
+    .stTabs [role="tablist"] button[aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(14, 165, 233, 0.9));
+        border-color: rgba(167, 139, 250, 0.7);
+        color: white;
+        box-shadow: 0 12px 24px rgba(124, 58, 237, 0.25);
+    }
+
+    div[data-testid="metric-container"] {
+        background: rgba(15, 23, 42, 0.72);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+        padding: 1rem 1.1rem;
+    }
+
+    .game-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        box-shadow: 0 12px 32px rgba(15,23,42,0.25);
+        background: rgba(15, 23, 42, 0.72);
+    }
+
+    .game-card img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        transition: transform .35s ease, filter .35s ease;
+        display: block;
+        filter: saturate(1.1) contrast(1.05);
+    }
+
+    .game-card:hover {
+        transform: translateY(-6px) scale(1.01);
+        box-shadow: 0 18px 40px rgba(79,70,229,0.18);
+        border-color: rgba(96, 165, 250, 0.32);
+    }
+
+    .game-card:hover img {
+        transform: scale(1.04);
+        filter: saturate(1.2) brightness(1.08);
+    }
+
+    .game-card .meta {
+        padding-top: 6px;
+        color: #cbd5e1;
+        font-size: 13px;
+    }
+
+    .game-card__overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, rgba(15,23,42,0.15), rgba(15,23,42,0.92));
+        color: #f8fafc;
+        padding: 10px 12px;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity .25s ease, transform .25s ease;
+        font-size: 12px;
+        line-height: 1.45;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+    }
+
+    .game-card:hover .game-card__overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .badge {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 0.02em;
+        box-shadow: 0 8px 18px rgba(15,23,42,0.2);
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 
+        70% { box-shadow: 0 0 0 10px rgba(155,92,255,0);} 
+        100% { box-shadow: 0 0 0 0 rgba(155,92,255,0);} 
+    }
+
+    .badge.pulse {
+        animation: pulse 2s infinite;
+    }
+
+    .dashboard-card {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        border: 1px solid rgba(148,163,184,0.1);
+        background: linear-gradient(135deg, #0f1720 0%, #111827 100%);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.28);
+    }
+
+    .dashboard-card img {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        transition: transform .3s ease, filter .3s ease;
+        display: block;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 38px rgba(59,130,246,0.16);
+        border-color: rgba(96, 165, 250, 0.24);
+    }
+
+    .dashboard-card:hover img {
+        transform: scale(1.05);
+        filter: brightness(1.05);
+    }
+
+    .dashboard-card__overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, rgba(15,23,42,0.15), rgba(15,23,42,0.96));
+        color: #f8fafc;
+        padding: 10px 12px;
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity .2s ease, transform .2s ease;
+        font-size: 11.5px;
+        line-height: 1.45;
+        z-index: 2;
+    }
+
+    .dashboard-card:hover .dashboard-card__overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .stButton > button {
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.9));
+        color: #f8fafc;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .stButton > button:hover {
+        border-color: rgba(96, 165, 250, 0.6);
+        box-shadow: 0 10px 22px rgba(59,130,246,0.18);
+    }
+
+    .stDataFrame, .stTable {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .stMetricLabel {
+        color: #cbd5e1 !important;
+    }
+
+    .stMetricValue {
+        font-weight: 700 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -107,13 +303,13 @@ TRANSLATIONS = {
         "view_info": "Ver Información",
         "details": "Detalles",
         "favorite": "Favorito",
-        "toggle_top": "Alternar Top 10 / 100",
+        "show_top_100": "Mostrar Top 100",
         "players_online": "Jugadores en Línea",
         "games_tracked": "Juegos Seguimiento",
         "top_game": "Mejor Juego",
         "welcome": "Bienvenido",
         "price": "Precio",
-        "free_to_play": "Gratis para jugar",
+        "free_to_play": "Gratis",
         "market_trends_title": "Tendencias y ventas",
         "genre_popularity_title": "Popularidad de géneros",
         "top_developers_title": "Mejores desarrolladores",
@@ -163,7 +359,7 @@ TRANSLATIONS = {
         "developer_label": "Desarrollador",
         "platforms_label": "Plataformas",
         "genres_label": "Géneros",
-        "rating_label": "Rating",
+        "rating_label": "Puntuación",
         "reviews_label": "Reseñas",
         "trend_formula_title": "Fórmula de tendencia",
         "trend_formula_description": "Puntuación estimada para proyectar la evolución de cada juego.",
@@ -215,13 +411,13 @@ TRANSLATIONS = {
         "view_info": "View Info",
         "details": "Details",
         "favorite": "Favorite",
-        "toggle_top": "Toggle Top 10 / 100",
+        "show_top_100": "Show Top 100",
         "players_online": "Players Online",
         "games_tracked": "Games Tracked",
         "top_game": "Top Game",
         "welcome": "Welcome",
         "price": "Price",
-        "free_to_play": "Free to Play",
+        "free_to_play": "Free",
         "market_trends_title": "Market Trends & Sales",
         "genre_popularity_title": "Genre Popularity",
         "top_developers_title": "Top Developers",
@@ -323,7 +519,7 @@ TRANSLATIONS = {
         "view_info": "Voir Infos",
         "details": "Détails",
         "favorite": "Favori",
-        "toggle_top": "Basculer Top 10 / 100",
+        "show_top_100": "Afficher le Top 100",
         "players_online": "Joueurs en ligne",
         "games_tracked": "Jeux suivis",
         "top_game": "Meilleur jeu",
@@ -360,7 +556,7 @@ TRANSLATIONS = {
         "no_24h_data": "Aucune donnée disponible pour les dernières 24 heures.",
         "popular_releases_description": "Un jeu est considéré comme populaire si son pic de joueurs hebdomadaire dépasse celui des autres jeux sortis à des dates similaires (plus ou moins 7 jours).",
         "copyright": "© 2026 infosteam — Surveillance de données haut de gamme",
-        "release_date": "Date de suite",
+        "release_date": "Date de sortie",
         "weekly_peak": "Pic hebdomadaire",
         "game_details": "Détails du jeu",
         "watch_trailer_on_steam": "Regarder la bande-annonce sur Steam",
@@ -379,7 +575,7 @@ TRANSLATIONS = {
         "rating_label": "Note",
         "reviews_label": "Avis",
         "trend_formula_title": "Formule de tendance",
-        "trend_formula_description": "Score estimé pour projeter l'évolution de cada jeu.",
+        "trend_formula_description": "Score estimé pour projeter l'évolution de chaque jeu.",
         "trend_formula_equation": "Score de tendance = (Pic hebdo * 0.6) + (Croissance 7j * 0.3) + (Récence * 0.1)",
         "trend_formula_note": "Les valeurs plus élevées indiquent une trajectoire ascendante plus probable.",
         "future_trending": "Tendance future",
@@ -396,7 +592,7 @@ TRANSLATIONS = {
         "added_to_favorites": "Ajouté aux favoris",
         "add_to_favorites": "Ajouter aux favoris",
         "remove_from_favorites": "Retirer des favoris",
-        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données para décrire le jeu sélectionné.",
+        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données pour décrire le jeu sélectionné.",
     },
     "pt": {
         "language_label": "Idioma",
@@ -420,24 +616,24 @@ TRANSLATIONS = {
         "price_analysis": "Análise de Preços",
         "popular_releases": "Lançamentos Populares",
         "favorites": "Favoritos",
-        "user_exists": "O usuário ya existe!",
+        "user_exists": "O usuário já existe!",
         "user_registered": "Usuário registrado!",
-        "wrong_credentials": "Credenciales incorretas",
+        "wrong_credentials": "Credenciais incorretas",
         "please_login_favorites": "Por favor faça login para ver seus favoritos.",
         "favorites_empty": "Sua lista de favoritos está vazia.",
         "saved": "Salvo:",
         "already_in_favorites": "Já está nos favoritos",
         "remove": "Remover",
-        "view_info": "Ver Informações",
+        "view_info": "Ver informações",
         "details": "Detalhes",
         "favorite": "Favorito",
-        "toggle_top": "Alternar Top 10 / 100",
+        "show_top_100": "Mostrar Top 100",
         "players_online": "Jogadores Online",
         "games_tracked": "Jogos Monitorados",
         "top_game": "Melhor Jogo",
         "welcome": "Bem-vindo",
         "price": "Preço",
-        "free_to_play": "Grátis para jogar",
+        "free_to_play": "Grátis",
         "market_trends_title": "Tendências e vendas",
         "genre_popularity_title": "Popularidade de gêneros",
         "top_developers_title": "Principais desenvolvedores",
@@ -570,13 +766,29 @@ def fix_nan(val, default="-"): #Si el valor es NaN, una cadena vacía o la caden
     return str(val)
 
 
+def truncate_text(text, max_chars=150):
+    """Reduce long text blocks to a compact preview while preserving readability."""
+    if text is None:
+        return ""
+    cleaned = re.sub(r"\s+", " ", str(text)).strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+    preview = cleaned[: max_chars - 3]
+    if " " in preview:
+        preview = preview.rsplit(" ", 1)[0]
+    return preview.strip() + "..."
+
+
 def get_game_description(game_row, lang):
     """Return the localized expanded description, falling back to English."""
     language_column = f"Descripcion_{lang}"
     description = fix_nan(game_row.get(language_column), "")
-    if description:
-        return description
-    return fix_nan(game_row.get("Descripcion_en", game_row.get("Descripcion")), "")
+    if description and description != "-":
+        return truncate_text(description)
+    fallback = fix_nan(game_row.get("Descripcion_en", game_row.get("Descripcion")), "")
+    if fallback and fallback != "-":
+        return truncate_text(fallback)
+    return ""
 
 def convert_to_usd_numeric(price_str):
     if pd.isna(price_str) or str(price_str).lower() == "nan":
@@ -705,8 +917,7 @@ def steam_video_exists(appid):
             if 'movies' in app_data and len(app_data['movies']) > 0:
                 
                 first_movie = app_data['movies'][0]
-                if 'hls_h264' in first_movie: #Verifica si el primer video tiene una URL de video en formato HLS (hls_h264) y, si es así, devuelve esa URL para que pueda ser utilizada como el trailer del juego. Si no se encuentra un video válido, devuelve False.
-                    return first_movie['hls_h264']
+                return first_movie.get('hls_h264') or first_movie.get('mp4') or first_movie.get('webm')
         return False
     except:
         return False
@@ -787,10 +998,9 @@ def get_enhanced_game_image(appid, game_name=None):
     except (KeyError, TypeError):
         pass
 
-    if steam_image_exists(appid):
-        return get_game_image(appid)
-
-    return get_fallback_game_image()
+    # El navegador ya dispone de un fallback mediante onerror en las cards.
+    # Evitamos un HEAD remoto por cada juego para que el dashboard cargue rápido.
+    return get_game_image(appid)
 
 def get_ai_response(user_input, game_data): #Devuelve una respuesta de estilo IA segura utilizando los datos conocidos del juego.
     """Return a safe fallback AI-style response using known game data."""
@@ -967,14 +1177,20 @@ def update_data_source():
         return False, str(e) #Devuelve el mensaje de error como una cadena, lo que permite mostrar información útil sobre lo que salió mal durante la actualización de los datos, ya sea un error específico del proceso o cualquier otra excepción que pueda ocurrir.
 
 
-def parse_date_safe(value): #Intenta analizar una fecha a partir de una cadena de texto utilizando pandas, primero asumiendo el formato día/mes/año (dayfirst=True) y luego intentando el formato mes/día/año (dayfirst=False) si el primer intento falla. Si ambos intentos fallan o si el valor es NaN, devuelve pd.NaT para indicar que no se pudo analizar la fecha de manera segura.
+def parse_date_safe(value): #Intenta analizar la fecha con formatos comunes sin generar warnings ni ambigüedades.
     try:
         if pd.isna(value):
             return pd.NaT
-        parsed = pd.to_datetime(value, dayfirst=True, errors='coerce') #Intenta analizar la fecha asumiendo el formato día/mes/año (dayfirst=True) y, si el análisis falla (errors='coerce' convierte valores no válidos en NaT), intenta nuevamente asumiendo el formato mes/día/año (dayfirst=False). Esto es útil para manejar fechas que pueden estar en diferentes formatos dependiendo de la fuente de datos, aumentando la probabilidad de analizar correctamente las fechas sin errores.
-        if pd.isna(parsed):
-            parsed = pd.to_datetime(value, dayfirst=False, errors='coerce')
-        return parsed
+        if isinstance(value, str):
+            value = value.strip()
+            if value == "":
+                return pd.NaT
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%m-%d-%Y"):
+            try:
+                return pd.to_datetime(value, format=fmt, errors='raise')
+            except Exception:
+                pass
+        return pd.to_datetime(value, errors='coerce')
     except Exception:
         return pd.NaT
 
@@ -1166,6 +1382,7 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
             st.button(t["details"], key=det_key, disabled=True)
         elif st.button(t["details"], key=det_key):
             st.session_state.selected_game = safe_id
+            st.session_state.scroll_to_top = True
             st.rerun()
     with c2:
 
@@ -1368,6 +1585,7 @@ def render_trend_formula_card(t):
 
 
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
+if "scroll_to_top" not in st.session_state: st.session_state.scroll_to_top = False
 if "show_more" not in st.session_state: st.session_state.show_more = False
 if "view" not in st.session_state: st.session_state.view = "Dashboard"
 if "language_name" not in st.session_state:
@@ -1483,12 +1701,38 @@ with st.sidebar:
             success, message = update_data_source()
         if success:
             st.success("Datos actualizados correctamente.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error(f"Error al actualizar datos: {message}")
 
 
 selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None #Intenta obtener el appid del juego seleccionado en el estado de la sesión, asegurándose de que sea un número entero válido. Si el valor no es un número válido o es None, se establecerá en None, lo que indica que no hay un juego seleccionado con un appid válido. Esto es útil para evitar errores al intentar mostrar los detalles de un juego sin un appid válido.
+if st.session_state.get("scroll_to_top"):
+    components.html(
+        """
+        <script>
+            const resetScroll = () => {
+                try {
+                    const target = document.querySelector('.stAppViewContainer, [data-testid="stAppViewContainer"]') || document.querySelector('.stApp');
+                    if (target) {
+                        target.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+                        target.scrollTop = 0;
+                    }
+                    const root = document.querySelector('html');
+                    if (root) {
+                        root.scrollTop = 0;
+                    }
+                    window.scrollTo(0, 0);
+                } catch (e) {}
+            };
+            setTimeout(resetScroll, 150);
+            setTimeout(resetScroll, 500);
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.scroll_to_top = False
+
 if selected_game_id:
     appid = selected_game_id
     st.session_state.selected_game = selected_game_id
@@ -1561,13 +1805,14 @@ if selected_game_id:
             st.markdown(f"### {t['trailer']}")
             video_url = get_game_video(appid)
             if video_url:
+                video_type = "application/x-mpegURL" if ".m3u8" in video_url else "video/mp4"
                 video_html = f"""
-                <video controls style="width:100%; border-radius:10px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);" poster="{get_enhanced_game_image(appid, game_name)}">
-                    <source src="{video_url}" type="application/x-mpegURL">
-                    Your browser does not support HLS video playback.
+                <video controls playsinline preload="metadata" style="width:100%; border-radius:10px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);" poster="{get_enhanced_game_image(appid, game_name)}">
+                    <source src="{video_url}" type="{video_type}">
+                    Tu navegador no admite la reproducción de este tráiler.
                 </video>
                 """
-                st.components.v1.html(video_html, height=250)
+                components.html(video_html, height=250)
             else:
                 st.markdown(f"[{t['watch_trailer_on_steam']}](https://store.steampowered.com/app/{appid})")
 
@@ -1612,9 +1857,9 @@ if selected_game_id:
                 st.write(f"**{t['about_game']}:** {description}")
 
         with info_col2:
-            st.markdown("""
+            st.markdown(f"""
             <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
-                <h4 style="margin: 0 0 10px 0;">Statistics</h4>
+                <h4 style="margin: 0 0 10px 0;">{t['information']}</h4>
             </div>
             """, unsafe_allow_html=True)
             st.write(f"**{t['current_rank']}:** {fix_nan(g_rank)}")
@@ -1869,7 +2114,7 @@ elif st.session_state.view == "Top Genres": #Esta sección se enfoca en analizar
     counts = pd.Series(flattened).value_counts().sort_values(ascending=False)
     fig = go.Figure(data=[go.Bar(x=counts.index, y=counts.values)])
     fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="top_genres_chart")
 
     popularity_df = genre_df.merge(df_detalles[['AppID', 'Reviews']], on='AppID', how='left')
     popularity_df['Reviews_Num'] = pd.to_numeric(popularity_df['Reviews'], errors='coerce').fillna(0)
@@ -1904,7 +2149,7 @@ elif st.session_state.view == "Top Developers":
     devs = df_info['Desarrollador'].value_counts().sort_values(ascending=False).head(15)
     fig = go.Figure(data=[go.Bar(x=devs.index, y=devs.values)])
     fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="top_developers_chart")
     sample = df_info.sort_values('Desarrollador').head(24)
     cols_per_row = 4
     for r in range(0, len(sample), cols_per_row):
@@ -1963,7 +2208,7 @@ elif st.session_state.view == "Future Trending":
         st.markdown(f"### {t.get('trend_forecast_chart', 'Top Trend Games')}")
         fig = go.Figure(data=[go.Bar(x=trend_df['Nombre'], y=trend_df['Trend Score'])])
         fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="future_trending_chart")
         st.markdown("### " + t.get('trend_formula_title', 'Formula de tendencia'))
         st.dataframe(trend_df[['Nombre', 'Weekly peak', 'Growth 7d', 'Recency', 'Trend Score']].rename(columns={
             'Nombre': t.get('name_filter', 'Name'),
@@ -1984,7 +2229,7 @@ elif st.session_state.view == "Price Analysis":
     price_sorted = df_p.sort_values('Price_Val', ascending=False).head(20)
     fig = go.Figure(data=[go.Bar(x=price_sorted['Nombre'], y=price_sorted['Price_Val'])])
     fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="price_analysis_chart")
     sorted_df = df_p.sort_values('Price_Val', ascending=False).head(24)
     cols_per_row = 4
     for r in range(0, len(sorted_df), cols_per_row):
@@ -2028,8 +2273,8 @@ with t1:
                     pos = int(game.get('Posicion', 0)) if not pd.isna(game.get('Posicion', 0)) else 0
                     players = int(game.get('JugadoresConcurrentes', 0)) if not pd.isna(game.get('JugadoresConcurrentes', 0)) else 0
                     render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  {format_number(players)}")
-    if st.button(t["toggle_top"]):
-        st.session_state.show_more = not st.session_state.show_more
+    if not st.session_state.show_more and st.button(t["show_top_100"], key="show_top_100_button"):
+        st.session_state.show_more = True
         st.rerun()
 
 with t2:
@@ -2065,7 +2310,7 @@ with t2:
             st.subheader("Top 10 juegos hoy por jugadores concurrentes")
             fig = go.Figure(data=[go.Bar(x=top_today['Nombre'], y=top_today['JugadoresConcurrentes'])])
             fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch", key="top_today_chart")
 
         prev_date = dates_list[1]
         cur = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
@@ -2087,7 +2332,7 @@ with t2:
             st.subheader("Top 10 crecimiento diario")
             fig = go.Figure(data=[go.Bar(x=movers['Nombre'], y=movers['growth'])])
             fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch", key="daily_growth_chart")
 
 with t3:
     st.header(t.get('data_explorer', t['data_explorer']))
@@ -2238,7 +2483,7 @@ with t6:
         trend_df = trend_df.sort_values('Trend Score', ascending=False)
         fig = go.Figure(data=[go.Bar(x=trend_df['Nombre'], y=trend_df['Trend Score'])])
         fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="dashboard_trend_chart")
         
         st.markdown("### Top Trend Games")
         cols_per_row = 4
