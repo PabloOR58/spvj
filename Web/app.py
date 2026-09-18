@@ -1,6 +1,7 @@
 import streamlit as st #biblioteca para la interfaz web
 import pandas as pd #librería para la manipulación y el análisis de datos
 import os #librería para interactuar con el sistema operativo y manejar archivos y directorios 
+import unicodedata
 import re #Sirve para gestionar rutas de archivos de forma segura e independiente de si ejecutas la app en Windows, Linux o Docker. También la usas para comprobar si un archivo físico existe en el disco duro, como los CSV de usuarios o favoritos
 import base64 #Se usa para buscar y extraer patrones de texto complejos. En tu código es fundamental para la conversión de divisas, ya que analiza los textos de los precios de Steam (que vienen con símbolos raros como €, $, ฿, o letras) y extrae únicamente la parte numérica para poder hacer cálculos matemáticos con ella.
 import subprocess #librería para ejecutar comandos del sistema operativo, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como actualizar datos o ejecutar scripts externos. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
@@ -937,6 +938,77 @@ def get_game_video(appid):
         return None
 
 
+@st.cache_data(ttl=900, show_spinner=False)
+def steam_store_search(term):
+    """Search the public Steam store API without requiring an API key."""
+    try:
+        import requests
+        response = requests.get(
+            "https://store.steampowered.com/api/storesearch/",
+            params={"term": term, "cc": "es", "l": "spanish", "category1": 998},
+            timeout=6,
+        )
+        response.raise_for_status()
+        return response.json().get("items", [])[:5]
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def steam_app_details(appid):
+    """Fetch current public store details for one Steam app."""
+    try:
+        import requests
+        response = requests.get(
+            f"https://store.steampowered.com/api/appdetails?appids={int(appid)}&cc=es&l=spanish",
+            timeout=6,
+        )
+        response.raise_for_status()
+        payload = response.json().get(str(int(appid)), {})
+        return payload.get("data", {}) if payload.get("success") else {}
+    except Exception:
+        return {}
+
+
+def get_steam_ai_response(user_query):
+    """Turn a natural-language game question into a current Steam answer."""
+    term = extract_game_term(user_query)
+    if len(term) < 2:
+        return None
+
+    results = steam_store_search(term)
+    if not results:
+        return None
+    result = results[0]
+    details = steam_app_details(result.get("id"))
+    if not details:
+        return None
+
+    name = details.get("name", result.get("name", term.title()))
+    developers = ", ".join(details.get("developers", [])) or "No disponible"
+    genres = ", ".join(item.get("description", "") for item in details.get("genres", [])) or "No disponible"
+    platforms = ", ".join(
+        platform for platform, enabled in details.get("platforms", {}).items() if enabled
+    ) or "No disponible"
+    release_date = details.get("release_date", {}).get("date", "No disponible")
+    price = "Gratis" if details.get("is_free") else details.get("price_overview", {}).get("final_formatted", "No disponible")
+    description = re.sub(r"<[^>]+>", "", details.get("short_description", "")).strip()
+    description = truncate_text(description, 320) if description else "Sin descripción disponible."
+    store_url = f"https://store.steampowered.com/app/{result.get('id')}"
+
+    return (
+        f"### {name}\n\n"
+        f"{description}\n\n"
+        f"- **Desarrollador:** {developers}\n"
+        f"- **Géneros:** {genres}\n"
+        f"- **Plataformas:** {platforms}\n"
+        f"- **Lanzamiento:** {release_date}\n"
+        f"- **Precio actual en Steam:** {price}\n\n"
+        f"[Abrir ficha en Steam]({store_url})\n\n"
+        f"_Datos consultados en la API pública de Steam._"
+    )
+
+
 def get_fallback_game_image():
     """Get a fallback game image when Steam image is not available"""
     
@@ -1367,6 +1439,28 @@ def safe_appid(value):
         return int(float(value))
     except Exception:
         return None
+
+
+def extract_game_term(user_query):
+    """Extract a likely game title from a natural-language question."""
+    term = user_query.lower()
+    term = re.sub(
+        r"\b(steam|dime|dime algo|puedes|puede|decirme|decir|sabes|saber|quiero|quieres|cuanto|cuánto|cuesta|vale|precio|actual|actualizada|informacion|información|sobre|acerca de|ficha|sinopsis|requisitos|juego|game|qué|que|del|de|la|el|los|las|me|por favor)\b",
+        " ",
+        term,
+    )
+    term = re.sub(r"[^\w\s:-]", " ", term, flags=re.UNICODE)
+    term = re.sub(r"\s+", " ", term).strip()
+    aliases = {
+        "counter": "counter-strike",
+        "counter strike": "counter-strike",
+        "cs2": "counter-strike 2",
+        "csgo": "counter-strike 2",
+        "gta": "grand theft auto",
+        "pubg": "playerunknown battlegrounds",
+        "cod": "call of duty",
+    }
+    return aliases.get(term, term)
 
 
 def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False): 
@@ -1962,13 +2056,19 @@ if st.session_state.view == "Favorites":
  
 if st.session_state.view == "Chat":
     st.title("Infosteam AI Assistant")
-    st.markdown("Asistente Avanzado. Puedes hablarme en lenguaje natural o escribir fragmentos vagos de juegos.")
+    st.markdown("Consulta el catálogo, compara juegos y descubre tendencias usando los datos actuales de la plataforma.")
 
     
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = [
-            {"role": "assistant", "content": "Hola. He analizado los CSVs del sistema. Pregúntame cosas como: '¿qué juegos son gratis?', 'busca juegos de Valve', 'juegos con rating mayor a 90' o un título parcial como 'strike'."}
+            {"role": "assistant", "content": "Hola. Puedo buscar juegos por título, desarrollador, género, precio, valoración y jugadores. Prueba con: `top 10`, `juegos gratis`, `aventuras`, `juegos de Valve` o `rating mayor a 90`."}
         ]
+
+    if st.button("Nueva conversación", key="clear_chat"):
+        st.session_state.chat_messages = [
+            {"role": "assistant", "content": "Conversación reiniciada. Puedo buscar por título, desarrollador, género, precio, valoración y jugadores. ¿Qué quieres descubrir?"}
+        ]
+        st.rerun()
 
     
     for msg in st.session_state.chat_messages:
@@ -1983,6 +2083,10 @@ if st.session_state.view == "Chat":
 
         ai_reply = ""
         query_lower = user_query.lower()
+        query_normalized = ''.join(
+            char for char in unicodedata.normalize("NFD", query_lower)
+            if unicodedata.category(char) != "Mn"
+        )
 
         
         alias_mapping = {
@@ -1995,9 +2099,76 @@ if st.session_state.view == "Chat":
         }
         for alias, real_name in alias_mapping.items():
             query_lower = re.sub(alias, real_name, query_lower)
+            query_normalized = re.sub(alias, real_name, query_normalized)
 
         
-        if "gratis" in query_lower or "free" in query_lower:
+        steam_query = re.search(
+            r"\b(steam|actual|actualizada|sinopsis|requisitos|ficha)\b",
+            query_normalized,
+        )
+        steam_reply = get_steam_ai_response(user_query) if steam_query else None
+        price_question = bool(re.search(r"\b(cuanto|cuánto|cuesta|vale|precio)\b", query_normalized))
+        recommendation_question = bool(re.search(r"\b(recomiendas|recomendar|recomendacion|recomendación|mejor para empezar)\b", query_normalized))
+
+        if price_question:
+            game_term = extract_game_term(user_query)
+            normalized_term = normalize_game_name(game_term)
+            local_matches = df_info[df_info["Nombre"].fillna("").apply(
+                lambda value: bool(normalized_term) and normalized_term in normalize_game_name(value)
+            )]
+            if not local_matches.empty:
+                local_game = local_matches.iloc[0]
+                local_aid = safe_appid(local_game.get("AppID"))
+                local_details = df_detalles[df_detalles["AppID"] == local_aid]
+                local_price = local_details["Precio"].iloc[0] if not local_details.empty else "N/A"
+                ai_reply = (
+                    f"**{local_game.get('Nombre', game_term)}** cuesta **{format_local_price(local_price, st.session_state.language)}**.\n\n"
+                    "El precio mostrado procede del catálogo actual de Infosteam. "
+                    "Si quieres, también puedo consultar la ficha actual directamente en Steam."
+                )
+            else:
+                ai_reply = steam_reply or get_steam_ai_response(user_query) or (
+                    f"No he encontrado una ficha para **{game_term or 'ese juego'}**. "
+                    "Prueba con el nombre completo, por ejemplo `Counter-Strike 2`."
+                )
+        elif recommendation_question:
+            recommendation_df = df_detalles.copy()
+            recommendation_df["Rating_Num"] = pd.to_numeric(recommendation_df["Rating"], errors="coerce").fillna(0)
+            recommendation_df["Reviews_Num"] = pd.to_numeric(recommendation_df["Reviews"], errors="coerce").fillna(0)
+            recent_user_messages = " ".join(
+                message["content"].lower()
+                for message in st.session_state.chat_messages[-6:]
+                if message["role"] == "user"
+            )
+            if "gratis" in recent_user_messages or "free" in recent_user_messages:
+                recommendation_df = recommendation_df[
+                    recommendation_df["Precio"].apply(convert_to_usd_numeric) == 0.0
+                ]
+            recommendation_df = recommendation_df[recommendation_df["Rating_Num"] > 0].copy()
+            if not recommendation_df.empty:
+                recommendation_df["Score"] = recommendation_df["Rating_Num"] + (
+                    recommendation_df["Reviews_Num"].clip(upper=1000000) / 1000000 * 5
+                )
+                pick = recommendation_df.sort_values("Score", ascending=False).iloc[0]
+                ai_reply = (
+                    f"Yo empezaría por **{pick.get('Nombre', 'este juego')}**. Tiene una valoración de **{pick['Rating_Num']:.0f}/100** "
+                    f"y **{format_number(pick['Reviews_Num'])} reseñas**, así que es la opción más sólida según los datos disponibles.\n\n"
+                    "Si me dices qué buscas, puedo afinar la recomendación: gratis, competitivo, historia, relajado o para jugar con amigos."
+                )
+            else:
+                ai_reply = "Necesito más datos de valoración para recomendarte uno con criterio."
+        elif steam_reply:
+            ai_reply = steam_reply
+        elif re.search(r"\b(top|ranking|mas jugad|más jugad)\b", query_normalized):
+            top_limit = 10 if re.search(r"\btop\s*10\b", query_normalized) else 5
+            ranking_df = df_listado[df_listado["Fecha"] == st.session_state.sel_date].copy()
+            ranking_df["Jugadores_Num"] = pd.to_numeric(ranking_df["JugadoresConcurrentes"], errors="coerce").fillna(0)
+            ranking_df = ranking_df.sort_values("Jugadores_Num", ascending=False).head(top_limit)
+            ai_reply = f"### Top {top_limit} de hoy\n\n"
+            for position, (_, row) in enumerate(ranking_df.iterrows(), start=1):
+                ai_reply += f"{position}. **{row.get('Nombre', 'N/A')}**: {format_number(row.get('Jugadores_Num', 0))} jugadores\n"
+
+        elif "gratis" in query_normalized or "free" in query_normalized:
             df_m = df_detalles.copy()
             df_m['Price_Val'] = df_m['Precio'].apply(convert_to_usd_numeric)
             gratis_df = df_m[df_m['Price_Val'] == 0.0].head(5)
@@ -2008,7 +2179,37 @@ if st.session_state.view == "Chat":
             else:
                 ai_reply = "No localicé juegos marcados explícitamente como gratuitos en los datos actuales."
 
-        elif "desarrollador" in query_lower or "creador" in query_lower or "de valve" in query_lower:
+        elif "genero" in query_normalized or "tipo de juego" in query_normalized:
+            genre_catalog = {}
+            for _, info_row in df_info.iterrows():
+                for genre in get_genre_tokens(info_row.get("Géneros")):
+                    normalized_genre = ''.join(
+                        char for char in unicodedata.normalize("NFD", genre.lower())
+                        if unicodedata.category(char) != "Mn"
+                    )
+                    genre_catalog.setdefault(normalized_genre, genre)
+            requested_genre = next(
+                (key for key in genre_catalog if key in query_normalized),
+                None
+            )
+            if requested_genre:
+                genre_rows = df_info[df_info["Géneros"].fillna("").apply(
+                    lambda value: requested_genre in "".join(
+                        char for char in unicodedata.normalize(
+                            "NFD", " ".join(get_genre_tokens(value)).lower()
+                        ) if unicodedata.category(char) != "Mn"
+                    )
+                )].head(8)
+                if not genre_rows.empty:
+                    ai_reply = f"### Juegos de {genre_catalog[requested_genre]}\n\n"
+                    for _, genre_row in genre_rows.iterrows():
+                        ai_reply += f"- **{genre_row.get('Nombre', 'N/A')}** | {genre_row.get('Desarrollador', 'N/A')}\n"
+                else:
+                    ai_reply = f"No encontré juegos clasificados como **{genre_catalog[requested_genre]}**."
+            else:
+                ai_reply = "Indícame un género concreto, por ejemplo: acción, aventura, RPG, estrategia o simulación."
+
+        elif "desarrollador" in query_normalized or "creador" in query_normalized or "de valve" in query_normalized:
             dev_search = query_lower.replace("desarrollador", "").replace("creador", "").replace("de", "").replace("busca", "").strip()
             if not dev_search: dev_search = "valve"
             
@@ -2020,7 +2221,7 @@ if st.session_state.view == "Chat":
             else:
                 ai_reply = f"No encontré ningún desarrollador que contenga el término '{dev_search}' en nuestros registros actuales."
 
-        elif "mejor rating" in query_lower or "puntuacion alta" in query_lower or "rating mayor" in query_lower or "buen rating" in query_lower:
+        elif "mejor rating" in query_normalized or "puntuacion alta" in query_normalized or "rating mayor" in query_normalized or "buen rating" in query_normalized:
             df_r = df_detalles.copy()
             df_r['Rating_Num'] = pd.to_numeric(df_r['Rating'], errors='coerce').fillna(0)
             mejo_df = df_r.sort_values('Rating_Num', ascending=False).head(5)
@@ -2029,12 +2230,15 @@ if st.session_state.view == "Chat":
                 ai_reply += f"- **{r['Nombre']}**: {int(r['Rating_Num'])}/100 de valoración positiva.\n"
 
         else:
-            clean_search = query_lower.replace("busca", "").replace("informacion", "").replace("sobre", "").replace("info", "").replace("del", "").replace("juego", "").strip()
+            clean_search = query_normalized.replace("busca", "").replace("informacion", "").replace("sobre", "").replace("info", "").replace("del", "").replace("juego", "").strip()
             
             found_games = []
             if len(clean_search) > 1 and not df_info.empty:
                 for _, row in df_info.iterrows():
-                    g_name = str(row.get('Nombre', '')).lower()
+                    g_name = ''.join(
+                        char for char in unicodedata.normalize("NFD", str(row.get('Nombre', '')).lower())
+                        if unicodedata.category(char) != "Mn"
+                    )
                     if clean_search in g_name or g_name in clean_search:
                         found_games.append(row)
                         if len(found_games) >= 3: break
@@ -2074,7 +2278,10 @@ if st.session_state.view == "Chat":
                 else:
                     ai_reply = "Sin datos de ranking para la fecha seleccionada."
             else:
-                ai_reply = "No encontré coincidencias semánticas directas. Intenta simplificar la búsqueda ingresando palabras clave separadas (ej: 'Counter', 'Dota', 'Valve' o 'gratis')."
+                ai_reply = get_steam_ai_response(user_query) or (
+                    "No encontré ese juego en el catálogo local ni en Steam. "
+                    "Prueba con el nombre completo o pregunta por `top 10`, `juegos gratis` o un género."
+                )
 
         with st.chat_message("assistant"):
             st.write(ai_reply)
