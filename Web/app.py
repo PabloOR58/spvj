@@ -1,13 +1,13 @@
-import streamlit as st
-import pandas as pd
-import os
-import re
-import base64
-import subprocess
-import sys
-import json
-import requests
-import plotly.graph_objects as go
+import streamlit as st #biblioteca para la interfaz web
+import pandas as pd #librería para la manipulación y el análisis de datos
+import os #librería para interactuar con el sistema operativo y manejar archivos y directorios 
+import unicodedata
+import re #Sirve para gestionar rutas de archivos de forma segura e independiente de si ejecutas la app en Windows, Linux o Docker. También la usas para comprobar si un archivo físico existe en el disco duro, como los CSV de usuarios o favoritos
+import base64 #Se usa para buscar y extraer patrones de texto complejos. En tu código es fundamental para la conversión de divisas, ya que analiza los textos de los precios de Steam (que vienen con símbolos raros como €, $, ฿, o letras) y extrae únicamente la parte numérica para poder hacer cálculos matemáticos con ella.
+import subprocess #librería para ejecutar comandos del sistema operativo, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como actualizar datos o ejecutar scripts externos. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
+import sys #librería para interactuar con el intérprete de Python, aunque no se utiliza en el código proporcionado, podría ser útil para tareas como manejar argumentos de línea de comandos o controlar la salida del programa. Por ejemplo, sirven para comprobar qué versión de Python se está usando (sys.version) o para lanzar tareas secundarias del sistema operativo directamente desde un botón de la web.
+import plotly.graph_objects as go #librería para crear gráficos interactivo visualizar datos de tendencias, análisis de precios, etc.
+import streamlit.components.v1 as components
 
  
 st.set_page_config(
@@ -19,45 +19,22 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-:root {
-    color-scheme: dark;
-    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-body { background: #070b14; }
-.game-card { position: relative; border-radius: 18px; overflow: hidden; transition: transform .25s ease, box-shadow .25s ease; box-shadow: 0 14px 45px rgba(0,0,0,0.18); }
-.game-card img { width: 100%; height: 180px; object-fit: cover; transition: transform .35s ease; display: block; }
-.game-card:hover { transform: translateY(-8px); box-shadow: 0 22px 56px rgba(0,0,0,0.28); }
-.game-card:hover img { transform: scale(1.05); }
-.game-card .meta { padding-top: 10px; color: #cbd5e1; font-size: 13px; }
-.game-card__overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(12, 18, 36, 0.95); color: #f8fafc; padding: 14px 16px; opacity: 0; transform: translateY(16px); transition: opacity .25s ease, transform .25s ease; font-size: 12px; line-height: 1.5; z-index: 2; }
-.game-card:hover .game-card__overlay { opacity: 1; transform: translateY(0); }
-.badge { position: absolute; right: 12px; top: 12px; padding: 5px 10px; border-radius: 999px; font-weight: 700; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 70% { box-shadow: 0 0 0 10px rgba(155,92,255,0); } 100% { box-shadow: 0 0 0 0 rgba(155,92,255,0); } }
+.game-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .25s ease, box-shadow .25s ease; }
+.game-card img { width:100%; height:140px; object-fit:cover; transition: transform .35s ease; display:block; }
+.game-card:hover { transform: translateY(-6px) scale(1.02); box-shadow:0 12px 30px rgba(0,0,0,0.45); }
+.game-card:hover img { transform: scale(1.04); }
+.game-card .meta { padding-top:6px; color: #cbd5e1; font-size:13px; }
+.game-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.92); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(12px); transition: opacity .25s ease, transform .25s ease; font-size:12px; line-height:1.4; z-index:2; }
+.game-card:hover .game-card__overlay { opacity:1; transform: translateY(0); }
+.badge { position:absolute; right:8px; top:8px; padding:4px 8px; border-radius:12px; font-weight:700; font-size:12px; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155,92,255,0.7);} 70% { box-shadow: 0 0 0 10px rgba(155,92,255,0);} 100% { box-shadow: 0 0 0 0 rgba(155,92,255,0);} }
 .badge.pulse { animation: pulse 2s infinite; }
-.dashboard-card { position: relative; border-radius: 18px; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 16px 42px rgba(0,0,0,0.16); }
-.dashboard-card img { width: 100%; height: 130px; object-fit: cover; transition: transform .3s ease; display: block; }
-.dashboard-card:hover { transform: translateY(-5px); }
-.dashboard-card__overlay { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.95); color: #f8fafc; padding: 12px 14px; opacity: 0; transform: translateY(14px); transition: opacity .2s ease, transform .2s ease; font-size: 12px; line-height: 1.4; z-index: 2; }
-.dashboard-card:hover .dashboard-card__overlay { opacity: 1; transform: translateY(0); }
-.hero-banner { background: linear-gradient(135deg, #0b1220 0%, #131b2f 100%); border-radius: 28px; padding: 34px; margin-bottom: 26px; box-shadow: 0 28px 80px rgba(0,0,0,0.26); border: 1px solid rgba(148,163,184,0.14); }
-.hero-banner .hero-left { max-width: 680px; }
-.hero-banner .eyebrow { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px; color: #a78bfa; letter-spacing: 1px; font-weight: 700; text-transform: uppercase; font-size: 0.82rem; }
-.hero-banner h1 { margin: 0 0 14px 0; font-size: clamp(2.4rem, 2.8vw, 3.4rem); line-height: 1.04; color: #f8fafc; }
-.hero-banner p { margin: 0; color: #cbd5e1; font-size: 1.02rem; max-width: 620px; }
-.hero-right { display: grid; gap: 16px; grid-template-columns: repeat(1, minmax(180px, 1fr)); margin-top: 24px; }
-.metric-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(148,163,184,0.15); border-radius: 20px; padding: 22px 24px; min-height: 112px; color: #f8fafc; }
-.metric-label { color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px; }
-.metric-value { font-size: 1.75rem; font-weight: 700; line-height: 1.1; }
-.detail-hero { background: linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.98) 100%); border-radius: 24px; padding: 28px; display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 26px; margin-bottom: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.24); }
-.detail-hero img { border-radius: 20px; width: 100%; height: auto; object-fit: cover; }
-.detail-hero h1 { margin: 0 0 12px 0; font-size: 2.6rem; color: #f8fafc; }
-.detail-hero p { margin: 6px 0 0 0; color: #cbd5e1; line-height: 1.7; }
-.tag-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
-.tag-chip { background: rgba(99,102,241,0.16); color: #e0e7ff; padding: 10px 14px; border-radius: 999px; font-size: 0.82rem; display: inline-flex; align-items: center; }
-.section-panel { background: rgba(255,255,255,0.05); border: 1px solid rgba(148,163,184,0.14); border-radius: 20px; padding: 22px; margin-bottom: 18px; }
-.section-panel h3 { margin: 0 0 12px 0; color: #f8fafc; }
-.streamlit-expanderHeader, .st-bf { color: #f8fafc !important; }
-@media (min-width: 900px) { .hero-banner { display: grid; grid-template-columns: 1.7fr 1fr; gap: 32px; align-items: center; } .hero-right { margin-top: 0; } }
+.dashboard-card { position: relative; border-radius:8px; overflow:hidden; transition: transform .2s ease, box-shadow .2s ease; }
+.dashboard-card img { width:100%; height:110px; object-fit:cover; transition: transform .3s ease; display:block; }
+.dashboard-card:hover { transform: translateY(-4px); box-shadow:0 10px 26px rgba(0,0,0,0.35); }
+.dashboard-card:hover img { transform: scale(1.03); filter:brightness(1); }
+.dashboard-card__overlay { position:absolute; bottom:0; left:0; right:0; background:rgba(15,23,42,0.95); color:#f8fafc; padding:10px 12px; opacity:0; transform: translateY(14px); transition: opacity .2s ease, transform .2s ease; font-size:12px; line-height:1.4; z-index:2; }
+.dashboard-card:hover .dashboard-card__overlay { opacity:1; transform: translateY(0); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -132,13 +109,13 @@ TRANSLATIONS = {
         "view_info": "Ver Información",
         "details": "Detalles",
         "favorite": "Favorito",
-        "toggle_top": "Alternar Top 10 / 100",
+        "show_top_100": "Mostrar Top 100",
         "players_online": "Jugadores en Línea",
         "games_tracked": "Juegos Seguimiento",
         "top_game": "Mejor Juego",
         "welcome": "Bienvenido",
         "price": "Precio",
-        "free_to_play": "Gratis para jugar",
+        "free_to_play": "Gratis",
         "market_trends_title": "Tendencias y ventas",
         "genre_popularity_title": "Popularidad de géneros",
         "top_developers_title": "Mejores desarrolladores",
@@ -188,7 +165,7 @@ TRANSLATIONS = {
         "developer_label": "Desarrollador",
         "platforms_label": "Plataformas",
         "genres_label": "Géneros",
-        "rating_label": "Rating",
+        "rating_label": "Puntuación",
         "reviews_label": "Reseñas",
         "trend_formula_title": "Fórmula de tendencia",
         "trend_formula_description": "Puntuación estimada para proyectar la evolución de cada juego.",
@@ -240,13 +217,13 @@ TRANSLATIONS = {
         "view_info": "View Info",
         "details": "Details",
         "favorite": "Favorite",
-        "toggle_top": "Toggle Top 10 / 100",
+        "show_top_100": "Show Top 100",
         "players_online": "Players Online",
         "games_tracked": "Games Tracked",
         "top_game": "Top Game",
         "welcome": "Welcome",
         "price": "Price",
-        "free_to_play": "Free to Play",
+        "free_to_play": "Free",
         "market_trends_title": "Market Trends & Sales",
         "genre_popularity_title": "Genre Popularity",
         "top_developers_title": "Top Developers",
@@ -348,7 +325,7 @@ TRANSLATIONS = {
         "view_info": "Voir Infos",
         "details": "Détails",
         "favorite": "Favori",
-        "toggle_top": "Basculer Top 10 / 100",
+        "show_top_100": "Afficher le Top 100",
         "players_online": "Joueurs en ligne",
         "games_tracked": "Jeux suivis",
         "top_game": "Meilleur jeu",
@@ -385,7 +362,7 @@ TRANSLATIONS = {
         "no_24h_data": "Aucune donnée disponible pour les dernières 24 heures.",
         "popular_releases_description": "Un jeu est considéré comme populaire si son pic de joueurs hebdomadaire dépasse celui des autres jeux sortis à des dates similaires (plus ou moins 7 jours).",
         "copyright": "© 2026 infosteam — Surveillance de données haut de gamme",
-        "release_date": "Date de suite",
+        "release_date": "Date de sortie",
         "weekly_peak": "Pic hebdomadaire",
         "game_details": "Détails du jeu",
         "watch_trailer_on_steam": "Regarder la bande-annonce sur Steam",
@@ -404,7 +381,7 @@ TRANSLATIONS = {
         "rating_label": "Note",
         "reviews_label": "Avis",
         "trend_formula_title": "Formule de tendance",
-        "trend_formula_description": "Score estimé pour projeter l'évolution de cada jeu.",
+        "trend_formula_description": "Score estimé pour projeter l'évolution de chaque jeu.",
         "trend_formula_equation": "Score de tendance = (Pic hebdo * 0.6) + (Croissance 7j * 0.3) + (Récence * 0.1)",
         "trend_formula_note": "Les valeurs plus élevées indiquent une trajectoire ascendante plus probable.",
         "future_trending": "Tendance future",
@@ -421,7 +398,7 @@ TRANSLATIONS = {
         "added_to_favorites": "Ajouté aux favoris",
         "add_to_favorites": "Ajouter aux favoris",
         "remove_from_favorites": "Retirer des favoris",
-        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données para décrire le jeu sélectionné.",
+        "summary_hint": "Ce résumé utilise les notes et le nombre d'avis du jeu dans l'ensemble de données pour décrire le jeu sélectionné.",
     },
     "pt": {
         "language_label": "Idioma",
@@ -445,24 +422,24 @@ TRANSLATIONS = {
         "price_analysis": "Análise de Preços",
         "popular_releases": "Lançamentos Populares",
         "favorites": "Favoritos",
-        "user_exists": "O usuário ya existe!",
+        "user_exists": "O usuário já existe!",
         "user_registered": "Usuário registrado!",
-        "wrong_credentials": "Credenciales incorretas",
+        "wrong_credentials": "Credenciais incorretas",
         "please_login_favorites": "Por favor faça login para ver seus favoritos.",
         "favorites_empty": "Sua lista de favoritos está vazia.",
         "saved": "Salvo:",
         "already_in_favorites": "Já está nos favoritos",
         "remove": "Remover",
-        "view_info": "Ver Informações",
+        "view_info": "Ver informações",
         "details": "Detalhes",
         "favorite": "Favorito",
-        "toggle_top": "Alternar Top 10 / 100",
+        "show_top_100": "Mostrar Top 100",
         "players_online": "Jogadores Online",
         "games_tracked": "Jogos Monitorados",
         "top_game": "Melhor Jogo",
         "welcome": "Bem-vindo",
         "price": "Preço",
-        "free_to_play": "Grátis para jogar",
+        "free_to_play": "Grátis",
         "market_trends_title": "Tendências e vendas",
         "genre_popularity_title": "Popularidade de gêneros",
         "top_developers_title": "Principais desenvolvedores",
@@ -539,16 +516,26 @@ CURRENCY_CONFIG = {
     "en": {"symbol": "$", "rate": 1.00},
 }
 def get_currency_config(lang): #Devuelve la configuración de moneda (símbolo y tasa de conversión) para el idioma especificado, con un valor predeterminado para inglés si el idioma no está definido en la configuración.
-    return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"])
+    return CURRENCY_CONFIG.get(lang, CURRENCY_CONFIG["en"]) #Devuelve la configuración de moneda (símbolo y tasa de conversión) para el idioma especificado, con un valor predeterminado para inglés si el idioma no está definido en la configuración.
 
 def format_local_price(price_str, lang):
-    val_usd = convert_to_usd_numeric(price_str)
     t = get_translations(lang)
-    if val_usd == 0.0:
+    if pd.isna(price_str) or str(price_str).strip().lower() in {"", "nan", "n/a"}:
+        return "N/A"
+    if re.search(r"\b(GRATIS|FREE)\b", str(price_str), re.IGNORECASE):
         return t["free_to_play"]
-    cfg = get_currency_config(lang)
-    amount = val_usd * cfg["rate"]
-    return f"{cfg['symbol']}{amount:,.2f}" #Formatea el precio local con el símbolo de moneda y dos decimales, usando comas como separadores de miles.
+    return str(price_str)
+
+
+def format_number(value, decimals=0):
+    """Format numbers with Spanish thousands separators for every UI language."""
+    try:
+        numeric = float(value)
+        if decimals:
+            return f"{numeric:,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"{int(numeric):,}".replace(",", ".")
+    except (TypeError, ValueError):
+        return fix_nan(value, "N/A")
 
 def get_translations(lang):
     return TRANSLATIONS.get(lang, TRANSLATIONS["es"])
@@ -584,6 +571,31 @@ def fix_nan(val, default="-"): #Si el valor es NaN, una cadena vacía o la caden
         return default
     return str(val)
 
+
+def truncate_text(text, max_chars=150):
+    """Reduce long text blocks to a compact preview while preserving readability."""
+    if text is None:
+        return ""
+    cleaned = re.sub(r"\s+", " ", str(text)).strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+    preview = cleaned[: max_chars - 3]
+    if " " in preview:
+        preview = preview.rsplit(" ", 1)[0]
+    return preview.strip() + "..."
+
+
+def get_game_description(game_row, lang):
+    """Return the localized expanded description, falling back to English."""
+    language_column = f"Descripcion_{lang}"
+    description = fix_nan(game_row.get(language_column), "")
+    if description and description != "-":
+        return truncate_text(description)
+    fallback = fix_nan(game_row.get("Descripcion_en", game_row.get("Descripcion")), "")
+    if fallback and fallback != "-":
+        return truncate_text(fallback)
+    return ""
+
 def convert_to_usd_numeric(price_str):
     if pd.isna(price_str) or str(price_str).lower() == "nan":
         return 0.0
@@ -611,7 +623,7 @@ def normalize_genre_token(token): #Normaliza un token de género eliminando espa
     token_text = str(token).strip()
     if not token_text:
         return None
-    token_text = re.sub(r"[\|/;]+", ",", token_text)
+    token_text = re.sub(r"[\|/;]+", ",", token_text) #Reemplaza cualquier secuencia de caracteres delimitadores (barra vertical, barra o punto y coma) por una coma para estandarizar la separación de géneros, lo que facilita la posterior división en tokens individuales.
     token_text = re.sub(r"\s+", " ", token_text)
     token_text = token_text.title()
     replacements = {
@@ -629,13 +641,13 @@ def normalize_genre_token(token): #Normaliza un token de género eliminando espa
         return replacements[token_text]
     if token_text.isdigit() or len(token_text) <= 1:
         return None
-    return token_text
+    return token_text #Devuelve el token de género normalizado, o None si el token es considerado vacío, no significativo o está en la lista de reemplazos que indican que no es un género válido.
 
 def get_genre_tokens(genre_text):
     if pd.isna(genre_text):
         return []
     tokens = []
-    for raw in re.split(r"[;,|/]+", str(genre_text)):
+    for raw in re.split(r"[;,|/]+", str(genre_text)): #Divide la cadena de texto de géneros en tokens individuales utilizando una expresión regular que permite múltiples delimitadores (punto y coma, barra vertical, barra o coma), luego normaliza cada token y lo agrega a la lista de tokens si no es None.
         normalized = normalize_genre_token(raw)
         if normalized:
             tokens.append(normalized)
@@ -648,10 +660,10 @@ def format_usd(price_str):
 def get_game_image(appid):
     """Get game image with multiple fallback options"""
     try:
-        aid = int(float(appid))
+        aid = int(float(appid)) #Intenta convertir el appid a un número entero para asegurarse de que es un valor válido antes de intentar acceder a la imagen de Steam. Si el appid no es un número válido o es menor o igual a cero, devuelve una imagen de respaldo genérica para juegos.
         if aid <= 0:
             return get_fallback_game_image()
-        return f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg"
+        return f"https://cdn.akamai.steamstatic.com/steam/apps/{aid}/header.jpg" #Intenta obtener la imagen del juego desde Steam usando el appid, pero si el appid no es válido o si la imagen no existe, devuelve una imagen de respaldo genérica para juegos.
     except:
         return get_fallback_game_image()
 
@@ -659,32 +671,32 @@ def normalize_game_name(game_name):
     if not game_name:
         return ""
     name = str(game_name).strip().lower()
-    return re.sub(r"[^a-z0-9\s]", "", name)
+    return re.sub(r"[^a-z0-9\s]", "", name) #Normaliza el nombre del juego convirtiéndolo a minúsculas, eliminando espacios al principio y al final, y eliminando caracteres especiales, dejando solo letras, números y espacios. Esto ayuda a estandarizar los nombres de juegos para comparaciones y búsquedas más consistentes.
 
 
 def normalize_game_name_compact(game_name):
-    return normalize_game_name(game_name).replace(" ", "")
+    return normalize_game_name(game_name).replace(" ", "") #Crea una versión compacta del nombre del juego eliminando todos los espacios después de normalizarlo, lo que permite comparaciones aún más flexibles al ignorar completamente los espacios entre palabras.
 
 
 def get_special_game_image(game_name):
     normalized = normalize_game_name(game_name)
     compact = normalize_game_name_compact(game_name)
-    for key, image_url in GAME_IMAGE_OVERRIDES.items():
+    for key, image_url in GAME_IMAGE_OVERRIDES.items(): #Busca en las claves de GAME_IMAGE_OVERRIDES si alguna de ellas está presente en el nombre normalizado o compactado del juego. Si encuentra una coincidencia, devuelve la URL de la imagen correspondiente. Esto permite asignar imágenes específicas a ciertos juegos basándose en palabras clave en sus nombres.
         if key in normalized or key in compact:
             return image_url
     return None
 
 
 def should_skip_steam_image(game_name):
-    normalized = normalize_game_name(game_name)
-    compact = normalize_game_name_compact(game_name)
-    return any(token in normalized or token in compact for token in NON_STEAM_IMAGE_TOKENS)
+    normalized = normalize_game_name(game_name) #Normaliza el nombre del juego eliminando caracteres especiales y convirtiéndolo a minúsculas para facilitar la detección de palabras clave que indican que no se debe usar la imagen de Steam, lo que es útil para juegos que pueden no tener imágenes disponibles o para evitar imágenes genéricas.
+    compact = normalize_game_name_compact(game_name) #Normaliza el nombre del juego tanto en una versión con espacios como en una versión compacta sin espacios para facilitar la detección de palabras clave que indican que no se debe usar la imagen de Steam, lo que es útil para juegos que pueden no tener imágenes disponibles o para evitar imágenes genéricas.
+    return any(token in normalized or token in compact for token in NON_STEAM_IMAGE_TOKENS) #Determina si se debe omitir la imagen de Steam para un juego verificando si el nombre del juego contiene alguna de las palabras clave definidas en NON_STEAM_IMAGE_TOKENS. Si alguna de estas palabras clave está presente en el nombre normalizado o compactado del juego, devuelve True, indicando que se debe usar una imagen de respaldo en lugar de la imagen de Steam, lo que es útil para juegos que no tienen imágenes disponibles en Steam o para evitar imágenes genéricas que no representan bien el juego.
 
 
-@st.cache_data(ttl=86400)
+@st.cache_data(ttl=86400) #Caché de la función para verificar si la imagen de Steam existe, con un tiempo de vida de 24 horas para evitar hacer demasiadas solicitudes a Steam y mejorar el rendimiento al reutilizar resultados anteriores.
 def steam_image_exists(appid):
     try:
-        aid = int(float(appid))
+        aid = int(float(appid)) #Intenta convertir el appid a un número entero para asegurarse de que es un valor válido antes de intentar acceder a la imagen de Steam. Si el appid no es un número válido o es menor o igual a cero, devuelve False, indicando que la imagen de Steam no existe para ese appid.
         if aid <= 0:
             return False
         import requests
@@ -695,7 +707,7 @@ def steam_image_exists(appid):
         return False
 
 
-@st.cache_data(ttl=86400)
+@st.cache_data(ttl=86400) #Caché de la función para verificar si el video de Steam existe, con un tiempo de vida de 24 horas para evitar hacer demasiadas solicitudes a Steam y mejorar el rendimiento al reutilizar resultados anteriores.
 def steam_video_exists(appid):
     try:
         aid = int(float(appid))
@@ -703,7 +715,7 @@ def steam_video_exists(appid):
             return False
         import requests
         
-        url = f"https://store.steampowered.com/api/appdetails?appids={aid}"
+        url = f"https://store.steampowered.com/api/appdetails?appids={aid}" #Hace una solicitud a la API de Steam para obtener los detalles del juego utilizando el appid, y luego verifica si la respuesta contiene información sobre videos (trailers) para ese juego. Si se encuentra un video válido, devuelve la URL del video; de lo contrario, devuelve False, indicando que no hay un video disponible para ese appid.
         response = requests.get(url, timeout=10)
         data = response.json()
         if str(aid) in data and data[str(aid)]['success']:
@@ -711,8 +723,7 @@ def steam_video_exists(appid):
             if 'movies' in app_data and len(app_data['movies']) > 0:
                 
                 first_movie = app_data['movies'][0]
-                if 'hls_h264' in first_movie:
-                    return first_movie['hls_h264']
+                return first_movie.get('hls_h264') or first_movie.get('mp4') or first_movie.get('webm')
         return False
     except:
         return False
@@ -730,240 +741,6 @@ def get_game_video(appid):
         return None
     except:
         return None
-
-
-@st.cache_data(ttl=86400)
-def get_steam_app_details(appid):
-    try:
-        aid = safe_appid(appid)
-        if not aid:
-            return {}
-        url = f"https://store.steampowered.com/api/appdetails?appids={aid}&cc=us&l=en"
-        response = requests.get(url, timeout=10, headers={"User-Agent": "infosteam-pro-dashboard/1.0"})
-        data = response.json()
-        if str(aid) in data and data[str(aid)].get("success"):
-            return data[str(aid)]["data"] or {}
-    except Exception:
-        pass
-    return {}
-
-
-def get_steam_store_tags(appid):
-    details = get_steam_app_details(appid)
-    tags = []
-    for section in ("genres", "categories"):
-        for item in details.get(section, []):
-            label = item.get("description") or item.get("title") or item.get("name")
-            if label and label not in tags:
-                tags.append(label)
-    return tags[:10]
-
-
-def render_hero_banner(t, df_day):
-    total_players = int(df_day["JugadoresConcurrentes"].sum()) if not df_day.empty else 0
-    total_games = len(df_day)
-    top_game = fix_nan(df_day.iloc[0]["Nombre"]) if not df_day.empty else "N/A"
-    today = pd.Timestamp.now().strftime('%Y-%m-%d')
-    hero_html = f"""
-    <div class="hero-banner">
-      <div class="hero-left">
-        <span class="eyebrow">infosteam</span>
-        <h1>Dashboard profesional de juegos y tendencias</h1>
-        <p>Visualiza métricas clave, rendimiento en vivo y detalles enriquecidos de Steam en una interfaz moderna y elegante.</p>
-      </div>
-      <div class="hero-right">
-        <div class="metric-card">
-          <div class="metric-label">{t['players_online']}</div>
-          <div class="metric-value">{total_players:,}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">{t['games_tracked']}</div>
-          <div class="metric-value">{total_games}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">{t['top_game']}</div>
-          <div class="metric-value">{top_game}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">{t['data_date']}</div>
-          <div class="metric-value">{today}</div>
-        </div>
-      </div>
-    </div>
-    """
-    st.markdown(hero_html, unsafe_allow_html=True)
-
-
-def render_advanced_html_dashboard(t, df_day, show_more=False):
-    top_games = []
-    if not df_day.empty:
-        limit = 24 if show_more else 8
-        for _, row in df_day.head(limit).iterrows():
-            top_games.append({
-                "name": fix_nan(row.get("Nombre")),
-                "rank": int(row.get("Posicion")) if not pd.isna(row.get("Posicion")) else None,
-                "players": int(row.get("JugadoresConcurrentes")) if not pd.isna(row.get("JugadoresConcurrentes")) else 0,
-                "appid": int(row.get("AppID")) if not pd.isna(row.get("AppID")) else None,
-            })
-
-    summary_cards = {
-        "players": int(df_day["JugadoresConcurrentes"].sum()) if not df_day.empty else 0,
-        "games": len(df_day),
-        "top_game": fix_nan(df_day.iloc[0]["Nombre"]) if not df_day.empty else "N/A",
-        "active_games": int((df_day["JugadoresConcurrentes"] > 0).sum()) if not df_day.empty else 0,
-        "limit": 24 if show_more else 8,
-    }
-
-    games_json = json.dumps(top_games)
-    html = """
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-3y16fY/1OfRkELRYh6Q+g+fp6cKPa7I9z+gM8Qkzn8oj7W0lTxfDKEk23y5q68sH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <div class="container-fluid" style="margin-top: 24px; margin-bottom: 24px; color: #e2e8f0;">
-      <div class="row g-3">
-        <div class="col-12">
-          <div class="p-4 rounded-4" style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(148, 163, 184, 0.14); box-shadow: 0 26px 70px rgba(0, 0, 0, 0.25);">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
-              <div>
-                <span class="d-inline-block mb-3" style="text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; font-weight: 700;">Interfaz Pro</span>
-                <h2 class="mb-3" style="font-size: clamp(2rem, 2.6vw, 2.8rem);">Vista avanzada de métricas y tendencias</h2>
-                <p class="mb-0" style="color: #cbd5e1; max-width: 720px;">Nuevo panel interactivo construido con HTML y JS para dar una experiencia más sofisticada, con tarjetas de datos, gráfico de top juegos y una tabla filtrable.</p>
-              </div>
-              <div class="d-flex gap-2 flex-wrap">
-                <span class="badge rounded-pill bg-gradient" style="background: linear-gradient(135deg, #7c3aed, #22c55e); font-size: 0.9rem;">Streamlit + HTML</span>
-                <span class="badge rounded-pill bg-gradient" style="background: linear-gradient(135deg, #0ea5e9, #6366f1); font-size: 0.9rem;">Chart.js</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-xl-3">
-          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
-            <h5 class="mb-3" style="color: #cbd5e1;">Jugadores totales</h5>
-            <div class="display-6 fw-bold">__PLAYERS__</div>
-            <p class="mb-0 text-muted">Total en la fecha seleccionada.</p>
-          </div>
-        </div>
-        <div class="col-12 col-xl-3">
-          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
-            <h5 class="mb-3" style="color: #cbd5e1;">Juegos monitorizados</h5>
-            <div class="display-6 fw-bold">__GAMES__</div>
-            <p class="mb-0 text-muted">Cantidad de títulos cargados en el dataset.</p>
-          </div>
-        </div>
-        <div class="col-12 col-xl-3">
-          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
-            <h5 class="mb-3" style="color: #cbd5e1;">Juego Líder</h5>
-            <div class="display-6 fw-bold">__TOP_GAME__</div>
-            <p class="mb-0 text-muted">El título con mayor prioridad en el ranking actual.</p>
-          </div>
-        </div>
-        <div class="col-12 col-xl-3">
-          <div class="p-4 rounded-4" style="background: rgba(30, 41, 59, 0.94); border: 1px solid rgba(148, 163, 184, 0.12);">
-            <h5 class="mb-3" style="color: #cbd5e1;">Activos</h5>
-            <div class="display-6 fw-bold">__ACTIVE_GAMES__</div>
-            <p class="mb-0 text-muted">Títulos con jugadores en línea.</p>
-          </div>
-        </div>
-
-        <div class="col-12 col-lg-7">
-          <div class="p-4 rounded-4" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(148, 163, 184, 0.12);">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <div>
-                <h5 class="mb-0" style="color: #cbd5e1;">Top juegos por jugadores</h5>
-                <small class="text-muted">Mostrando los __DISPLAY_LIMIT__ juegos principales</small>
-              </div>
-              <small class="text-muted">Actualizado al momento</small>
-            </div>
-            <canvas id="topPlayersChart" height="260"></canvas>
-          </div>
-        </div>
-
-        <div class="col-12 col-lg-5">
-          <div class="p-4 rounded-4" style="background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(148, 163, 184, 0.12);">
-            <div class="mb-3">
-              <h5 class="mb-2" style="color: #cbd5e1;">Buscar juegos</h5>
-              <input id="gameSearch" type="search" class="form-control form-control-dark" placeholder="Filtrar por nombre..." style="background: rgba(255,255,255,0.04); border-color: rgba(148,163,184,0.2); color: #f8fafc;" />
-            </div>
-            <div class="table-responsive" style="max-height: 360px; overflow-y: auto;">
-              <table class="table table-borderless text-white mb-0">
-                <thead>
-                  <tr style="border-bottom: 1px solid rgba(148,163,184,0.16);">
-                    <th class="text-muted">Rank</th>
-                    <th class="text-muted">Juego</th>
-                    <th class="text-muted">Jugadores</th>
-                  </tr>
-                </thead>
-                <tbody id="gameTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script>
-      const topGames = __GAMES_JSON__;
-
-      function buildTable(filtered) {
-        const tbody = document.getElementById('gameTableBody');
-        tbody.innerHTML = '';
-        filtered.forEach(game => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td style="color:#a5b4fc;">${game.rank || '-'}</td>
-            <td style="color:#e2e8f0;"><a href="https://store.steampowered.com/app/${game.appid}" target="_blank" style="color:#e2e8f0; text-decoration:none;">${game.name}</a></td>
-            <td style="color:#cbd5e1;">${game.players.toLocaleString()}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      }
-
-      function renderChart() {
-        const labels = topGames.map(game => game.name);
-        const values = topGames.map(game => game.players);
-        const ctx = document.getElementById('topPlayersChart').getContext('2d');
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [{
-              label: 'Jugadores concurrentes',
-              data: values,
-              backgroundColor: 'rgba(99, 102, 241, 0.85)',
-              borderRadius: 12,
-              maxBarThickness: 32,
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-              x: { ticks: { color: '#cbd5e1' }, grid: { display: false } },
-              y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(148, 163, 184, 0.12)' } }
-            }
-          }
-        });
-      }
-
-      buildTable(topGames);
-      renderChart();
-
-      document.getElementById('gameSearch').addEventListener('input', (event) => {
-        const query = event.target.value.toLowerCase();
-        const filtered = topGames.filter(game => game.name.toLowerCase().includes(query));
-        buildTable(filtered);
-      });
-    </script>
-    """
-    html = html.replace("__PLAYERS__", f"{summary_cards['players']:,}")
-    html = html.replace("__GAMES__", str(summary_cards['games']))
-    html = html.replace("__TOP_GAME__", summary_cards["top_game"])
-    html = html.replace("__ACTIVE_GAMES__", str(summary_cards["active_games"]))
-    html = html.replace("__DISPLAY_LIMIT__", str(summary_cards["limit"]))
-    html = html.replace("__GAMES_JSON__", games_json)
-    st.components.v1.html(html, height=840)
 
 
 def get_fallback_game_image():
@@ -989,7 +766,7 @@ def get_fallback_game_image():
 
     
     import random
-    return random.choice(game_placeholders)
+    return random.choice(game_placeholders) #Devuelve una imagen de respaldo aleatoria de la lista de game_placeholders para usar cuando la imagen de Steam no esté disponible, proporcionando una variedad de imágenes relacionadas con juegos para mejorar la apariencia visual de la aplicación incluso cuando no se pueden obtener imágenes específicas de los juegos desde Steam.
 
 
 def get_fallback_game_background():
@@ -1004,7 +781,7 @@ def get_fallback_game_background():
     import random
     return random.choice(background_placeholders)
 
-def get_game_background(appid):
+def get_game_background(appid): #Intenta obtener la imagen de fondo del juego desde Steam utilizando el appid, pero si el appid no es válido o si la imagen no existe, devuelve una imagen de respaldo genérica para juegos.
     try:
         aid = int(float(appid))
         if aid <= 0: return get_fallback_game_background()
@@ -1020,12 +797,18 @@ def get_enhanced_game_image(appid, game_name=None):
         if special_image:
             return special_image
 
-    if steam_image_exists(appid):
-        return get_game_image(appid)
+    try:
+        stored_image = df_detalles.loc[df_detalles["AppID"] == safe_appid(appid), "Imagen"]
+        if not stored_image.empty and pd.notna(stored_image.iloc[0]) and str(stored_image.iloc[0]).strip():
+            return str(stored_image.iloc[0])
+    except (KeyError, TypeError):
+        pass
 
-    return get_fallback_game_image()
+    # El navegador ya dispone de un fallback mediante onerror en las cards.
+    # Evitamos un HEAD remoto por cada juego para que el dashboard cargue rápido.
+    return get_game_image(appid)
 
-def get_ai_response(user_input, game_data):
+def get_ai_response(user_input, game_data): #Devuelve una respuesta de estilo IA segura utilizando los datos conocidos del juego.
     """Return a safe fallback AI-style response using known game data."""
     response_lines = [
         f"Here is what I found for {game_data.get('name', 'the game')}:",
@@ -1038,7 +821,7 @@ def get_ai_response(user_input, game_data):
         f"- Reviews: {game_data.get('reviews', 'Unknown')}"
     ]
     if "price" in user_input.lower():
-        response_lines.append("This game appears to have the listed price and may be free to play depending on the store listing.")
+        response_lines.append("This game appears to have the listed price and may be free to play depending on the store listing.") #Agrega una línea adicional a la respuesta si el usuario pregunta sobre el precio, indicando que el juego tiene el precio listado y que puede ser gratuito dependiendo de la tienda, lo que proporciona información útil sin hacer afirmaciones específicas sobre promociones o descuentos actuales.
     elif "rating" in user_input.lower() or "review" in user_input.lower():
         response_lines.append("The rating and reviews are based on the current dataset and may vary over time.")
     return "\n".join(response_lines)
@@ -1058,18 +841,18 @@ def generate_review_snippets(game_name, rating, reviews):
         return [
             f"Los jugadores valoran {game_name} muy positivamente: {int(rating_val)}/100.",
             "Destacan especialmente su jugabilidad fluida y equilibrio.",
-            f"Con más de {reviews_val:,} opiniones, se nota una comunidad activa y satisfecha."
+            f"Con más de {format_number(reviews_val)} opiniones, se nota una comunidad activa y satisfecha."
         ]
     if rating_val >= 70:
         return [
             f"{game_name} mantiene una buena valoración: {int(rating_val)}/100.",
             "Muchos usuarios destacan su contenido y experiencia general.",
-            f"Las {reviews_val:,} reseñas muestran interés y opiniones mayoritariamente positivas." 
+            f"Las {format_number(reviews_val)} reseñas muestran interés y opiniones mayoritariamente positivas." 
         ]
     return [
         f"{game_name} tiene una puntuación de {int(rating_val)}/100.",
         "Algunos usuarios aprecian su propuesta, aunque piden mejoras en ciertos aspectos.",
-        f"Con {reviews_val:,} reseñas, hay una base suficiente para obtener una idea general del juego."
+        f"Con {format_number(reviews_val)} reseñas, hay una base suficiente para obtener una idea general del juego."
     ]
 
 def format_game_name_for_twitch(game_name):
@@ -1078,7 +861,7 @@ def format_game_name_for_twitch(game_name):
         return ""
    
     import re
-    import urllib.parse
+    import urllib.parse #Importa el módulo re para usar expresiones regulares y urllib.parse para codificar el nombre del juego de manera segura en una URL, asegurándose de que los caracteres especiales se manejen correctamente al generar enlaces a Twitch.
     
     clean_name = re.sub(r'[^\w\s-]', '', game_name).strip()
     
@@ -1110,14 +893,14 @@ def get_platform_icons(platforms_str):
     return " | ".join(icons)
 
 
-def display_platforms_section(appid, lang):
+def display_platforms_section(appid, lang): 
     """Display platforms in an attractive card format"""
-    t = get_translations(lang)
+    t = get_translations(lang) 
 
     
     platforms_data = df_plataformas[df_plataformas["AppID"] == appid]
     if not platforms_data.empty:
-        platforms_str = platforms_data["Plataformas"].iloc[0]
+        platforms_str = platforms_data["Plataformas"].iloc[0] #Obtiene la cadena de plataformas para el juego con el appid dado desde el DataFrame df_plataformas. Si se encuentra una fila correspondiente, extrae la información de plataformas; de lo contrario, se considera que no hay datos disponibles para las plataformas del juego.
         platforms_display = get_platform_icons(platforms_str)
     else:
         platforms_display = "No disponible"
@@ -1129,7 +912,7 @@ def get_enhanced_game_background(appid, game_name=None):
     """Enhanced background getter that tries multiple sources"""
     try:
        
-        aid = int(float(appid)) if appid and str(appid).strip() else 0
+        aid = int(float(appid)) if appid and str(appid).strip() else 0 #Intenta convertir el appid a un número entero para asegurarse de que es un valor válido antes de intentar acceder a la imagen de fondo de Steam. Si el appid no es un número válido o es menor o igual a cero, devuelve una imagen de fondo de respaldo genérica para juegos.
 
         
         skip_steam_games = [
@@ -1138,7 +921,7 @@ def get_enhanced_game_background(appid, game_name=None):
         ]
 
         should_check_steam = True
-        if game_name and any(skip.lower() in game_name.lower() for skip in skip_steam_games):
+        if game_name and any(skip.lower() in game_name.lower() for skip in skip_steam_games): #Si el nombre del juego contiene alguna de las palabras clave definidas en skip_steam_games (como "fivem", "multiplayer", "server", etc.), se establece should_check_steam en False para indicar que no se debe intentar obtener la imagen de fondo de Steam, lo que es útil para juegos que son modificaciones, servidores personalizados o juegos multijugador que pueden no tener imágenes de fondo representativas en Steam.
             should_check_steam = False
         elif aid <= 0 or aid > 99999999:  
             should_check_steam = False
@@ -1156,18 +939,18 @@ def get_enhanced_game_background(appid, game_name=None):
     return get_fallback_game_background()
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CLEAN_DIR = os.path.join(BASE_DIR, "Clean")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #Determina el directorio base del proyecto al obtener la ruta absoluta del archivo actual, luego subir un nivel para llegar al directorio raíz del proyecto. Esto es útil para construir rutas relativas a los archivos de datos y scripts dentro del proyecto de manera consistente, independientemente de dónde se ejecute el código.
+CLEAN_DIR = os.path.join(BASE_DIR, "Clean") #Construye la ruta al directorio "Clean" dentro del directorio base del proyecto, donde se espera que se encuentren los archivos CSV limpios con los datos de juegos. Esta ruta se utiliza para cargar los datos en los DataFrames de pandas y para acceder a los archivos necesarios para la aplicación.
 SRC_DIR = os.path.join(BASE_DIR, "Src")
 DOWNLOAD_SCRIPT = os.path.join(SRC_DIR, "download.py")
 
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=300) 
 def load_data():
     try:
         df_l = pd.read_csv(os.path.join(CLEAN_DIR, "listado_juegos.csv"))
-        df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"))
+        df_i = pd.read_csv(os.path.join(CLEAN_DIR, "info_juegos.csv"), on_bad_lines="skip")
         df_d = pd.read_csv(os.path.join(CLEAN_DIR, "detalles_juegos.csv"), on_bad_lines="skip")
         df_p = pd.read_csv(os.path.join(CLEAN_DIR, "plataformas_juegos.csv"))
         for df in [df_l, df_i, df_d, df_p]:
@@ -1182,7 +965,7 @@ df_listado, df_info, df_detalles, df_plataformas = load_data()
 
 def update_data_source():
     """Run the external download script and clear cached data on success."""
-    try:
+    try: #Ejecuta el script de descarga externo para actualizar los datos, capturando la salida y los errores. Si el script se ejecuta correctamente (código de retorno 0), borra la caché de datos para forzar la recarga de los nuevos datos actualizados. Si el script falla o si ocurre un error, devuelve un mensaje de error apropiado.
         result = subprocess.run(
             [sys.executable, DOWNLOAD_SCRIPT],
             cwd=BASE_DIR,
@@ -1197,22 +980,28 @@ def update_data_source():
     except subprocess.TimeoutExpired as e:
         return False, f"Tiempo de actualización agotado después de {e.timeout} segundos."
     except Exception as e:
-        return False, str(e)
+        return False, str(e) #Devuelve el mensaje de error como una cadena, lo que permite mostrar información útil sobre lo que salió mal durante la actualización de los datos, ya sea un error específico del proceso o cualquier otra excepción que pueda ocurrir.
 
 
-def parse_date_safe(value):
+def parse_date_safe(value): #Intenta analizar la fecha con formatos comunes sin generar warnings ni ambigüedades.
     try:
         if pd.isna(value):
             return pd.NaT
-        parsed = pd.to_datetime(value, dayfirst=True, errors='coerce')
-        if pd.isna(parsed):
-            parsed = pd.to_datetime(value, dayfirst=False, errors='coerce')
-        return parsed
+        if isinstance(value, str):
+            value = value.strip()
+            if value == "":
+                return pd.NaT
+        for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%m-%d-%Y"):
+            try:
+                return pd.to_datetime(value, format=fmt, errors='raise')
+            except Exception:
+                pass
+        return pd.to_datetime(value, errors='coerce')
     except Exception:
         return pd.NaT
 
 
-def get_recent_releases(ref_date, days=30):
+def get_recent_releases(ref_date, days=30): #Devuelve un DataFrame de juegos que se lanzaron dentro de una ventana de tiempo específica (por defecto, los últimos 30 días) antes de una fecha de referencia dada. Analiza las fechas de lanzamiento de los juegos y filtra aquellos que caen dentro del rango definido por la fecha de referencia y el número de días especificado.
     ref_dt = parse_date_safe(ref_date)
     if pd.isna(ref_dt) or df_info.empty:
         return pd.DataFrame()
@@ -1229,16 +1018,16 @@ def get_recent_releases(ref_date, days=30):
 
 def peak_players_last_week(appid, ref_date):
     end_dt = parse_date_safe(ref_date)
-    if pd.isna(end_dt) or df_listado.empty:
+    if pd.isna(end_dt) or df_listado.empty: #Si la fecha de referencia no se puede analizar correctamente o si el DataFrame df_listado está vacío, devuelve 0 como el número máximo de jugadores concurrentes en la última semana, lo que indica que no hay datos disponibles para calcular esta métrica.
         return 0
-    game_rows = df_listado[df_listado['AppID'] == int(appid)].copy()
-    if game_rows.empty:
+    game_rows = df_listado[df_listado['AppID'] == int(appid)].copy() #Filtra el DataFrame df_listado para obtener solo las filas correspondientes al juego con el appid dado. Si no se encuentran filas para ese appid, devuelve 0, indicando que no hay datos de jugadores concurrentes disponibles para ese juego.
+    if game_rows.empty: 
         return 0
-    game_rows['__date'] = pd.to_datetime(game_rows['Fecha'], errors='coerce')
+    game_rows['__date'] = pd.to_datetime(game_rows['Fecha'], errors='coerce') #Convierte la columna 'Fecha' a un formato de fecha utilizando pandas, lo que permite realizar operaciones de filtrado basadas en fechas. Si alguna fecha no se puede analizar correctamente, se convierte en NaT (Not a Time), lo que facilita la exclusión de filas con fechas no válidas al calcular el número máximo de jugadores concurrentes en la última semana.
     window = game_rows[(game_rows['__date'] > (end_dt - pd.Timedelta(days=7))) & (game_rows['__date'] <= end_dt)]
     if window.empty:
         return 0
-    values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0)
+    values = pd.to_numeric(window['JugadoresConcurrentes'], errors='coerce').fillna(0) #Convierte la columna 'JugadoresConcurrentes' a valores numéricos, manejando cualquier valor no numérico como NaN y luego llenando esos NaN con 0 para asegurarse de que se puedan calcular correctamente los valores máximos sin errores. Esto es útil para obtener el número máximo de jugadores concurrentes en la última semana, incluso si algunos datos de jugadores concurrentes no son válidos o están ausentes.
     return int(values.max())
 
 
@@ -1277,17 +1066,17 @@ def get_previous_week_peak(appid, ref_date):
     return int(values.max())
 
 
-def compute_trend_scores(ref_date, limit=12):
+def compute_trend_scores(ref_date, limit=12): #Calcula una puntuación de tendencia para los juegos basándose en su pico de jugadores concurrentes en la última semana, el crecimiento en jugadores concurrentes en los últimos 7 días y la recencia del lanzamiento. Devuelve un DataFrame con los juegos ordenados por su puntuación de tendencia, mostrando solo los mejores resultados según el límite especificado.
     ref_dt = parse_date_safe(ref_date)
     if pd.isna(ref_dt) or df_info.empty:
         return pd.DataFrame()
 
     rows = []
     for _, row in df_info.iterrows():
-        appid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0
+        appid = int(row.get('AppID', 0)) if not pd.isna(row.get('AppID', 0)) else 0 #Intenta obtener el appid de la fila actual del DataFrame df_info, asegurándose de que sea un número entero válido. Si el appid no es un número válido o es menor o igual a cero, se establece en 0, lo que indica que no hay un appid válido para ese juego. Esto es útil para evitar errores al calcular las métricas de tendencia para juegos sin un appid válido.
         if appid <= 0:
             continue
-        weekly_peak = peak_players_last_week(appid, ref_dt)
+        weekly_peak = peak_players_last_week(appid, ref_dt)  
         prev_peak = get_previous_week_peak(appid, ref_dt)
         growth_7d = weekly_peak - prev_peak
         release_dt = parse_date_safe(row.get('Fecha_Lanzamiento'))
@@ -1303,7 +1092,7 @@ def compute_trend_scores(ref_date, limit=12):
             'Trend Score': round(score, 2),
         })
 
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame(rows) #Crea un DataFrame a partir de la lista de diccionarios que contienen las métricas calculadas para cada juego, lo que permite ordenar y filtrar los juegos según su puntuación de tendencia.
     if df.empty:
         return df
     return df.sort_values('Trend Score', ascending=False).head(limit).reset_index(drop=True)
@@ -1316,7 +1105,7 @@ def get_latest_release_date():
     return dates.max()
 
 
-def get_popular_reference_date():
+def get_popular_reference_date(): #Determina la fecha de referencia para calcular los lanzamientos populares, utilizando la fecha de los datos más recientes si hay lanzamientos recientes, o la fecha del último lanzamiento si no hay lanzamientos recientes. Esto asegura que la sección de lanzamientos populares se base en una fecha relevante para los datos disponibles.
     data_ref = get_latest_data_date()
     if not get_recent_releases(data_ref, days=30).empty:
         return data_ref
@@ -1331,7 +1120,7 @@ def compute_popular_releases(ref_date):
         )
 
     rows = []
-    for _, row in recent.iterrows():
+    for _, row in recent.iterrows(): #Itera sobre las filas del DataFrame de lanzamientos recientes y calcula el pico de jugadores concurrentes en la última semana para cada juego utilizando su appid. Luego, almacena esta información junto con el nombre y la fecha de lanzamiento en una lista de diccionarios, que se convertirá en un nuevo DataFrame para analizar qué lanzamientos son populares en comparación con sus pares lanzados en un período similar.
         appid = int(row.get('AppID', 0))
         release_dt = parse_date_safe(row.get('Fecha_Lanzamiento'))
         peak_week = peak_players_last_week(appid, ref_date)
@@ -1358,10 +1147,10 @@ def compute_popular_releases(ref_date):
         else:
             df_recent.at[idx, 'is_popular'] = int(row['peak_last_week']) > int(peers['peak_last_week'].max())
 
-    return df_recent.sort_values(['is_popular', 'peak_last_week'], ascending=[False, False]).reset_index(drop=True)
+    return df_recent.sort_values(['is_popular', 'peak_last_week'], ascending=[False, False]).reset_index(drop=True) #Ordena el DataFrame de lanzamientos recientes primero por la columna 'is_popular' en orden descendente (colocando los lanzamientos populares al principio) y luego por 'peak_last_week' también en orden descendente (colocando los lanzamientos con mayor pico de jugadores concurrentes en la última semana al principio dentro de cada grupo de popularidad), lo que permite mostrar los lanzamientos más destacados y populares en la parte superior de la lista.
 
 
-def prepare_popular_releases_display(popular_releases, t):
+def prepare_popular_releases_display(popular_releases, t): #Prepara el DataFrame de lanzamientos populares para su visualización, filtrando solo los lanzamientos populares y formateando la fecha de lanzamiento para mostrarla de manera legible. Si no hay lanzamientos populares, devuelve un DataFrame vacío con las columnas esperadas para mantener la consistencia en la visualización.
     if 'is_popular' in popular_releases.columns:
         popular_releases = popular_releases.loc[popular_releases['is_popular']]
     if 'Fecha_Lanzamiento' in popular_releases.columns:
@@ -1386,7 +1175,30 @@ def safe_appid(value):
         return None
 
 
-def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
+def extract_game_term(user_query):
+    """Extract a likely game title from a natural-language question."""
+    term = user_query.lower()
+    term = re.sub(
+        r"\b(steam|dime|dime algo|puedes|puede|decirme|decir|sabes|saber|quiero|quieres|cuanto|cuánto|cuenta|cuesta|vale|precio|actual|actualizada|informacion|información|sobre|acerca de|ficha|sinopsis|requisitos|juego|game|qué|que|q|del|de|la|el|los|las|me|por|favor|y|sus|su|ese|esa|tambien|también)\b",
+        " ",
+        term,
+    )
+    term = re.sub(r"[^\w\s:-]", " ", term, flags=re.UNICODE)
+    term = re.sub(r"\s+", " ", term).strip()
+    aliases = {
+        "counter": "counter-strike",
+        "counter strike": "counter-strike",
+        "cs2": "counter-strike 2",
+        "csgo": "counter-strike 2",
+        "gta": "grand theft auto",
+        "pubg": "playerunknown battlegrounds",
+        "cod": "call of duty",
+        "forza": "forza horizon 5",
+    }
+    return aliases.get(term, term)
+
+
+def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False): 
     """Render details + favorite add/remove controls with consistent keys and behavior."""
     safe_id = safe_appid(aid)
     det_key = f"{key_prefix}_det_dash" if compact else f"{key_prefix}_det"
@@ -1399,6 +1211,7 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
             st.button(t["details"], key=det_key, disabled=True)
         elif st.button(t["details"], key=det_key):
             st.session_state.selected_game = safe_id
+            st.session_state.scroll_to_top = True
             st.rerun()
     with c2:
 
@@ -1424,9 +1237,9 @@ def render_card_controls(aid, name, key_prefix, is_fav, t, compact=False):
 
 
 
-def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, rating=None, reviews=None, rel_dt=None, extra_caption=None):
+def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, rating=None, reviews=None, rel_dt=None, extra_caption=None): 
     """Render a standardized game card inside the current Streamlit column."""
-    title_attr = f"{name}"
+    title_attr = f"{name}" 
     img_url = get_enhanced_game_image(aid, name)
     
     badge_html = ''
@@ -1447,7 +1260,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     overlay_lines = []
     if rel_dt is not None:
         try:
-            rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt)
+            rel_str = parse_date_safe(rel_dt).strftime('%Y-%m-%d') if not pd.isna(parse_date_safe(rel_dt)) else fix_nan(rel_dt) #Intenta analizar la fecha de lanzamiento y formatearla como una cadena legible. Si el análisis falla o si la fecha es NaN, utiliza la función fix_nan para mostrar un valor adecuado en su lugar. Luego, agrega esta información a las líneas de superposición que se mostrarán sobre la imagen del juego en la tarjeta.
             overlay_lines.append(f"{t['release_date']}: {rel_str}")
         except:
             pass
@@ -1456,7 +1269,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     if rating is not None:
         overlay_lines.append(f"{t['rating_label']}: {fix_nan(rating)}")
     if reviews is not None and not pd.isna(reviews):
-        overlay_lines.append(f"{t['reviews_label']}: {int(pd.to_numeric(reviews, errors='coerce')):,}")
+        overlay_lines.append(f"{t['reviews_label']}: {format_number(reviews)}")
     if safe_id is not None:
         try:
             info_row = df_info[df_info['AppID'] == safe_id]
@@ -1465,7 +1278,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
                 dev = fix_nan(info_row['Desarrollador'].iloc[0])
                 if dev and dev.lower() != 'nan':
                     overlay_lines.insert(0, f"{t['developer_label']}: {dev}")
-                platforms = display_platforms_section(aid, st.session_state.language)
+                platforms = display_platforms_section(aid, st.session_state.language) #Obtiene la información de plataformas para el juego utilizando la función display_platforms_section, que a su vez consulta el DataFrame df_plataformas para obtener las plataformas disponibles para el juego con el appid dado. Si se encuentran plataformas disponibles, se agrega esta información a las líneas de superposición que se mostrarán sobre la imagen del juego en la tarjeta, proporcionando a los usuarios información adicional sobre en qué plataformas pueden jugar el juego.
                 if platforms:
                     overlay_lines.append(platforms)
             if not det_row.empty and rating is None:
@@ -1475,7 +1288,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
             if not det_row.empty and (reviews is None or pd.isna(reviews)):
                 det_reviews = pd.to_numeric(det_row['Reviews'].iloc[0], errors='coerce')
                 if not pd.isna(det_reviews):
-                    overlay_lines.append(f"{t['reviews_label']}: {int(det_reviews):,}")
+                    overlay_lines.append(f"{t['reviews_label']}: {format_number(det_reviews)}")
         except:
             pass
     if extra_caption:
@@ -1503,7 +1316,7 @@ def render_game_card(aid, name, t, key_prefix, price_raw=None, genres_raw=None, 
     if rating is not None:
         st.write(f"**{t['rating_label']}:** {fix_nan(rating)}")
     if reviews is not None and not pd.isna(reviews):
-        st.write(f"**{t['reviews_label']}:** {int(pd.to_numeric(reviews, errors='coerce')):,}")
+        st.write(f"**{t['reviews_label']}:** {format_number(reviews)}")
 
   
     render_card_controls(aid, name, key_prefix, is_fav, t, compact=False)
@@ -1567,9 +1380,9 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
     except:
         pass
     if players is not None:
-        overlay_lines.append(f"Jugadores: {int(players):,}")
+        overlay_lines.append(f"Jugadores: {format_number(players)}")
     if peak is not None:
-        overlay_lines.append(f"Pico: {int(peak):,}")
+        overlay_lines.append(f"Pico: {format_number(peak)}")
     overlay_html = ''
     if overlay_lines:
         overlay_html = '<div class="dashboard-card__overlay">' + '<br>'.join(overlay_lines[:4]) + '</div>'
@@ -1578,9 +1391,9 @@ def render_dashboard_card(aid, name, t, key_prefix, small_image_height=110, badg
     st.markdown(f"**{name}**")
     meta = []
     if players is not None:
-        meta.append(f"Jugadores: {int(players):,}")
+        meta.append(f"Jugadores: {format_number(players)}")
     if peak is not None:
-        meta.append(f"Pico: {int(peak):,}")
+        meta.append(f"Pico: {format_number(peak)}")
     if meta:
         st.caption("  •  ".join(meta))
 
@@ -1601,6 +1414,7 @@ def render_trend_formula_card(t):
 
 
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
+if "scroll_to_top" not in st.session_state: st.session_state.scroll_to_top = False
 if "show_more" not in st.session_state: st.session_state.show_more = False
 if "view" not in st.session_state: st.session_state.view = "Dashboard"
 if "language_name" not in st.session_state:
@@ -1661,7 +1475,7 @@ with st.sidebar:
                         
                         users.loc[users["username"] == u_name, "password"] = encrypted_input
                         users.to_csv(USERS_FILE, index=False)
-                        break
+                        break #Si el usuario ingresó la contraseña sin cifrar pero coincide con la contraseña almacenada, se considera una coincidencia válida. En este caso, se actualiza la contraseña almacenada para ese usuario con la versión cifrada de la contraseña ingresada, y luego se guarda el DataFrame actualizado en el archivo CSV. Esto permite que los usuarios que tenían contraseñas almacenadas sin cifrar puedan iniciar sesión y al mismo tiempo mejora la seguridad al cifrar sus contraseñas para futuros inicios de sesión.
 
             if valid_user is not None:
                 st.session_state["user"] = u_name
@@ -1716,12 +1530,38 @@ with st.sidebar:
             success, message = update_data_source()
         if success:
             st.success("Datos actualizados correctamente.")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error(f"Error al actualizar datos: {message}")
 
 
-selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None
+selected_game_id = safe_appid(st.session_state.selected_game) if 'selected_game' in st.session_state else None #Intenta obtener el appid del juego seleccionado en el estado de la sesión, asegurándose de que sea un número entero válido. Si el valor no es un número válido o es None, se establecerá en None, lo que indica que no hay un juego seleccionado con un appid válido. Esto es útil para evitar errores al intentar mostrar los detalles de un juego sin un appid válido.
+if st.session_state.get("scroll_to_top"):
+    components.html(
+        """
+        <script>
+            const resetScroll = () => {
+                try {
+                    const target = document.querySelector('.stAppViewContainer, [data-testid="stAppViewContainer"]') || document.querySelector('.stApp');
+                    if (target) {
+                        target.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+                        target.scrollTop = 0;
+                    }
+                    const root = document.querySelector('html');
+                    if (root) {
+                        root.scrollTop = 0;
+                    }
+                    window.scrollTo(0, 0);
+                } catch (e) {}
+            };
+            setTimeout(resetScroll, 150);
+            setTimeout(resetScroll, 500);
+        </script>
+        """,
+        height=0,
+    )
+    st.session_state.scroll_to_top = False
+
 if selected_game_id:
     appid = selected_game_id
     st.session_state.selected_game = selected_game_id
@@ -1773,11 +1613,11 @@ if selected_game_id:
         with col1:
             st.metric(t["rating_label"], f"{rating_num}/100" if not pd.isna(rating_num) else "N/A")
         with col2:
-            st.metric(t["reviews_label"], f"{int(reviews_num):,}" if not pd.isna(reviews_num) else "N/A")
+            st.metric(t["reviews_label"], format_number(reviews_num) if not pd.isna(reviews_num) else "N/A")
         with col3:
             st.metric(t["current_rank"], f"#{int(rank_num)}" if not pd.isna(rank_num) else "N/A")
         with col4:
-            st.metric(t["current_players"], f"{int(players_num):,}" if not pd.isna(players_num) else "N/A")
+            st.metric(t["current_players"], format_number(players_num) if not pd.isna(players_num) else "N/A")
 
         
         st.markdown("---")
@@ -1804,13 +1644,14 @@ if selected_game_id:
             st.markdown(f"### {t['trailer']}")
             video_url = get_game_video(appid)
             if video_url:
+                video_type = "application/x-mpegURL" if ".m3u8" in video_url else "video/mp4"
                 video_html = f"""
-                <video controls style="width:100%; border-radius:10px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);" poster="{get_enhanced_game_image(appid, game_name)}">
-                    <source src="{video_url}" type="application/x-mpegURL">
-                    Your browser does not support HLS video playback.
+                <video controls playsinline preload="metadata" style="width:100%; border-radius:10px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);" poster="{get_enhanced_game_image(appid, game_name)}">
+                    <source src="{video_url}" type="{video_type}">
+                    Tu navegador no admite la reproducción de este tráiler.
                 </video>
                 """
-                st.components.v1.html(video_html, height=250)
+                components.html(video_html, height=250)
             else:
                 st.markdown(f"[{t['watch_trailer_on_steam']}](https://store.steampowered.com/app/{appid})")
 
@@ -1850,11 +1691,14 @@ if selected_game_id:
             st.write(f"**{t['genres_label']}:** {fix_nan(g_i.get('Géneros'))}")
             st.write(f"**{t['platforms_label']}:** {display_platforms_section(appid, st.session_state.language)}")
             st.write(f"**{t['release_information']}:** {fix_nan(g_i.get('Fecha_Lanzamiento'))}")
+            description = get_game_description(g_d, st.session_state.language)
+            if description:
+                st.write(f"**{t['about_game']}:** {description}")
 
         with info_col2:
-            st.markdown("""
+            st.markdown(f"""
             <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 15px; color: white; margin-bottom: 15px;">
-                <h4 style="margin: 0 0 10px 0;">Statistics</h4>
+                <h4 style="margin: 0 0 10px 0;">{t['information']}</h4>
             </div>
             """, unsafe_allow_html=True)
             st.write(f"**{t['current_rank']}:** {fix_nan(g_rank)}")
@@ -1875,6 +1719,10 @@ if selected_game_id:
             t['current_players']: fix_nan(g_players),
         }
         st.table(pd.DataFrame.from_dict(detail_rows, orient="index", columns=["Value"]))
+        description = get_game_description(g_d, st.session_state.language)
+        if description:
+            st.markdown(f"**{t['about_game']}**")
+            st.write(description)
 
     with tab3:
         st.markdown(f"### {t['reviews_tab']}")
@@ -1883,7 +1731,7 @@ if selected_game_id:
         else:
             st.write(f"**{t['rating_label']}:** N/A")
         if not pd.isna(reviews_num):
-            st.metric(t["reviews_label"], f"{int(reviews_num):,}")
+            st.metric(t["reviews_label"], format_number(reviews_num))
         else:
             st.write(f"**{t['reviews_label']}:** N/A")
 
@@ -1953,13 +1801,19 @@ if st.session_state.view == "Favorites":
  
 if st.session_state.view == "Chat":
     st.title("Infosteam AI Assistant")
-    st.markdown("Asistente Avanzado. Puedes hablarme en lenguaje natural o escribir fragmentos vagos de juegos.")
+    st.markdown("Consulta el catálogo, compara juegos y descubre tendencias usando los datos actuales de la plataforma.")
 
     
     if "chat_messages" not in st.session_state:
         st.session_state.chat_messages = [
-            {"role": "assistant", "content": "Hola. He analizado los CSVs del sistema. Pregúntame cosas como: '¿qué juegos son gratis?', 'busca juegos de Valve', 'juegos con rating mayor a 90' o un título parcial como 'strike'."}
+            {"role": "assistant", "content": "Hola, soy el asistente de Infosteam. Puedo investigar juegos en tu catálogo y consultar Steam para darte precios, requisitos, géneros, valoraciones y recomendaciones. Puedes preguntarme de forma natural, por ejemplo: `¿qué me recomiendas para jugar gratis?`, `¿cuánto cuesta el Counter?` o `¿y sus requisitos?`."}
         ]
+
+    if st.button("Nueva conversación", key="clear_chat"):
+        st.session_state.chat_messages = [
+            {"role": "assistant", "content": "Conversación reiniciada. Cuéntame qué quieres encontrar y lo investigaré en Infosteam y Steam."}
+        ]
+        st.rerun()
 
     
     for msg in st.session_state.chat_messages:
@@ -1974,6 +1828,10 @@ if st.session_state.view == "Chat":
 
         ai_reply = ""
         query_lower = user_query.lower()
+        query_normalized = ''.join(
+            char for char in unicodedata.normalize("NFD", query_lower)
+            if unicodedata.category(char) != "Mn"
+        )
 
         
         alias_mapping = {
@@ -1986,12 +1844,136 @@ if st.session_state.view == "Chat":
         }
         for alias, real_name in alias_mapping.items():
             query_lower = re.sub(alias, real_name, query_lower)
+            query_normalized = re.sub(alias, real_name, query_normalized)
+
+        previous_user_messages = [
+            message["content"] for message in st.session_state.chat_messages[:-1]
+            if message["role"] == "user"
+        ]
+        context_term = extract_game_term(previous_user_messages[-1]) if previous_user_messages else None
+        if context_term in {"", "que", "cual", "ese", "este", "el", "la"}:
+            context_term = None
+
+        recent_user_messages = " ".join(
+            message["content"].lower()
+            for message in st.session_state.chat_messages[-8:]
+            if message["role"] == "user"
+        )
 
         
-        if "gratis" in query_lower or "free" in query_lower:
+        steam_query = re.search(
+            r"\b(steam|actual|actualizada|sinopsis|requisitos|ficha)\b",
+            query_normalized,
+        )
+        follow_up_query = bool(re.search(r"\b(y|e|sus|su|ese|esa|tambien|también|requisitos|sinopsis|precio)\b", query_normalized))
+        steam_reply = get_steam_ai_response(user_query, context_term) if (steam_query or follow_up_query) and not platform_question else None
+        price_question = bool(re.search(r"\b(cuanto|cuánto|cuenta|cuesta|vale|precio)\b", query_normalized))
+        recommendation_question = bool(re.search(r"\b(q|recomiendas|recomendar|recomendacion|recomendación|mejor para empezar|que me compro|qué me compro|que juego|qué juego)\b", query_normalized))
+        platform_question = bool(re.search(r"\b(windows|pc|linux|mac|steam deck)\b", query_normalized))
+
+        if price_question:
+            game_term = extract_game_term(user_query)
+            normalized_term = normalize_game_name(game_term)
+            local_matches = df_info[df_info["Nombre"].fillna("").apply(
+                lambda value: bool(normalized_term) and normalized_term in normalize_game_name(value)
+            )]
+            if not local_matches.empty:
+                local_game = local_matches.iloc[0]
+                local_aid = safe_appid(local_game.get("AppID"))
+                local_details = df_detalles[df_detalles["AppID"] == local_aid]
+                local_price = local_details["Precio"].iloc[0] if not local_details.empty else "N/A"
+                ai_reply = (
+                    f"**{local_game.get('Nombre', game_term)}** cuesta **{format_local_price(local_price, st.session_state.language)}**.\n\n"
+                    "El precio mostrado procede del catálogo actual de Infosteam. "
+                    "Si quieres, también puedo consultar la ficha actual directamente en Steam."
+                )
+            else:
+                ai_reply = steam_reply or get_steam_ai_response(user_query, context_term) or (
+                    f"No he encontrado una ficha para **{game_term or 'ese juego'}**. "
+                    "Prueba con el nombre completo, por ejemplo `Counter-Strike 2`."
+                )
+        elif recommendation_question:
+            recommendation_df = df_detalles.copy()
+            recommendation_df["Rating_Num"] = pd.to_numeric(recommendation_df["Rating"], errors="coerce").fillna(0)
+            recommendation_df["Reviews_Num"] = pd.to_numeric(recommendation_df["Reviews"], errors="coerce").fillna(0)
+            if "gratis" in recent_user_messages or "free" in recent_user_messages:
+                recommendation_df = recommendation_df[
+                    recommendation_df["Precio"].apply(convert_to_usd_numeric) == 0.0
+                ]
+            preference_tokens = {
+                "competitivo": ["Action", "Multiplayer", "Sports"],
+                "competitiva": ["Action", "Multiplayer", "Sports"],
+                "historia": ["Adventure", "RPG", "Story Rich"],
+                "relajado": ["Casual", "Simulation", "Indie"],
+                "amigos": ["Multiplayer", "Co-op", "Casual"],
+                "estrategia": ["Strategy"],
+                "accion": ["Action"],
+                "aventura": ["Adventure"],
+                "rpg": ["RPG"],
+            }
+            requested_preferences = next(
+                (tokens for preference, tokens in preference_tokens.items() if preference in recent_user_messages),
+                None,
+            )
+            if requested_preferences:
+                recommendation_df = recommendation_df[
+                    recommendation_df["Géneros"].fillna("").apply(
+                        lambda value: any(token.lower() in str(value).lower() for token in requested_preferences)
+                    )
+                ]
+            recommendation_df = recommendation_df[recommendation_df["Rating_Num"] > 0].copy()
+            if not recommendation_df.empty:
+                recommendation_df["Score"] = recommendation_df["Rating_Num"] + (
+                    recommendation_df["Reviews_Num"].clip(upper=1000000) / 1000000 * 5
+                )
+                pick = recommendation_df.sort_values("Score", ascending=False).iloc[0]
+                ai_reply = (
+                    f"Yo empezaría por **{pick.get('Nombre', 'este juego')}**. Tiene una valoración de **{pick['Rating_Num']:.0f}/100** "
+                    f"y **{format_number(pick['Reviews_Num'])} reseñas**, así que es la opción más sólida según los datos disponibles.\n\n"
+                    "Si me dices qué buscas, puedo afinar la recomendación: gratis, competitivo, historia, relajado o para jugar con amigos."
+                )
+            else:
+                ai_reply = "Necesito más datos de valoración para recomendarte uno con criterio."
+        elif platform_question and ("gratis" in recent_user_messages or "free" in recent_user_messages or "gratis" in query_normalized or "free" in query_normalized):
+            platform_name = "windows" if "windows" in query_normalized or "pc" in query_normalized else "linux" if "linux" in query_normalized else "mac"
+            platform_rows = df_info[
+                df_info["Géneros"].notna() & df_info["Nombre"].notna()
+            ].copy()
+            platform_map = df_plataformas.groupby("AppID")["Plataformas"].first().fillna("")
+            platform_rows = platform_rows[
+                platform_rows["AppID"].map(platform_map).fillna("").astype(str).str.lower().str.contains(platform_name)
+            ]
+            free_ids = set(
+                df_detalles.loc[
+                    df_detalles["Precio"].apply(convert_to_usd_numeric) == 0.0, "AppID"
+                ].dropna().astype(int)
+            )
+            platform_rows = platform_rows[platform_rows["AppID"].isin(free_ids)]
+            platform_rows = platform_rows.head(8)
+            if not platform_rows.empty:
+                ai_reply = f"### Juegos gratis para {platform_name.title()}\n\n"
+                for _, platform_row in platform_rows.iterrows():
+                    ai_reply += f"- **{platform_row.get('Nombre', 'N/A')}** | {platform_row.get('Desarrollador', 'N/A')}\n"
+                ai_reply += "\nPuedo recomendarte uno según si buscas competitivo, historia, relajado o jugar con amigos."
+            else:
+                ai_reply = f"No encontré juegos gratuitos con datos compatibles con {platform_name.title()} en el catálogo actual."
+        elif steam_reply:
+            ai_reply = steam_reply
+        elif re.search(r"\b(top|ranking|mas jugad|más jugad)\b", query_normalized):
+            top_limit = 10 if re.search(r"\btop\s*10\b", query_normalized) else 5
+            ranking_df = df_listado[df_listado["Fecha"] == st.session_state.sel_date].copy()
+            ranking_df["Jugadores_Num"] = pd.to_numeric(ranking_df["JugadoresConcurrentes"], errors="coerce").fillna(0)
+            ranking_df = ranking_df.sort_values("Jugadores_Num", ascending=False).head(top_limit)
+            ai_reply = f"### Top {top_limit} de hoy\n\n"
+            for position, (_, row) in enumerate(ranking_df.iterrows(), start=1):
+                ai_reply += f"{position}. **{row.get('Nombre', 'N/A')}**: {format_number(row.get('Jugadores_Num', 0))} jugadores\n"
+
+        elif "gratis" in query_normalized or "free" in query_normalized:
             df_m = df_detalles.copy()
             df_m['Price_Val'] = df_m['Precio'].apply(convert_to_usd_numeric)
-            gratis_df = df_m[df_m['Price_Val'] == 0.0].head(5)
+            gratis_df = df_m[df_m['Price_Val'] == 0.0].copy()
+            gratis_df['Rating_Num'] = pd.to_numeric(gratis_df['Rating'], errors='coerce').fillna(0)
+            gratis_df = gratis_df.sort_values('Rating_Num', ascending=False).head(5)
             if not gratis_df.empty:
                 ai_reply = "### Juegos Populares Gratuitos Detectados:\n\n"
                 for _, r in gratis_df.iterrows():
@@ -1999,7 +1981,37 @@ if st.session_state.view == "Chat":
             else:
                 ai_reply = "No localicé juegos marcados explícitamente como gratuitos en los datos actuales."
 
-        elif "desarrollador" in query_lower or "creador" in query_lower or "de valve" in query_lower:
+        elif "genero" in query_normalized or "tipo de juego" in query_normalized:
+            genre_catalog = {}
+            for _, info_row in df_info.iterrows():
+                for genre in get_genre_tokens(info_row.get("Géneros")):
+                    normalized_genre = ''.join(
+                        char for char in unicodedata.normalize("NFD", genre.lower())
+                        if unicodedata.category(char) != "Mn"
+                    )
+                    genre_catalog.setdefault(normalized_genre, genre)
+            requested_genre = next(
+                (key for key in genre_catalog if key in query_normalized),
+                None
+            )
+            if requested_genre:
+                genre_rows = df_info[df_info["Géneros"].fillna("").apply(
+                    lambda value: requested_genre in "".join(
+                        char for char in unicodedata.normalize(
+                            "NFD", " ".join(get_genre_tokens(value)).lower()
+                        ) if unicodedata.category(char) != "Mn"
+                    )
+                )].head(8)
+                if not genre_rows.empty:
+                    ai_reply = f"### Juegos de {genre_catalog[requested_genre]}\n\n"
+                    for _, genre_row in genre_rows.iterrows():
+                        ai_reply += f"- **{genre_row.get('Nombre', 'N/A')}** | {genre_row.get('Desarrollador', 'N/A')}\n"
+                else:
+                    ai_reply = f"No encontré juegos clasificados como **{genre_catalog[requested_genre]}**."
+            else:
+                ai_reply = "Indícame un género concreto, por ejemplo: acción, aventura, RPG, estrategia o simulación."
+
+        elif "desarrollador" in query_normalized or "creador" in query_normalized or "de valve" in query_normalized:
             dev_search = query_lower.replace("desarrollador", "").replace("creador", "").replace("de", "").replace("busca", "").strip()
             if not dev_search: dev_search = "valve"
             
@@ -2011,7 +2023,7 @@ if st.session_state.view == "Chat":
             else:
                 ai_reply = f"No encontré ningún desarrollador que contenga el término '{dev_search}' en nuestros registros actuales."
 
-        elif "mejor rating" in query_lower or "puntuacion alta" in query_lower or "rating mayor" in query_lower or "buen rating" in query_lower:
+        elif "mejor rating" in query_normalized or "puntuacion alta" in query_normalized or "rating mayor" in query_normalized or "buen rating" in query_normalized:
             df_r = df_detalles.copy()
             df_r['Rating_Num'] = pd.to_numeric(df_r['Rating'], errors='coerce').fillna(0)
             mejo_df = df_r.sort_values('Rating_Num', ascending=False).head(5)
@@ -2020,12 +2032,15 @@ if st.session_state.view == "Chat":
                 ai_reply += f"- **{r['Nombre']}**: {int(r['Rating_Num'])}/100 de valoración positiva.\n"
 
         else:
-            clean_search = query_lower.replace("busca", "").replace("informacion", "").replace("sobre", "").replace("info", "").replace("del", "").replace("juego", "").strip()
+            clean_search = query_normalized.replace("busca", "").replace("informacion", "").replace("sobre", "").replace("info", "").replace("del", "").replace("juego", "").strip()
             
             found_games = []
             if len(clean_search) > 1 and not df_info.empty:
                 for _, row in df_info.iterrows():
-                    g_name = str(row.get('Nombre', '')).lower()
+                    g_name = ''.join(
+                        char for char in unicodedata.normalize("NFD", str(row.get('Nombre', '')).lower())
+                        if unicodedata.category(char) != "Mn"
+                    )
                     if clean_search in g_name or g_name in clean_search:
                         found_games.append(row)
                         if len(found_games) >= 3: break
@@ -2050,7 +2065,7 @@ if st.session_state.view == "Chat":
                     ai_reply += f"- **Precio Real:** {precio_local}\n"
                     ai_reply += f"- **Rating:** {rating_game}/100\n"
                     if isinstance(players_game, (int, float)):
-                        ai_reply += f"- **Jugadores concurrentes hoy:** {int(players_game):,}\n"
+                        ai_reply += f"- **Jugadores concurrentes hoy:** {format_number(players_game)}\n"
                     else:
                         ai_reply += f"- **Jugadores concurrentes hoy:** {players_game}\n"
                     ai_reply += "\n"
@@ -2061,11 +2076,14 @@ if st.session_state.view == "Chat":
                 df_day_dt = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
                 if not df_day_dt.empty:
                     top_1 = df_day_dt.iloc[0]
-                    ai_reply = f"El líder absoluto de hoy es **{top_1['Nombre']}** registrando **{int(top_1['JugadoresConcurrentes']):,}** usuarios activos."
+                    ai_reply = f"El líder absoluto de hoy es **{top_1['Nombre']}** registrando **{format_number(top_1['JugadoresConcurrentes'])}** usuarios activos."
                 else:
                     ai_reply = "Sin datos de ranking para la fecha seleccionada."
             else:
-                ai_reply = "No encontré coincidencias semánticas directas. Intenta simplificar la búsqueda ingresando palabras clave separadas (ej: 'Counter', 'Dota', 'Valve' o 'gratis')."
+                ai_reply = get_steam_ai_response(user_query) or (
+                    "No encontré ese juego en el catálogo local ni en Steam. "
+                    "Prueba con el nombre completo o pregunta por `top 10`, `juegos gratis` o un género."
+                )
 
         with st.chat_message("assistant"):
             st.write(ai_reply)
@@ -2084,7 +2102,7 @@ if st.session_state.view == "Market Trends":
     if top.empty:
         st.info("No data available")
     else:
-        cols_per_row = 4
+        cols_per_row = 4 #Número de columnas por fila para mostrar las tarjetas de los juegos. En este caso, se mostrarán 4 tarjetas por fila, lo que permite una presentación más compacta y organizada de los juegos populares en la sección de tendencias del mercado.
         for r in range(0, len(top), cols_per_row):
             cols = st.columns(cols_per_row)
             for i, col in enumerate(cols):
@@ -2096,7 +2114,7 @@ if st.session_state.view == "Market Trends":
                         render_game_card(aid, fix_nan(row.get('Nombre')), t, f"mt_{idx}", price_raw=row.get('Precio'), rating=row.get('Rating'), reviews=row.get('Reviews'))
     st.stop()
 
-elif st.session_state.view == "Top Genres":
+elif st.session_state.view == "Top Genres": #Esta sección se enfoca en analizar la popularidad de los géneros de juegos presentes en el dataset. Primero, se extraen y cuentan los géneros de los juegos para visualizar cuáles son los más comunes. Luego, se muestra una selección de juegos populares dentro de esos géneros, ordenados por número de jugadores concurrentes y número de reseñas, proporcionando a los usuarios una visión clara de qué tipos de juegos están dominando el mercado actualmente.
     st.title(t["genre_popularity_title"])
     genre_df = df_info[['AppID', 'Nombre', 'Géneros', 'Fecha_Lanzamiento']].copy()
     genre_df['Genre_List'] = genre_df['Géneros'].apply(get_genre_tokens)
@@ -2105,7 +2123,7 @@ elif st.session_state.view == "Top Genres":
     counts = pd.Series(flattened).value_counts().sort_values(ascending=False)
     fig = go.Figure(data=[go.Bar(x=counts.index, y=counts.values)])
     fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="top_genres_chart")
 
     popularity_df = genre_df.merge(df_detalles[['AppID', 'Reviews']], on='AppID', how='left')
     popularity_df['Reviews_Num'] = pd.to_numeric(popularity_df['Reviews'], errors='coerce').fillna(0)
@@ -2140,7 +2158,7 @@ elif st.session_state.view == "Top Developers":
     devs = df_info['Desarrollador'].value_counts().sort_values(ascending=False).head(15)
     fig = go.Figure(data=[go.Bar(x=devs.index, y=devs.values)])
     fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="top_developers_chart")
     sample = df_info.sort_values('Desarrollador').head(24)
     cols_per_row = 4
     for r in range(0, len(sample), cols_per_row):
@@ -2199,7 +2217,7 @@ elif st.session_state.view == "Future Trending":
         st.markdown(f"### {t.get('trend_forecast_chart', 'Top Trend Games')}")
         fig = go.Figure(data=[go.Bar(x=trend_df['Nombre'], y=trend_df['Trend Score'])])
         fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="future_trending_chart")
         st.markdown("### " + t.get('trend_formula_title', 'Formula de tendencia'))
         st.dataframe(trend_df[['Nombre', 'Weekly peak', 'Growth 7d', 'Recency', 'Trend Score']].rename(columns={
             'Nombre': t.get('name_filter', 'Name'),
@@ -2220,7 +2238,7 @@ elif st.session_state.view == "Price Analysis":
     price_sorted = df_p.sort_values('Price_Val', ascending=False).head(20)
     fig = go.Figure(data=[go.Bar(x=price_sorted['Nombre'], y=price_sorted['Price_Val'])])
     fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch", key="price_analysis_chart")
     sorted_df = df_p.sort_values('Price_Val', ascending=False).head(24)
     cols_per_row = 4
     for r in range(0, len(sorted_df), cols_per_row):
@@ -2246,10 +2264,10 @@ render_advanced_html_dashboard(t, df_day, show_more=st.session_state.show_more)
 
 m1, m2, m3, m4 = st.columns(4)
 selected_peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
-m1.metric(t["players_online"], f"{int(df_day['JugadoresConcurrentes'].sum()):,}")
+m1.metric(t["players_online"], format_number(df_day['JugadoresConcurrentes'].sum()))
 m2.metric(t["games_tracked"], f"{len(df_day)}")
 m3.metric(t["top_game"], fix_nan(df_day.iloc[0]["Nombre"]) if len(df_day) > 0 else "N/A")
-m4.metric(t["peak_24h"], f"{get_peak_last_24h(selected_peak_date):,}")
+m4.metric(t["peak_24h"], format_number(get_peak_last_24h(selected_peak_date)))
 
 st.divider()
 
@@ -2269,9 +2287,9 @@ with t1:
                     game_name = fix_nan(game.get("Nombre"))
                     pos = int(game.get('Posicion', 0)) if not pd.isna(game.get('Posicion', 0)) else 0
                     players = int(game.get('JugadoresConcurrentes', 0)) if not pd.isna(game.get('JugadoresConcurrentes', 0)) else 0
-                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  {players:,}")
-    if st.button(t["toggle_top"]):
-        st.session_state.show_more = not st.session_state.show_more
+                    render_game_card(aid, fix_nan(game_name), t, f"lr_{idx}", extra_caption=f"#{pos}  •  {format_number(players)}")
+    if not st.session_state.show_more and st.button(t["show_top_100"], key="show_top_100_button"):
+        st.session_state.show_more = True
         st.rerun()
 
 with t2:
@@ -2307,7 +2325,7 @@ with t2:
             st.subheader("Top 10 juegos hoy por jugadores concurrentes")
             fig = go.Figure(data=[go.Bar(x=top_today['Nombre'], y=top_today['JugadoresConcurrentes'])])
             fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch", key="top_today_chart")
 
         prev_date = dates_list[1]
         cur = df_listado[df_listado["Fecha"] == st.session_state.sel_date]
@@ -2329,7 +2347,7 @@ with t2:
             st.subheader("Top 10 crecimiento diario")
             fig = go.Figure(data=[go.Bar(x=movers['Nombre'], y=movers['growth'])])
             fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch", key="daily_growth_chart")
 
 with t3:
     st.header(t.get('data_explorer', t['data_explorer']))
@@ -2417,7 +2435,7 @@ with t4:
     st.subheader(t["peak_24h_section"])
     peak_date = st.session_state.sel_date if st.session_state.sel_date else get_latest_data_date()
     peak_value = get_peak_last_24h(peak_date)
-    st.metric(t["peak_24h"], f"{peak_value:,}")
+    st.metric(t["peak_24h"], format_number(peak_value))
     if peak_date is not None and not pd.isna(parse_date_safe(peak_date)):
         st.write(f"{t['data_date']} {parse_date_safe(peak_date).strftime('%Y-%m-%d')}")
 
@@ -2480,7 +2498,7 @@ with t6:
         trend_df = trend_df.sort_values('Trend Score', ascending=False)
         fig = go.Figure(data=[go.Bar(x=trend_df['Nombre'], y=trend_df['Trend Score'])])
         fig.update_layout(xaxis={'categoryorder':'total descending'}, height=400)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch", key="dashboard_trend_chart")
         
         st.markdown("### Top Trend Games")
         cols_per_row = 4
