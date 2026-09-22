@@ -96,14 +96,15 @@ def obtener_detalles_juego(appid):
                     f"https://store.steampowered.com/api/appdetails?appids={appid}&l={steam_language}&cc=es",
                     timeout=10,
                 ).json()
-                localized_data = localized_response.get(str(appid), {}).get("data", {})
+                localized_entry = (localized_response or {}).get(str(appid)) or {}
+                localized_data = localized_entry.get("data") or {}
                 localized_text = re.sub(r"<[^>]+>", " ", localized_data.get("about_the_game", ""))
                 localized_text = re.sub(r"\s+", " ", localized_text).strip()
                 short_text = localized_data.get("short_description", "")
                 localized_descriptions[f"Descripcion_{language}"] = (
                     f"{short_text} {localized_text}".strip()
                 )
-            except requests.RequestException:
+            except (TypeError, ValueError, requests.RequestException):
                 localized_descriptions[f"Descripcion_{language}"] = ""
 
         return {
