@@ -590,10 +590,10 @@ def get_game_description(game_row, lang):
     language_column = f"Descripcion_{lang}"
     description = fix_nan(game_row.get(language_column), "")
     if description and description != "-":
-        return truncate_text(description)
+        return description
     fallback = fix_nan(game_row.get("Descripcion_en", game_row.get("Descripcion")), "")
     if fallback and fallback != "-":
-        return truncate_text(fallback)
+        return fallback
     return ""
 
 def convert_to_usd_numeric(price_str):
@@ -715,15 +715,17 @@ def steam_video_exists(appid):
             return False
         import requests
         
-        url = f"https://store.steampowered.com/api/appdetails?appids={aid}" #Hace una solicitud a la API de Steam para obtener los detalles del juego utilizando el appid, y luego verifica si la respuesta contiene información sobre videos (trailers) para ese juego. Si se encuentra un video válido, devuelve la URL del video; de lo contrario, devuelve False, indicando que no hay un video disponible para ese appid.
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        if str(aid) in data and data[str(aid)]['success']:
-            app_data = data[str(aid)]['data']
-            if 'movies' in app_data and len(app_data['movies']) > 0:
-                
-                first_movie = app_data['movies'][0]
-                return first_movie.get('hls_h264') or first_movie.get('mp4') or first_movie.get('webm')
+        for country, language in (("es", "spanish"), ("us", "english")):
+            url = f"https://store.steampowered.com/api/appdetails?appids={aid}&cc={country}&l={language}"
+            response = requests.get(url, timeout=10)
+            data = response.json()
+            if str(aid) not in data or not data[str(aid)].get("success"):
+                continue
+            movies = data[str(aid)].get("data", {}).get("movies", [])
+            for movie in movies:
+                video_url = movie.get("mp4") or movie.get("hls_h264") or movie.get("webm")
+                if video_url:
+                    return video_url
         return False
     except:
         return False
@@ -971,7 +973,7 @@ def update_data_source():
             cwd=BASE_DIR,
             capture_output=True,
             text=True,
-            timeout=180
+            timeout=600
         )
         if result.returncode != 0:
             return False, result.stderr.strip() or result.stdout.strip() or "Error al ejecutar la actualización."
@@ -1412,6 +1414,15 @@ def render_trend_formula_card(t):
     st.markdown(formula_html, unsafe_allow_html=True)
 
 
+def update_view_from_menu(view_keys, view_labels):
+    """Sincroniza la vista con la opción elegida en el menú lateral."""
+    selected_label = st.session_state.get("view_selector")
+    if selected_label in view_labels:
+        st.session_state.view = view_keys[view_labels.index(selected_label)]
+        st.session_state.selected_game = None
+        st.session_state.scroll_to_top = True
+
+
 
 if "selected_game" not in st.session_state: st.session_state.selected_game = None
 if "scroll_to_top" not in st.session_state: st.session_state.scroll_to_top = False
@@ -1489,6 +1500,8 @@ with st.sidebar:
             st.rerun()
         if st.button(t["my_favorites"], width='stretch'):
             st.session_state.view = "Favorites"
+            st.session_state.view_selector = t["favorites"]
+            st.session_state.scroll_to_top = True
             st.rerun()
 
     st.divider()
@@ -1497,12 +1510,16 @@ with st.sidebar:
     if st.button(t["home_dashboard"], width='stretch'):
         st.session_state.selected_game = None
         st.session_state.view = "Dashboard"
+        st.session_state.view_selector = t["dashboard"]
+        st.session_state.scroll_to_top = True
         st.rerun()
 
     
     if st.button("Chat", width='stretch'):
         st.session_state.selected_game = None
         st.session_state.view = "Chat"
+        st.session_state.view_selector = None
+        st.session_state.scroll_to_top = True
         st.rerun()
 
     st.blank = st.markdown("<br>", unsafe_allow_html=True)
@@ -1515,11 +1532,16 @@ with st.sidebar:
     
     
     current_index = view_menu_keys.index(st.session_state.view) if st.session_state.view in view_menu_keys else 0
-    selected_label = st.selectbox("Seleccionar vista", view_menu_labels, index=current_index, label_visibility="collapsed")
-    
-    
-    if st.session_state.view != "Chat" or selected_label != view_menu_labels[current_index]:
-        st.session_state.view = view_menu_keys[view_menu_labels.index(selected_label)]
+    if st.session_state.get("view_selector") not in view_menu_labels:
+        st.session_state.view_selector = view_menu_labels[current_index]
+    st.selectbox(
+        "Seleccionar vista",
+        view_menu_labels,
+        label_visibility="collapsed",
+        key="view_selector",
+        on_change=update_view_from_menu,
+        args=(view_menu_keys, view_menu_labels),
+    )
 
     if not df_listado.empty:
         dates = sorted(df_listado["Fecha"].unique(), reverse=True)
@@ -1542,20 +1564,26 @@ if st.session_state.get("scroll_to_top"):
         <script>
             const resetScroll = () => {
                 try {
-                    const target = document.querySelector('.stAppViewContainer, [data-testid="stAppViewContainer"]') || document.querySelector('.stApp');
-                    if (target) {
-                        target.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+                    const page = window.parent.document;
+                    const targets = page.querySelectorAll(
+                        '.stAppViewContainer, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .stApp'
+                    );
+                    targets.forEach((target) => {
                         target.scrollTop = 0;
-                    }
-                    const root = document.querySelector('html');
-                    if (root) {
-                        root.scrollTop = 0;
-                    }
-                    window.scrollTo(0, 0);
+                        target.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+                    });
+                    page.querySelectorAll('*').forEach((element) => {
+                        if (element.scrollHeight > element.clientHeight) element.scrollTop = 0;
+                    });
+                    page.documentElement.scrollTop = 0;
+                    page.body.scrollTop = 0;
+                    window.parent.scrollTo(0, 0);
                 } catch (e) {}
             };
             setTimeout(resetScroll, 150);
             setTimeout(resetScroll, 500);
+            setTimeout(resetScroll, 1000);
+            setTimeout(resetScroll, 1500);
         </script>
         """,
         height=0,
@@ -1866,10 +1894,10 @@ if st.session_state.view == "Chat":
             query_normalized,
         )
         follow_up_query = bool(re.search(r"\b(y|e|sus|su|ese|esa|tambien|también|requisitos|sinopsis|precio)\b", query_normalized))
+        platform_question = bool(re.search(r"\b(windows|pc|linux|mac|steam deck)\b", query_normalized))
         steam_reply = get_steam_ai_response(user_query, context_term) if (steam_query or follow_up_query) and not platform_question else None
         price_question = bool(re.search(r"\b(cuanto|cuánto|cuenta|cuesta|vale|precio)\b", query_normalized))
         recommendation_question = bool(re.search(r"\b(q|recomiendas|recomendar|recomendacion|recomendación|mejor para empezar|que me compro|qué me compro|que juego|qué juego)\b", query_normalized))
-        platform_question = bool(re.search(r"\b(windows|pc|linux|mac|steam deck)\b", query_normalized))
 
         if price_question:
             game_term = extract_game_term(user_query)

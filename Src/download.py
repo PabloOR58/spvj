@@ -3,9 +3,26 @@ from datetime import datetime #Importa la clase datetime del módulo datetime pa
 import csv #Importa el módulo csv para trabajar con archivos CSV (Comma-Separated Values). Este módulo proporciona funciones para leer y escribir archivos CSV de manera sencilla. En este código, se utiliza para crear archivos CSV con encabezados específicos, eliminar filas basadas en la fecha y escribir los datos recopilados sobre los juegos en los archivos CSV correspondientes.                                                                                                   
 import re
 import os #Importa el módulo os para interactuar con el sistema operativo, como crear directorios y manejar rutas de archivos. En este código, se utiliza para determinar la ruta base del proyecto, crear un directorio "Clean" si no existe y construir las rutas completas para los archivos CSV donde se almacenarán los datos de los juegos. Esto ayuda a organizar los archivos de salida y asegurarse de que se guarden en la ubicación correcta dentro del proyecto.
+import html
+import time
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #Determina la ruta base del proyecto al obtener el directorio del archivo actual (download.py) y luego subir un nivel para llegar al directorio raíz del proyecto. Esto es útil para construir rutas relativas a partir de la ubicación del proyecto, lo que facilita la gestión de archivos y directorios dentro del proyecto sin depender de rutas absolutas que pueden variar entre diferentes entornos o sistemas.
 CLEAN_DIR = os.path.join(BASE_DIR, "Clean") #Construye la ruta completa para el directorio "Clean" dentro del proyecto utilizando la ruta base determinada anteriormente. Este directorio se utilizará para almacenar los archivos CSV generados con los datos de los juegos, manteniendo los archivos organizados y separados de otros archivos del proyecto.
+
+REQUEST_TIMEOUT = 20
+
+
+def steam_json(url):
+    """Obtiene JSON de Steam con reintentos para errores transitorios."""
+    for attempt in range(3):
+        try:
+            response = requests.get(url, timeout=REQUEST_TIMEOUT)
+            response.raise_for_status()
+            return response.json()
+        except (requests.RequestException, ValueError):
+            if attempt < 2:
+                time.sleep(1 + attempt)
+    return {}
 
 
 def crear_csv(path, headers): #Crea un archivo CSV en la ruta especificada con los encabezados proporcionados si el archivo no existe. Si el archivo ya existe, no realiza ninguna acción. Esto es útil para asegurarse de que los archivos CSV necesarios para almacenar los datos de los juegos estén presentes y tengan la estructura correcta antes de escribir los datos en ellos.
@@ -37,7 +54,7 @@ def eliminar_fecha(path, fecha):
 def get_platforms(appid): #Obtiene las plataformas disponibles para un juego específico utilizando su appid. Realiza una solicitud a la API de Steam para obtener los detalles del juego y extrae la información de las plataformas (Windows, Mac, Linux) en las que el juego está disponible. Devuelve una cadena con las plataformas separadas por comas o "windows" como valor predeterminado si no se pueden obtener los datos de la API o si no se encuentran plataformas específicas.
     try:
         url = f"https://store.steampowered.com/api/appdetails?appids={appid}"
-        data = requests.get(url, timeout=10).json()
+        data = steam_json(url)
         info = data[str(appid)]["data"]
 
         p = info.get("platforms", {})
@@ -59,10 +76,9 @@ def get_platforms(appid): #Obtiene las plataformas disponibles para un juego esp
 def obtener_detalles_juego(appid):
     """Obtiene y normaliza los metadatos públicos de un juego de Steam."""
     try:
-        response = requests.get(
-            f"https://store.steampowered.com/api/appdetails?appids={appid}&l=english&cc=es",
-            timeout=10,
-        ).json()
+        response = steam_json(
+            f"https://store.steampowered.com/api/appdetails?appids={appid}&l=english&cc=es"
+        )
         entry = response.get(str(appid), {})
         if not entry.get("success"):
             return None
@@ -74,10 +90,9 @@ def obtener_detalles_juego(appid):
         recommendations = data.get("recommendations", {}).get("total", 0)
         rating = data.get("metacritic", {}).get("score")
         try:
-            review_data = requests.get(
-                f"https://store.steampowered.com/appreviews/{appid}?json=1&language=all&num_per_page=0",
-                timeout=10,
-            ).json().get("query_summary", {})
+            review_data = steam_json(
+                f"https://store.steampowered.com/appreviews/{appid}?json=1&language=all&num_per_page=0"
+            ).get("query_summary", {})
             total_reviews = review_data.get("total_reviews", 0)
             if total_reviews:
                 rating = round(review_data.get("total_positive", 0) * 100 / total_reviews)
@@ -85,25 +100,30 @@ def obtener_detalles_juego(appid):
         except (TypeError, ValueError, requests.RequestException):
             pass
 
-        descripcion = re.sub(r"<[^>]+>", " ", data.get("about_the_game", ""))
-        descripcion = re.sub(r"\s+", " ", descripcion).strip()
-        if data.get("short_description") and descripcion:
-            descripcion = f"{data['short_description']} {descripcion}"
+        def clean_description(value):
+            value = html.unescape(value or "")
+            value = re.sub(r"<[^>]+>", " ", value)
+            return re.sub(r"\s+", " ", value).strip()
+
+        short_description = clean_description(data.get("short_description"))
+        full_description = clean_description(data.get("about_the_game"))
+        descripcion = full_description or short_description
+        if short_description and full_description and short_description not in full_description:
+            descripcion = f"{short_description} {full_description}"
         localized_descriptions = {"Descripcion_en": descripcion}
         for language, steam_language in (("es", "spanish"), ("fr", "french"), ("pt", "portuguese")):
             try:
-                localized_response = requests.get(
-                    f"https://store.steampowered.com/api/appdetails?appids={appid}&l={steam_language}&cc=es",
-                    timeout=10,
-                ).json()
-                localized_data = localized_response.get(str(appid), {}).get("data", {})
-                localized_text = re.sub(r"<[^>]+>", " ", localized_data.get("about_the_game", ""))
-                localized_text = re.sub(r"\s+", " ", localized_text).strip()
-                short_text = localized_data.get("short_description", "")
-                localized_descriptions[f"Descripcion_{language}"] = (
-                    f"{short_text} {localized_text}".strip()
+                localized_response = steam_json(
+                    f"https://store.steampowered.com/api/appdetails?appids={appid}&l={steam_language}&cc=es"
                 )
-            except requests.RequestException:
+                localized_entry = (localized_response or {}).get(str(appid)) or {}
+                localized_data = localized_entry.get("data") or {}
+                localized_text = clean_description(localized_data.get("about_the_game"))
+                short_text = clean_description(localized_data.get("short_description"))
+                localized_descriptions[f"Descripcion_{language}"] = (
+                    localized_text or short_text
+                )
+            except (TypeError, ValueError, requests.RequestException):
                 localized_descriptions[f"Descripcion_{language}"] = ""
 
         return {
@@ -156,7 +176,11 @@ def guardar_catalogo(path_info, path_detalles, path_plataformas, juegos):
             continue
         detalles = obtener_detalles_juego(int(appid))
         if detalles:
-            catalogo[int(appid)] = detalles
+            previous = catalogo.get(int(appid), {})
+            for key, value in detalles.items():
+                if value not in (None, "", "N/A"):
+                    previous[key] = value
+            catalogo[int(appid)] = previous
 
     with open(path_info, "w", newline="", encoding="utf-8") as info_file, \
          open(path_detalles, "w", newline="", encoding="utf-8") as detalles_file, \
@@ -209,7 +233,7 @@ def generar_datos(): #Genera los datos de los juegos más jugados y vendidos en 
 
     url = "https://api.steampowered.com/ISteamChartsService/GetGamesByConcurrentPlayers/v1/"
     try: #Realiza una solicitud a la API de Steam para obtener la lista de juegos ordenados por número de jugadores concurrentes. Si la solicitud es exitosa, se extrae la información relevante (appid, nombre y número de jugadores concurrentes) para cada juego. Si ocurre algún error durante la solicitud o el procesamiento de los datos, se maneja la excepción y se asigna una lista vacía a la variable "juegos", lo que permite que el programa continúe sin interrupciones incluso si no se pueden obtener los datos de la API.
-        juegos = requests.get(url, timeout=10).json().get("response", {}).get("ranks", [])
+        juegos = steam_json(url).get("response", {}).get("ranks", [])
     except Exception:
         juegos = []
 
@@ -224,9 +248,7 @@ def generar_datos(): #Genera los datos de los juegos más jugados y vendidos en 
             players = juego.get("concurrent_in_game", 0)
 
             try:
-                data = requests.get(
-                    f"https://store.steampowered.com/api/appdetails?appids={appid}"
-                ).json()
+                data = steam_json(f"https://store.steampowered.com/api/appdetails?appids={appid}")
                 nombre = data[str(appid)]["data"]["name"]
             except:
                 nombre = f"ID {appid}"
@@ -259,7 +281,7 @@ def generar_datos(): #Genera los datos de los juegos más jugados y vendidos en 
 
     url = "https://store.steampowered.com/api/featuredcategories"
     try:
-        data = requests.get(url, timeout=10).json()
+        data = steam_json(url)
         top = data.get("top_sellers", {}).get("items", [])
     except Exception:
         top = []
